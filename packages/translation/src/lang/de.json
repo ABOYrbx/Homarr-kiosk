@@ -6750,6 +6750,16 @@
     }
   },
   "board": {
+    "idleScreen": {
+      "label": "Leerlaufbildschirm-Anzeige",
+      "title": "Leerlaufbildschirm",
+      "progress": "Wiedergabefortschritt",
+      "progressLabel": "Wiedergabefortschritt",
+      "lyricsLabel": "Synchronisierte Lyrics",
+      "attribution": "Lyrics: {provider}",
+      "uploader": "Uploader: {name}",
+      "maker": "Ersteller: {name}"
+    },
     "emptyState": {
       "title": "Erstelle deine erste Ansicht",
       "description": "Fügen Sie ein Widget oder eine App hinzu, oder verbinden Sie einen Dienst und verwenden Sie seine Daten auf diesem Board.",
@@ -7007,6 +7017,41 @@
       "isPublic": {
         "label": "Öffentlich",
         "description": "Öffentliche Boards sind für jedermann zugänglich, auch ohne Benutzerkonto."
+      },
+      "idleScreenEnabled": {
+        "label": "Leerlaufbildschirm",
+        "description": "Vollbild-Leerlaufanzeige nach Inaktivität anzeigen"
+      },
+      "idleScreenTimeoutMinutes": {
+        "label": "Leerlauf-Timeout (Minuten)",
+        "description": "Minuten der Inaktivität vor dem Erscheinen des Leerlaufbildschirms"
+      },
+      "idleScreenMode": {
+        "label": "Leerlaufbildschirm-Modus",
+        "description": "Was auf dem Leerlaufbildschirm angezeigt wird",
+        "option": {
+          "auto": "Automatisch",
+          "clock": "Nur Uhr",
+          "music": "Musik"
+        }
+      },
+      "idleScreenHomeAssistantIntegrationId": {
+        "label": "Home-Assistant-Integration",
+        "description": "Home-Assistant-Integration, die den Media-Player bereitstellt",
+        "none": "Keine Home-Assistant-Integration verfügbar"
+      },
+      "idleScreenMediaPlayerEntityId": {
+        "label": "Media-Player",
+        "description": "Home-Assistant-media_player-Entity (Music Assistant)"
+      },
+      "idleScreenShowClockSeconds": {
+        "label": "Sekundenzeiger anzeigen",
+        "description": "Sekundenzeiger auf der Analoguhr anzeigen"
+      },
+      "idleScreenShowLyrics": {
+        "label": "Lyrics anzeigen",
+        "description": "Synchronisierte Lyrics von Spicy Lyrics anzeigen",
+        "hint": "Erfordert SPICY_LYRICS_API_KEY in der Server-Konfiguration."
       }
     },
     "content": {
@@ -7128,6 +7173,9 @@
               }
             }
           }
+        },
+        "idleScreen": {
+          "title": "Leerlaufbildschirm"
         }
       }
     },

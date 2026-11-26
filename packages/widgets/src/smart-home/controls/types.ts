@@ -79,7 +79,9 @@ export interface HaAttributes {
   mediaTitle?: string;
   mediaArtist?: string;
   mediaAlbum?: string;
+  mediaContentId?: string;
   mediaSource?: string;
+  mediaContentType?: string;
   artworkUrl?: string;
   volume?: number;
   isMuted?: boolean;

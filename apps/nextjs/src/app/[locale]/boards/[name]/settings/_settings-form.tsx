@@ -23,7 +23,7 @@ import { AdvancedSettings } from "~/components/manage/advanced-settings";
 import type { Board } from "../../_types";
 import { ColorSettingsContent } from "./_appereance";
 import { BackgroundSettingsContent } from "./_background";
-import { BehaviorSettingsContent } from "./_behavior";
+import { BehaviorSettingsContent, IdleScreenSettingsContent } from "./_behavior";
 import { BoardAccessSettings } from "./_board-access";
 import { CustomCssSettingsContent } from "./_customCss";
 import { DangerZoneSettingsContent } from "./_danger";
@@ -60,6 +60,13 @@ const PARTIAL_FORM_KEYS = [
   "itemRadius",
   "customCss",
   "disableStatus",
+  "idleScreenEnabled",
+  "idleScreenTimeoutMinutes",
+  "idleScreenMode",
+  "idleScreenHomeAssistantIntegrationId",
+  "idleScreenMediaPlayerEntityId",
+  "idleScreenShowClockSeconds",
+  "idleScreenShowLyrics",
 ] as const;
 
 const buildInitialValues = (board: Board): FormValues => ({
@@ -78,6 +85,13 @@ const buildInitialValues = (board: Board): FormValues => ({
   itemRadius: board.itemRadius,
   customCss: board.customCss ?? "",
   disableStatus: board.disableStatus,
+  idleScreenEnabled: board.idleScreenEnabled,
+  idleScreenTimeoutMinutes: board.idleScreenTimeoutMinutes,
+  idleScreenMode: board.idleScreenMode,
+  idleScreenHomeAssistantIntegrationId: board.idleScreenHomeAssistantIntegrationId,
+  idleScreenMediaPlayerEntityId: board.idleScreenMediaPlayerEntityId,
+  idleScreenShowClockSeconds: board.idleScreenShowClockSeconds,
+  idleScreenShowLyrics: board.idleScreenShowLyrics,
   layouts: normalizeMobileLayoutGutters(board.layouts),
 });
 
@@ -191,6 +205,7 @@ export const BoardSettingsForm = ({ board, permissions, hasFullAccess, hideVisib
           <BackgroundSettingsContent form={form} />
           <ColorSettingsContent form={form} />
           <BehaviorSettingsContent form={form} />
+          <IdleScreenSettingsContent form={form} />
           <AdvancedSettings>
             <CustomCssSettingsContent form={form} />
           </AdvancedSettings>

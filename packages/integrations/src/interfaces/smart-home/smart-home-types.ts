@@ -49,6 +49,7 @@ export interface SmartHomeEntityAttributes {
   mediaAlbum?: string;
   mediaSeriesTitle?: string;
   mediaContentType?: string;
+  mediaContentId?: string;
   mediaSource?: string;
   sources?: string[];
   appName?: string;

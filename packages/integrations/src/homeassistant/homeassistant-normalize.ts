@@ -116,6 +116,7 @@ const domainAttributes = (domain: string, attributes: Record<string, unknown>): 
         mediaAlbum: text(attributes.media_album_name),
         mediaSeriesTitle: text(attributes.media_series_title),
         mediaContentType: text(attributes.media_content_type),
+        mediaContentId: text(attributes.media_content_id),
         mediaSource: text(attributes.source),
         sources: texts(attributes.source_list),
         appName: text(attributes.app_name),

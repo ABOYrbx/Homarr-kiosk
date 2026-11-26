@@ -12,6 +12,7 @@ import { boardViewportWidthCookieName, getLayoutIdForViewportWidth } from "@homa
 import { createLogger } from "@homarr/core/infrastructure/logs";
 import { ModalProvider } from "@homarr/modals";
 
+import { IdleScreen } from "~/components/board/idle-screen/idle-screen";
 import { MainHeader } from "~/components/layout/header";
 import { appShellLogoHeight } from "~/components/layout/constants";
 import { BoardLogo, BoardLogoWithTitle } from "~/components/layout/logo/board-logo";
@@ -111,6 +112,18 @@ export const createBoardLayout = <TParams extends Params>({
           <ModalProvider>
             {withCustomCss && <CustomCss />}
             <BoardTourGate enabled={shouldRunBoardTour}>
+              <IdleScreen
+                board={{
+                  idleScreenEnabled: initialBoard.idleScreenEnabled,
+                  idleScreenTimeoutMinutes: initialBoard.idleScreenTimeoutMinutes,
+                  idleScreenMode: initialBoard.idleScreenMode as "auto" | "clock" | "music",
+                  idleScreenHomeAssistantIntegrationId: initialBoard.idleScreenHomeAssistantIntegrationId,
+                  idleScreenMediaPlayerEntityId: initialBoard.idleScreenMediaPlayerEntityId,
+                  idleScreenShowClockSeconds: initialBoard.idleScreenShowClockSeconds,
+                  idleScreenShowLyrics: initialBoard.idleScreenShowLyrics,
+                }}
+                tourActive={shouldRunBoardTour}
+              />
               <ClientShell hasNavigation={false}>
                 <MainHeader
                   logo={<BoardLogo size={appShellLogoHeight} />}

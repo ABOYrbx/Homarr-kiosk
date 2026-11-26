@@ -6750,6 +6750,16 @@
     }
   },
   "board": {
+    "idleScreen": {
+      "label": "Idle screen display",
+      "title": "Idle screen",
+      "progress": "Playback progress",
+      "progressLabel": "Playback progress",
+      "lyricsLabel": "Synchronized lyrics",
+      "attribution": "Lyrics: {provider}",
+      "uploader": "Uploader: {name}",
+      "maker": "Maker: {name}"
+    },
     "emptyState": {
       "title": "Build your first view",
       "description": "Add a widget or app, or connect a service and use its data on this board.",
@@ -7007,6 +7017,41 @@
       "isPublic": {
         "label": "Public",
         "description": "Public boards are accessible by everyone, even without an account."
+      },
+      "idleScreenEnabled": {
+        "label": "Idle screen",
+        "description": "Show a full-screen idle display after inactivity"
+      },
+      "idleScreenTimeoutMinutes": {
+        "label": "Idle timeout (minutes)",
+        "description": "Minutes of inactivity before the idle screen appears"
+      },
+      "idleScreenMode": {
+        "label": "Idle screen mode",
+        "description": "What to show on the idle screen",
+        "option": {
+          "auto": "Automatic",
+          "clock": "Clock only",
+          "music": "Music"
+        }
+      },
+      "idleScreenHomeAssistantIntegrationId": {
+        "label": "Home Assistant integration",
+        "description": "Home Assistant integration providing the media player",
+        "none": "No Home Assistant integration available"
+      },
+      "idleScreenMediaPlayerEntityId": {
+        "label": "Media player",
+        "description": "Home Assistant media_player entity (Music Assistant)"
+      },
+      "idleScreenShowClockSeconds": {
+        "label": "Show seconds hand",
+        "description": "Show the seconds hand on the analog clock"
+      },
+      "idleScreenShowLyrics": {
+        "label": "Show lyrics",
+        "description": "Show synchronized lyrics from Spicy Lyrics",
+        "hint": "Requires SPICY_LYRICS_API_KEY in the server configuration."
       }
     },
     "content": {
@@ -7128,6 +7173,9 @@
               }
             }
           }
+        },
+        "idleScreen": {
+          "title": "Idle screen"
         }
       }
     },

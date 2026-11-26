@@ -28,6 +28,13 @@ export class BoardMockBuilder {
       opacity: 100,
       isPublic: true,
       disableStatus: false,
+      idleScreenEnabled: false,
+      idleScreenTimeoutMinutes: 5,
+      idleScreenMode: "auto",
+      idleScreenHomeAssistantIntegrationId: null,
+      idleScreenMediaPlayerEntityId: null,
+      idleScreenShowClockSeconds: false,
+      idleScreenShowLyrics: true,
       customCss: "",
       creatorId: createId(),
       creator: {

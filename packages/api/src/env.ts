@@ -24,6 +24,7 @@ export const env = createEnv({
     HOMARR_WEBSITE_URL: publicHttpUrl("HOMARR_WEBSITE_URL").default("https://homarr.dev"),
     WORKSHOP_API_URL: publicHttpUrl("WORKSHOP_API_URL").optional(),
     WORKSHOP_WEB_URL: publicHttpUrl("WORKSHOP_WEB_URL").optional(),
+    SPICY_LYRICS_API_KEY: z.string().optional(),
   },
   runtimeEnv: {
     KUBERNETES_SERVICE_ACCOUNT_NAME: process.env.KUBERNETES_SERVICE_ACCOUNT_NAME,
@@ -32,5 +33,6 @@ export const env = createEnv({
     HOMARR_WEBSITE_URL: process.env.HOMARR_WEBSITE_URL,
     WORKSHOP_API_URL: process.env.WORKSHOP_API_URL,
     WORKSHOP_WEB_URL: process.env.WORKSHOP_WEB_URL,
+    SPICY_LYRICS_API_KEY: process.env.SPICY_LYRICS_API_KEY,
   },
 });

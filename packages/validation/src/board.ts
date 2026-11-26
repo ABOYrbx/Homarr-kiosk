@@ -55,6 +55,11 @@ const trimmedNullableString = z
   .transform((value) => (value?.trim().length === 0 ? null : value))
   .pipe(z.string().nullable());
 
+const mediaPlayerEntityIdSchema = trimmedNullableString.refine(
+  (value) => value === null || /^media_player\.[A-Za-z0-9_]+$/.test(value),
+  "Must be a Home Assistant media_player entity id",
+);
+
 export const boardSavePartialSettingsSchema = z
   .object({
     pageTitle: trimmedNullableString,
@@ -77,6 +82,13 @@ export const boardSavePartialSettingsSchema = z
       .nullable()
       .describe("Widget roundness override; null inherits the instance theme"),
     disableStatus: z.boolean(),
+    idleScreenEnabled: z.boolean(),
+    idleScreenTimeoutMinutes: z.number().int().min(1).max(120),
+    idleScreenMode: z.enum(["auto", "clock", "music"]),
+    idleScreenHomeAssistantIntegrationId: trimmedNullableString,
+    idleScreenMediaPlayerEntityId: mediaPlayerEntityIdSchema,
+    idleScreenShowClockSeconds: z.boolean(),
+    idleScreenShowLyrics: z.boolean(),
   })
   .partial();
 

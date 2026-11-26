@@ -72,13 +72,17 @@ export const rssFeedsRequestHandler = createWidgetRequestHandler({
     return {
       ...result,
       entries:
-        result.entries          
+        result.entries
           ?.map((entry) => {
             const { mediaDescription, ...feedEntry } = entry as ExtendedFeedEntry & { mediaDescription?: string };
             if (!feedEntry.description && mediaDescription) {
               feedEntry.description = mediaDescription;
             }
-            return { ...feedEntry, feedUrl: input.url, feedTitle: typeof result.title === "string" ? result.title : "" };
+            return {
+              ...feedEntry,
+              feedUrl: input.url,
+              feedTitle: typeof result.title === "string" ? result.title : "",
+            };
           })
           .slice(0, input.count) ?? [],
     };

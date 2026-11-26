@@ -83,6 +83,13 @@ const normalizeFormValues = (
     iconColor: values.iconColor ?? "",
     itemRadius: values.itemRadius,
     disableStatus: values.disableStatus,
+    idleScreenEnabled: values.idleScreenEnabled,
+    idleScreenTimeoutMinutes: values.idleScreenTimeoutMinutes,
+    idleScreenMode: values.idleScreenMode,
+    idleScreenHomeAssistantIntegrationId: values.idleScreenHomeAssistantIntegrationId,
+    idleScreenMediaPlayerEntityId: values.idleScreenMediaPlayerEntityId,
+    idleScreenShowClockSeconds: values.idleScreenShowClockSeconds,
+    idleScreenShowLyrics: values.idleScreenShowLyrics,
   };
 };
 

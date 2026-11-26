@@ -291,6 +291,13 @@ export const boards = sqliteTable("board", {
   iconColor: text(),
   itemRadius: text().$type<MantineSize>(),
   disableStatus: int({ mode: "boolean" }).default(false).notNull(),
+  idleScreenEnabled: int({ mode: "boolean" }).default(false).notNull(),
+  idleScreenTimeoutMinutes: int().default(5).notNull(),
+  idleScreenMode: text().$type<"auto" | "clock" | "music">().default("auto").notNull(),
+  idleScreenHomeAssistantIntegrationId: text(),
+  idleScreenMediaPlayerEntityId: text(),
+  idleScreenShowClockSeconds: int({ mode: "boolean" }).default(false).notNull(),
+  idleScreenShowLyrics: int({ mode: "boolean" }).default(true).notNull(),
 });
 
 export const boardUserPermissions = sqliteTable(

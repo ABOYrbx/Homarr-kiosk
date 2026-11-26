@@ -10,4 +10,5 @@
   --homarr-z-index-board-header: calc(var(--mantine-z-index-modal) - 2);
   --homarr-z-index-widget-focus: calc(var(--mantine-z-index-modal) - 1);
   --homarr-z-index-modal-tooltip: calc(var(--mantine-z-index-modal) + 2);
+  --homarr-z-index-idle-screen: calc(var(--mantine-z-index-modal) + 10);
 }

@@ -306,6 +306,13 @@ export const boards = pgTable("board", {
   iconColor: text(),
   itemRadius: text().$type<MantineSize>(),
   disableStatus: boolean().default(false).notNull(),
+  idleScreenEnabled: boolean().default(false).notNull(),
+  idleScreenTimeoutMinutes: integer().default(5).notNull(),
+  idleScreenMode: text().$type<"auto" | "clock" | "music">().default("auto").notNull(),
+  idleScreenHomeAssistantIntegrationId: varchar({ length: 64 }),
+  idleScreenMediaPlayerEntityId: text(),
+  idleScreenShowClockSeconds: boolean().default(false).notNull(),
+  idleScreenShowLyrics: boolean().default(true).notNull(),
 });
 
 export const boardUserPermissions = pgTable(
