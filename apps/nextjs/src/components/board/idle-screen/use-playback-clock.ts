@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 import type { PlaybackState } from "./playback";
-import { computePlaybackPosition, isBackwardSeek } from "./playback";
+import { computePlaybackPosition } from "./playback";
 
 const TICK_MS = 250;
 
@@ -17,17 +17,14 @@ export const usePlaybackClock = ({
   mediaPositionUpdatedAt,
   mediaDuration,
   enabled,
-}: PlaybackState & { enabled: boolean }): number | null => {
+  seekOverrideAt,
+}: PlaybackState & { enabled: boolean; seekOverrideAt?: number }): number | null => {
   const [now, setNow] = useState(() => Date.now());
   const playing = enabled && state === "playing";
-  const reportedPosition = useRef<number | undefined>(mediaPosition);
 
   useEffect(() => {
-    // A rewind must move the lyrics back with the audio. Anchor the clock at
-    // the new timestamp so no leftover extrapolation keeps the old position.
-    const seekedBack = isBackwardSeek(reportedPosition.current, mediaPosition);
-    reportedPosition.current = mediaPosition;
-    setNow(seekedBack ? (mediaPositionUpdatedAt ?? Date.now()) : Date.now());
+    // Rebase the local clock when the player reports a fresh position.
+    setNow(Date.now());
   }, [mediaPosition, mediaPositionUpdatedAt]);
 
   useEffect(() => {
@@ -38,9 +35,12 @@ export const usePlaybackClock = ({
 
   return computePlaybackPosition({
     state,
-    mediaPosition,
+    // While the optimistic seek is active, show position 0 regardless of the
+    // old entity value; HA may need a moment to report the new track.
+    mediaPosition: seekOverrideAt !== undefined ? 0 : mediaPosition,
     mediaPositionUpdatedAt,
     mediaDuration,
     now,
+    seekAnchorAt: seekOverrideAt,
   });
 };

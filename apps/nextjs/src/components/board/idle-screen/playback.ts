@@ -30,7 +30,8 @@ export const computePlaybackPosition = ({
   mediaPositionUpdatedAt,
   mediaDuration,
   now,
-}: PlaybackState & { now: number }): number | null => {
+  seekAnchorAt,
+}: PlaybackState & { now: number; seekAnchorAt?: number }): number | null => {
   if (!Number.isFinite(mediaPosition)) return null;
   const base = Math.max(0, mediaPosition as number);
   const duration = Number.isFinite(mediaDuration) ? (mediaDuration as number) : undefined;
@@ -39,10 +40,12 @@ export const computePlaybackPosition = ({
     return duration !== undefined ? clamp(base, 0, Math.max(0, duration)) : base;
   }
 
-  const elapsedSeconds = Math.min(
-    MAX_POSITION_AGE_SECONDS,
-    Math.max(0, (now - (mediaPositionUpdatedAt as number)) / 1000),
-  );
+  // After a seek, HA may keep reporting the old position_updated_at. Anchor the
+  // clock at the moment of the seek so it does not extrapolate from stale data.
+  const elapsed = Math.max(0, (now - (seekAnchorAt ?? (mediaPositionUpdatedAt as number))) / 1000);
+  // The cap protects against permanently stale HA timestamps. A fresh seek
+  // anchor must keep advancing normally, otherwise the bar freezes at 30 s.
+  const elapsedSeconds = seekAnchorAt !== undefined ? elapsed : Math.min(MAX_POSITION_AGE_SECONDS, elapsed);
   const position = base + elapsedSeconds;
   return duration !== undefined ? clamp(position, 0, Math.max(0, duration)) : position;
 };

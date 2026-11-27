@@ -75,6 +75,18 @@ describe("playback position", () => {
     expect(isBackwardSeek(undefined, 12)).toBe(false);
   });
 
+  it("anchors the clock at the seek moment instead of a stale HA timestamp", () => {
+    const seekAt = 50_000;
+    const seeked = {
+      state: "playing",
+      mediaPosition: 0,
+      mediaPositionUpdatedAt: 1_000, // 49 s old — HA did not refresh it
+      mediaDuration: 121,
+    };
+    expect(computePlaybackPosition({ ...seeked, now: seekAt, seekAnchorAt: seekAt })).toBe(0);
+    expect(computePlaybackPosition({ ...seeked, now: seekAt + 5_000, seekAnchorAt: seekAt })).toBe(5);
+  });
+
   it("formats m:ss and longer durations", () => {
     expect(formatDuration(0)).toBe("0:00");
     expect(formatDuration(65.8)).toBe("1:05");

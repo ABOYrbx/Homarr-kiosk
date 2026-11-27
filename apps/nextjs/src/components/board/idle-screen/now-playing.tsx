@@ -44,9 +44,17 @@ export const NowPlaying = ({
 }) => {
   const t = useI18n("board");
   const [imageFailed, setImageFailed] = useState(false);
-  const { mutate: executeAction } = clientApi.widget.smartHome.executeAction.useMutation();
-  const run = (action: "mediaPrevious" | "mediaPlayPause" | "mediaNext") =>
+  const [seekOverrideAt, setSeekOverrideAt] = useState<number | undefined>(undefined);
+  const utils = clientApi.useUtils();
+  const { mutate: executeAction } = clientApi.widget.smartHome.executeAction.useMutation({
+    // The live patch can be delayed; refresh the player state right away so
+    // seeking back or skipping a track moves the progress bar immediately.
+    onSuccess: () => void utils.widget.smartHome.snapshot.invalidate(),
+  });
+  const run = (action: "mediaPrevious" | "mediaPlayPause" | "mediaNext") => {
+    if (action !== "mediaPlayPause") setSeekOverrideAt(Date.now());
     executeAction({ integrationId, entityId, action });
+  };
   const playing = entity.state === "playing";
   const attributes = entity.attributes;
   const title = attributes.mediaTitle?.trim() || entity.name;
@@ -58,12 +66,18 @@ export const NowPlaying = ({
   // A failed cover belongs to one track only; a new artwork gets a new chance.
   useEffect(() => setImageFailed(false), [artwork]);
 
+  // Once HA reports real forward progress the optimistic seek can be dropped.
+  useEffect(() => {
+    if (seekOverrideAt !== undefined && (attributes.mediaPosition ?? 0) > 1) setSeekOverrideAt(undefined);
+  }, [attributes.mediaPosition, seekOverrideAt]);
+
   const position = usePlaybackClock({
     state: entity.state,
     mediaPosition: attributes.mediaPosition,
     mediaPositionUpdatedAt: attributes.mediaPositionUpdatedAt,
     mediaDuration: duration,
     enabled: true,
+    seekOverrideAt,
   });
 
   const lyricsQuery = useLyrics({
