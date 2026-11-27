@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { TtlLruCache } from "./cache";
-import { createCacheKey, findExactSearchId, parseTrackId } from "./match";
+import { createCacheKey, findExactSearchId, isDurationMatch, parseTrackId } from "./match";
 import { normalizeSpicyLyrics } from "./normalize";
 
 const syllable = (text: string, start: number, end: number, isPartOfWord = false) => ({
@@ -161,9 +161,9 @@ describe("TtlLruCache", () => {
     vi.useFakeTimers();
     try {
       vi.setSystemTime(new Date("2026-01-01T00:00:00Z"));
-      const cache = new TtlLruCache<string>(2, 7 * 24 * 60 * 60 * 1000, 24 * 60 * 60 * 1000);
-      cache.set("hit", "lyrics", true);
-      cache.set("miss", "error", false);
+      const cache = new TtlLruCache<string>(2);
+      cache.set("hit", "lyrics", 7 * 24 * 60 * 60 * 1000);
+      cache.set("miss", "error", 24 * 60 * 60 * 1000);
       vi.setSystemTime(new Date("2026-01-02T00:00:01Z"));
       expect(cache.get("hit")).toBe("lyrics");
       expect(cache.get("miss")).toBeUndefined();
@@ -173,13 +173,34 @@ describe("TtlLruCache", () => {
   });
 
   it("evicts the least recently used entry", () => {
-    const cache = new TtlLruCache<number>(2, 1000, 1000);
-    cache.set("a", 1, true);
-    cache.set("b", 2, true);
+    const cache = new TtlLruCache<number>(2);
+    cache.set("a", 1, 1000);
+    cache.set("b", 2, 1000);
     cache.get("a");
-    cache.set("c", 3, true);
+    cache.set("c", 3, 1000);
     expect(cache.get("b")).toBeUndefined();
     expect(cache.get("a")).toBe(1);
-    expect(createCacheKey({ title: "Track", artist: "Artist", durationSeconds: 200 })).toBe("q:track|artist|200");
+    expect(createCacheKey({ title: "Track", artist: "Artist", durationSeconds: 200 })).toBe("lrclib:track|artist||200");
+  });
+});
+
+describe("LRCLIB helpers", () => {
+  it("rejects duration outside 2 seconds", () => {
+    expect(isDurationMatch(200, 202)).toBe(true);
+    expect(isDurationMatch(200, 205)).toBe(false);
+  });
+  it("builds a stable key from the track signature", () => {
+    expect(createCacheKey({ title: "Track", artist: "Artist", album: "Album", durationSeconds: 200 })).toBe(
+      "lrclib:track|artist|album|200",
+    );
+  });
+  it("expires entries with an explicit TTL", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-01-01T00:00:00Z"));
+    const cache = new TtlLruCache<string>(2);
+    cache.set("a", "lyrics", 1000);
+    vi.setSystemTime(new Date("2026-01-01T00:00:01Z"));
+    expect(cache.get("a")).toBeUndefined();
+    vi.useRealTimers();
   });
 });

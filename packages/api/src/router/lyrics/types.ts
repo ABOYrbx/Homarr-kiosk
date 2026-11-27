@@ -24,15 +24,47 @@ export const lyricAttributionSchema = z.object({
 export const normalizedLyricsSchema = z.object({
   type: z.enum(["syllable", "line", "static"]),
   lines: z.array(normalizedLyricLineSchema),
+  source: z.literal("lrclib"),
+  provider: z.literal("LRCLIB"),
+});
+
+export type NormalizedLyrics = z.infer<typeof normalizedLyricsSchema>;
+export type NormalizedLyricLine = z.infer<typeof normalizedLyricLineSchema>;
+export type NormalizedLyricWord = z.infer<typeof normalizedLyricWordSchema>;
+
+/**
+ * Defensive schema for the LRCLIB `/api/get` response. Fields that LRCLIB may
+ * omit or return as null are optional; unknown fields are stripped.
+ */
+export const lrclibRecordSchema = z.object({
+  id: z.number(),
+  trackName: z.string(),
+  artistName: z.string(),
+  albumName: z.string().nullish(),
+  duration: z.number(),
+  instrumental: z.boolean(),
+  hasWordSync: z.boolean(),
+  plainLyrics: z.string().nullish(),
+  syncedLyrics: z.string().nullish(),
+  lyricsfile: z.string().nullish(),
+});
+
+export type LrclibRecord = z.infer<typeof lrclibRecordSchema>;
+
+/**
+ * Legacy shape still produced by `normalizeSpicyLyrics`. It remains until the
+ * router switches to LRCLIB; it is deliberately not part of `NormalizedLyrics`.
+ */
+export const legacyNormalizedLyricsSchema = z.object({
+  type: z.enum(["syllable", "line", "static"]),
+  lines: z.array(normalizedLyricLineSchema),
   source: z.string(),
   provider: z.string(),
   uploader: lyricAttributionSchema.optional(),
   maker: lyricAttributionSchema.optional(),
 });
 
-export type NormalizedLyrics = z.infer<typeof normalizedLyricsSchema>;
-export type NormalizedLyricLine = z.infer<typeof normalizedLyricLineSchema>;
-export type NormalizedLyricWord = z.infer<typeof normalizedLyricWordSchema>;
+export type LegacyNormalizedLyrics = z.infer<typeof legacyNormalizedLyricsSchema>;
 
 /**
  * Defensive schema for the Spicy Lyrics responses. Unknown fields are

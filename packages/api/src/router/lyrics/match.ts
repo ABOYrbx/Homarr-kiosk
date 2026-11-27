@@ -32,9 +32,11 @@ export const parseTrackId = (mediaContentId: string | null | undefined): string 
   return undefined;
 };
 
-/** Duration tolerance: 3 seconds or 2 %, whichever is larger. */
+/** Duration tolerance: exactly two seconds, so remixes cannot be mistaken for the track. */
+export const DURATION_TOLERANCE_SECONDS = 2;
+
 export const isDurationMatch = (expected: number, actual: number): boolean =>
-  Math.abs(expected - actual) <= Math.max(3, expected * 0.02);
+  Math.abs(expected - actual) <= DURATION_TOLERANCE_SECONDS;
 
 /** Spicy search hits sometimes only carry provider-specific ids. */
 const firstId = (ids: SpicySearchHit["ids"]): string | undefined => {
@@ -76,15 +78,13 @@ export const extractSearchHits = (body: unknown): SpicySearchHit[] => {
   return Array.isArray(candidates) ? (candidates as SpicySearchHit[]) : [];
 };
 
-/** Stable, bounded cache key. The key never contains the API secret. */
+/** Stable cache key derived from the LRCLIB track signature. */
 export const createCacheKey = (input: {
-  trackId?: string;
   title: string;
   artist?: string;
+  album?: string;
   durationSeconds?: number;
-}): string => {
-  if (input.trackId) return `id:${input.trackId}`;
-  return `q:${input.title.trim().toLowerCase()}|${(input.artist ?? "").trim().toLowerCase()}|${input.durationSeconds ?? ""}`;
-};
+}): string =>
+  `lrclib:${input.title.trim().toLowerCase()}|${(input.artist ?? "").trim().toLowerCase()}|${(input.album ?? "").trim().toLowerCase()}|${input.durationSeconds ?? ""}`;
 
 export { SPOTIFY_ID, ISRC };

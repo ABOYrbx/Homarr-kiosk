@@ -1,12 +1,12 @@
 import type { z } from "zod/v4";
 import type {
+  LegacyNormalizedLyrics,
   lyricAttributionSchema,
-  NormalizedLyrics,
   NormalizedLyricLine,
   NormalizedLyricWord,
   SpicySyllable,
 } from "./types";
-import { normalizedLyricsSchema, spicyLyricsResponseSchema } from "./types";
+import { legacyNormalizedLyricsSchema, spicyLyricsResponseSchema } from "./types";
 
 const PROVIDER_NAME = "Spicy Lyrics";
 const PROVIDER_URL = "https://spicylyrics.org";
@@ -56,7 +56,7 @@ const syllableToWords = (syllables: SpicySyllable[]): NormalizedLyricWord[] => {
  * Returns null for empty, unknown or malformed payloads — callers must hide
  * lyrics rather than show an incorrect sync.
  */
-export const normalizeSpicyLyrics = (input: unknown): NormalizedLyrics | null => {
+export const normalizeSpicyLyrics = (input: unknown): LegacyNormalizedLyrics | null => {
   const parsed = spicyLyricsResponseSchema.safeParse(input);
   if (!parsed.success) return null;
 
@@ -104,7 +104,7 @@ export const normalizeSpicyLyrics = (input: unknown): NormalizedLyrics | null =>
   const uploader = source === "spicy_lyrics" ? toAttribution(attribution?.Uploader) : undefined;
   const maker = source === "spicy_lyrics" ? toAttribution(attribution?.Maker) : undefined;
 
-  const result = normalizedLyricsSchema.safeParse({
+  const result = legacyNormalizedLyricsSchema.safeParse({
     type: type.toLowerCase() as "syllable" | "line" | "static",
     lines,
     source,

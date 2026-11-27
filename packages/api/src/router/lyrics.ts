@@ -6,7 +6,7 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { TtlLruCache } from "./lyrics/cache";
 import { createCacheKey, extractSearchHits, findExactSearchId, parseTrackId } from "./lyrics/match";
 import { normalizeSpicyLyrics } from "./lyrics/normalize";
-import type { NormalizedLyrics } from "./lyrics/types";
+import type { LegacyNormalizedLyrics } from "./lyrics/types";
 import { lyricAttributionSchema, normalizedLyricLineSchema } from "./lyrics/types";
 
 const logger = createLogger({ module: "lyricsRouter" });
@@ -17,7 +17,7 @@ const MAX_CACHE_ENTRIES = 500;
 const POSITIVE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const NEGATIVE_TTL_MS = 24 * 60 * 60 * 1000;
 
-const cache = new TtlLruCache<LyricsResult>(MAX_CACHE_ENTRIES, POSITIVE_TTL_MS, NEGATIVE_TTL_MS);
+const cache = new TtlLruCache<LyricsResult>(MAX_CACHE_ENTRIES);
 
 const inputSchema = z.object({
   trackId: z.string().max(128).optional(),
@@ -39,7 +39,7 @@ const outputSchema = z.object({
 
 type LyricsResult = z.infer<typeof outputSchema>;
 
-const toResult = (lyrics: NormalizedLyrics): LyricsResult => ({
+const toResult = (lyrics: LegacyNormalizedLyrics): LyricsResult => ({
   status: "found",
   type: lyrics.type,
   lines: lyrics.lines,
@@ -138,7 +138,7 @@ export const lyricsRouter = createTRPCRouter({
 
       let result: LyricsResult;
       try {
-        let normalized: NormalizedLyrics | null = null;
+        let normalized: LegacyNormalizedLyrics | null = null;
 
         // A usable media_content_id resolves the track directly. If the API
         // has no lyrics for it (or the payload is malformed), fall back to a
@@ -163,7 +163,7 @@ export const lyricsRouter = createTRPCRouter({
         result = { status: "error" };
       }
 
-      cache.set(cacheKey, result, result.status === "found");
+      cache.set(cacheKey, result, result.status === "found" ? POSITIVE_TTL_MS : NEGATIVE_TTL_MS);
       return result;
     }),
 });

@@ -4,23 +4,19 @@ interface CacheEntry<T> {
 }
 
 /**
- * Small in-memory TTL cache with an insertion-order eviction bound.
- * Lyrics are never persisted to disk or Redis; every entry expires well
- * within the 30-day window required by the Spicy Lyrics API terms.
+ * Small in-memory cache with an insertion-order eviction bound and an explicit
+ * TTL per entry. Callers choose the TTL, so Lyrics are never persisted and
+ * each result type can expire on its own schedule.
  */
 export class TtlLruCache<T> {
   private readonly entries = new Map<string, CacheEntry<T>>();
 
-  constructor(
-    private readonly maxEntries: number,
-    private readonly positiveTtlMs: number,
-    private readonly negativeTtlMs: number,
-  ) {}
+  constructor(private readonly maxEntries: number) {}
 
   get(key: string): T | undefined {
     const entry = this.entries.get(key);
     if (!entry) return undefined;
-    if (Date.now() > entry.expiresAt) {
+    if (Date.now() >= entry.expiresAt) {
       this.entries.delete(key);
       return undefined;
     }
@@ -30,7 +26,7 @@ export class TtlLruCache<T> {
     return entry.value;
   }
 
-  set(key: string, value: T, positive: boolean): void {
+  set(key: string, value: T, ttlMs: number): void {
     this.entries.delete(key);
     while (this.entries.size >= this.maxEntries) {
       const oldest = this.entries.keys().next().value;
@@ -39,7 +35,7 @@ export class TtlLruCache<T> {
     }
     this.entries.set(key, {
       value,
-      expiresAt: Date.now() + (positive ? this.positiveTtlMs : this.negativeTtlMs),
+      expiresAt: Date.now() + ttlMs,
     });
   }
 
