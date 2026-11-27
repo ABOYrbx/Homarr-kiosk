@@ -137,29 +137,26 @@ describe("playback position", () => {
 
 describe("idle mode decision", () => {
   it("shows the clock in clock mode even when music plays", () => {
-    expect(decideIdleView({ mode: "clock", hasTrack: true, isPlaying: true })).toBe("clock");
+    expect(decideIdleView({ mode: "clock", hasTrack: true })).toBe("clock");
   });
 
-  it("shows music in auto mode only while playing", () => {
-    expect(decideIdleView({ mode: "auto", hasTrack: true, isPlaying: true })).toBe("music");
-    expect(decideIdleView({ mode: "auto", hasTrack: true, isPlaying: false })).toBe("clock");
-    expect(decideIdleView({ mode: "auto", hasTrack: false, isPlaying: true })).toBe("clock");
+  it("keeps a paused track in the music layer until the carousel leaves it", () => {
+    expect(decideIdleView({ mode: "auto", hasTrack: true })).toBe("music");
+    expect(decideIdleView({ mode: "auto", hasTrack: false })).toBe("clock");
   });
 
   it("freezes now playing for paused tracks in music mode", () => {
-    expect(decideIdleView({ mode: "music", hasTrack: true, isPlaying: false })).toBe("music");
-    expect(decideIdleView({ mode: "music", hasTrack: false, isPlaying: false })).toBe("clock");
+    expect(decideIdleView({ mode: "music", hasTrack: true })).toBe("music");
+    expect(decideIdleView({ mode: "music", hasTrack: false })).toBe("clock");
   });
 
   it("shows widgets when an idle layout exists", () => {
-    expect(decideIdleView({ mode: "widgets", hasTrack: true, isPlaying: true, hasWidgetLayout: true })).toBe("widgets");
+    expect(decideIdleView({ mode: "widgets", hasTrack: true, hasWidgetLayout: true })).toBe("widgets");
   });
 
   it("falls back to the clock when the idle layout is missing or empty", () => {
-    expect(decideIdleView({ mode: "widgets", hasTrack: true, isPlaying: true })).toBe("clock");
-    expect(decideIdleView({ mode: "widgets", hasTrack: false, isPlaying: false, hasWidgetLayout: false })).toBe(
-      "clock",
-    );
+    expect(decideIdleView({ mode: "widgets", hasTrack: true })).toBe("clock");
+    expect(decideIdleView({ mode: "widgets", hasTrack: false, hasWidgetLayout: false })).toBe("clock");
   });
 });
 

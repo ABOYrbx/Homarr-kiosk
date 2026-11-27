@@ -80,7 +80,7 @@ const MusicIdleScreen = ({
   const { entity, isLoading } = useNowPlaying({ integrationId, entityId });
   const attributes = entity?.attributes;
   const hasTrack = Boolean(attributes?.mediaTitle || entity?.state === "playing");
-  const view = decideIdleView({ mode, hasTrack, isPlaying: entity?.state === "playing" });
+  const view = decideIdleView({ mode, hasTrack });
 
   if (isLoading || !entity || view === "clock") return <AnalogClock showSeconds={showClockSeconds} />;
   return <NowPlaying entity={entity} showLyrics={showLyrics} integrationId={integrationId} entityId={entityId} />;

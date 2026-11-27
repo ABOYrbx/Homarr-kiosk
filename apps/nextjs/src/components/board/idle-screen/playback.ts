@@ -92,22 +92,22 @@ export const formatDuration = (seconds: number | null | undefined): string => {
 };
 
 /**
- * Mode decision for the idle screen. `auto` only switches to music while a
- * track is actually playing; `music` keeps a frozen view for paused tracks.
+ * Mode decision for the idle screen. A loaded track stays visible in the music
+ * layer even while paused; the carousel decides when to leave that layer.
  */
 export const decideIdleView = ({
   mode,
   hasTrack,
-  isPlaying,
   hasWidgetLayout = false,
 }: {
   mode: IdleScreenMode;
   hasTrack: boolean;
-  isPlaying: boolean;
   hasWidgetLayout?: boolean;
 }): IdleView => {
   if (mode === "widgets") return hasWidgetLayout ? "widgets" : "clock";
   if (mode === "clock") return "clock";
   if (mode === "music") return hasTrack ? "music" : "clock";
-  return hasTrack && isPlaying ? "music" : "clock";
+  // A paused track stays visible in the music layer; the carousel decides
+  // when to leave it after playback stopped.
+  return hasTrack ? "music" : "clock";
 };

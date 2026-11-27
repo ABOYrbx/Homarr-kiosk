@@ -9,6 +9,7 @@ import { classifyIdlePointer, getIdleLayerTarget, idleLayerOrder, isIdleNavigati
 import type { IdleLayer } from "./carousel";
 
 const DOTS_VISIBLE_MS = 3_000;
+const PAUSE_RETURN_DELAY_MS = 60_000;
 
 interface PointerStart {
   pointerId: number;
@@ -35,6 +36,12 @@ export const IdleCarousel = ({
   const previousPreferredLayer = useRef<IdleLayer>(initialLayer);
   const [showDots, setShowDots] = useState(true);
   const dotsTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const returnTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const cancelPendingReturn = useCallback(() => {
+    if (returnTimer.current) clearTimeout(returnTimer.current);
+    returnTimer.current = null;
+  }, []);
 
   const revealDots = useCallback(() => {
     setShowDots(true);
@@ -46,20 +53,30 @@ export const IdleCarousel = ({
     revealDots();
     return () => {
       if (dotsTimer.current) clearTimeout(dotsTimer.current);
+      if (returnTimer.current) clearTimeout(returnTimer.current);
     };
   }, [revealDots]);
 
-  // Playback starting or stopping changes the preferred layer. Follow every
-  // transition so the view always matches the player; manual navigation holds
-  // only until the next playback change.
+  // Playback starting switches to music immediately. When it stops, keep the
+  // music layer for a grace period before returning to the clock, so a short
+  // pause does not kick the user off the player view.
   useEffect(() => {
     const previous = previousPreferredLayer.current;
     previousPreferredLayer.current = initialLayer;
-    if (previous !== initialLayer) {
-      setActiveLayer(initialLayer);
-      revealDots();
+    if (previous === initialLayer) return;
+
+    cancelPendingReturn();
+    if (previous === "music" && initialLayer === "clock") {
+      returnTimer.current = setTimeout(() => {
+        returnTimer.current = null;
+        setActiveLayer("clock");
+        revealDots();
+      }, PAUSE_RETURN_DELAY_MS);
+      return;
     }
-  }, [initialLayer, revealDots]);
+    setActiveLayer(initialLayer);
+    revealDots();
+  }, [initialLayer, revealDots, cancelPendingReturn]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -74,16 +91,18 @@ export const IdleCarousel = ({
       revealDots();
       if (event.key === "ArrowLeft") {
         event.preventDefault();
+        cancelPendingReturn();
         setActiveLayer((current) => getIdleLayerTarget(current, -1));
       } else if (event.key === "ArrowRight") {
         event.preventDefault();
+        cancelPendingReturn();
         setActiveLayer((current) => getIdleLayerTarget(current, 1));
       }
     };
 
     window.addEventListener("keydown", handleKeyDown, true);
     return () => window.removeEventListener("keydown", handleKeyDown, true);
-  }, [onClose, revealDots]);
+  }, [onClose, revealDots, cancelPendingReturn]);
 
   const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (!event.isPrimary || event.button !== 0) {
@@ -110,6 +129,7 @@ export const IdleCarousel = ({
       onClose();
       return;
     }
+    cancelPendingReturn();
     setActiveLayer((current) => getIdleLayerTarget(current, direction));
   };
 
