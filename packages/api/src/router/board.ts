@@ -1575,6 +1575,91 @@ export const boardRouter = createTRPCRouter({
         }))
         .toSorted((layoutA, layoutB) => layoutA.breakpoint - layoutB.breakpoint);
     }),
+  createIdleScreenLayout: protectedProcedure
+    .meta({
+      openapi: {
+        method: "POST",
+        path: "/api/boards/{id}/idle-layout",
+        tags: ["boards"],
+        protect: true,
+        summary: "Create an idle screen layout",
+        description:
+          "Create a fresh custom layout with the Base layout's section geometry and no items, and save it as the board's idle screen layout. Requires modify access.",
+      },
+      mcp: {
+        enabled: true,
+        effect: "additive",
+        description:
+          "Create a new idle screen layout for a board using the Base layout's section geometry without items, save it on the board and return its ID. Requires modify permission. REQUIRED: boardId (board ID), name (layout name)",
+      },
+    })
+    .input(z.object({ boardId: z.string(), name: z.string().trim().nonempty().max(32) }))
+    .output(z.object({ layoutId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      await throwIfActionForbiddenAsync(ctx, eq(boards.id, input.boardId), "modify");
+
+      const board = await getFullBoardWithWhereAsync(ctx.db, eq(boards.id, input.boardId), ctx.session.user.id);
+      const baseLayout = board.layouts.find((layout) => layout.role === "base");
+      if (!baseLayout) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Board must have a Base layout" });
+      }
+
+      const geometry = {
+        columnCount: baseLayout.columnCount,
+        leftGutterColumnCount: baseLayout.leftGutterColumnCount,
+        rightGutterColumnCount: baseLayout.rightGutterColumnCount,
+      };
+      const layoutId = createId();
+      const usedBreakpoints = new Set(board.layouts.map((layout) => layout.breakpoint));
+      let breakpoint = 1;
+      while (usedBreakpoints.has(breakpoint)) breakpoint++;
+
+      const layoutToInsert: InferInsertModel<typeof layouts> = {
+        id: layoutId,
+        name: input.name,
+        boardId: board.id,
+        ...geometry,
+        breakpoint,
+        role: "custom",
+      };
+      const projectedLayout = getUpdatedBoardLayout(board, {
+        previous: {
+          layoutId: baseLayout.id,
+          ...geometry,
+          elements: getElementsForLayout(board, baseLayout.id),
+        },
+        current: {
+          layoutId,
+          ...geometry,
+        },
+      });
+
+      await handleTransactionsAsync(ctx.db, {
+        async handleAsync(db, schema) {
+          await db.transaction(async (transaction) => {
+            await transaction.insert(schema.layouts).values(layoutToInsert);
+            if (projectedLayout.sectionLayouts.length > 0) {
+              await transaction.insert(schema.sectionLayouts).values(projectedLayout.sectionLayouts);
+            }
+            await transaction
+              .update(schema.boards)
+              .set({ idleScreenLayoutId: layoutId })
+              .where(eq(schema.boards.id, board.id));
+          });
+        },
+        handleSync(db) {
+          db.transaction((transaction) => {
+            transaction.insert(layouts).values(layoutToInsert).run();
+            if (projectedLayout.sectionLayouts.length > 0) {
+              transaction.insert(sectionLayouts).values(projectedLayout.sectionLayouts).run();
+            }
+            transaction.update(boards).set({ idleScreenLayoutId: layoutId }).where(eq(boards.id, board.id)).run();
+          });
+        },
+      });
+
+      return { layoutId };
+    }),
   resetLayout: protectedProcedure
     .meta({
       openapi: {
