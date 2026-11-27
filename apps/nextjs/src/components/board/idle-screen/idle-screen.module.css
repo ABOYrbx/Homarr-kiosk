@@ -22,6 +22,20 @@
   }
 }
 
+/* Idle widget layout ---------------------------------------------------- */
+
+.widgets {
+  position: relative;
+  flex-shrink: 0;
+  width: max-content;
+  height: max-content;
+  transform: scale(var(--idle-widgets-scale, 1));
+}
+
+.widgetSlot {
+  position: absolute;
+}
+
 /* Clock ----------------------------------------------------------------- */
 
 .clockRoot {

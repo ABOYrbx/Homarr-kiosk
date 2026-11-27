@@ -10,6 +10,8 @@ import { useI18n } from "@homarr/translation/client";
 
 import { AnalogClock } from "./analog-clock";
 import classes from "./idle-screen.module.css";
+import { IdleWidgets } from "./idle-widgets";
+import { resolveIdleItems } from "./idle-widgets-layout";
 import { NowPlaying } from "./now-playing";
 import type { IdleScreenMode } from "./playback";
 import { decideIdleView } from "./playback";
@@ -20,6 +22,7 @@ export interface IdleScreenSettings {
   idleScreenEnabled: boolean;
   idleScreenTimeoutMinutes: number;
   idleScreenMode: IdleScreenMode;
+  idleScreenLayoutId: string | null;
   idleScreenHomeAssistantIntegrationId: string | null;
   idleScreenMediaPlayerEntityId: string | null;
   idleScreenShowClockSeconds: boolean;
@@ -85,7 +88,8 @@ export const IdleScreen = ({ board, tourActive = false }: { board: IdleScreenSet
   const pathname = usePathname();
   const onSettingsPage = pathname?.endsWith("/settings") ?? false;
   // Read the live board so saved setting changes take effect without a reload.
-  const settings: IdleScreenSettings = useOptionalBoard() ?? board;
+  const liveBoard = useOptionalBoard();
+  const settings: IdleScreenSettings = liveBoard ?? board;
   const open = useIdleScreen({
     enabled: settings.idleScreenEnabled && !isEditMode && !tourActive && !onSettingsPage,
     timeoutMinutes: settings.idleScreenTimeoutMinutes,
@@ -97,11 +101,28 @@ export const IdleScreen = ({ board, tourActive = false }: { board: IdleScreenSet
   const integrationId = settings.idleScreenHomeAssistantIntegrationId;
   const entityId = settings.idleScreenMediaPlayerEntityId;
   const canShowMusic = settings.idleScreenMode !== "clock" && Boolean(integrationId && entityId);
+  const idleLayoutId = settings.idleScreenLayoutId;
+  const hasWidgetLayout = Boolean(
+    liveBoard &&
+    idleLayoutId &&
+    liveBoard.layouts.some((layout) => layout.id === idleLayoutId) &&
+    resolveIdleItems(liveBoard, idleLayoutId).length > 0,
+  );
+  // Playback state stays owned by MusicIdleScreen; only the widgets branch is
+  // decided here, independently of whether a track is playing.
+  const view = decideIdleView({
+    mode: settings.idleScreenMode,
+    hasTrack: false,
+    isPlaying: false,
+    hasWidgetLayout,
+  });
 
   return (
     <Portal>
       <div className={classes.overlay} role="region" aria-label={t("idleScreen.title")} data-idle-screen="true">
-        {canShowMusic ? (
+        {view === "widgets" ? (
+          <IdleWidgets layoutId={idleLayoutId ?? ""} />
+        ) : canShowMusic ? (
           <MusicIdleScreen
             integrationId={integrationId as string}
             entityId={entityId as string}
