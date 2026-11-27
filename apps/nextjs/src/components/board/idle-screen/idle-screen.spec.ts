@@ -4,7 +4,13 @@ import { isIdleScreenOpen } from "./preview-context";
 import { getClockAngles } from "./angles";
 import type { LyricLine } from "./lyrics-view";
 import { buildTrackKey, effectiveLineEnd, findActiveLineIndex, findActiveWordIndex } from "./lyrics-view";
-import { computePlaybackPosition, decideIdleView, formatDuration, isBackwardSeek } from "./playback";
+import {
+  computePlaybackPosition,
+  decideIdleView,
+  formatDuration,
+  isBackwardSeek,
+  resolvePositionAnchorAt,
+} from "./playback";
 
 describe("idle screen open state", () => {
   it("opens for either the timer or the preview", () => {
@@ -85,6 +91,40 @@ describe("playback position", () => {
     };
     expect(computePlaybackPosition({ ...seeked, now: seekAt, seekAnchorAt: seekAt })).toBe(0);
     expect(computePlaybackPosition({ ...seeked, now: seekAt + 5_000, seekAnchorAt: seekAt })).toBe(5);
+  });
+
+  it("anchors at receipt when another device seeks backwards with a stale timestamp", () => {
+    // Music Assistant can restart a track while HA keeps the old timestamp.
+    expect(
+      resolvePositionAnchorAt({
+        previousPosition: 79,
+        mediaPosition: 0,
+        mediaPositionUpdatedAt: 50_000,
+        now: 110_000,
+      }),
+    ).toBe(110_000);
+  });
+
+  it("anchors at receipt when the reported position moves but the timestamp is stale", () => {
+    expect(
+      resolvePositionAnchorAt({
+        previousPosition: 30,
+        mediaPosition: 31,
+        mediaPositionUpdatedAt: 50_000,
+        now: 110_000,
+      }),
+    ).toBe(110_000);
+  });
+
+  it("uses HA's own timestamp when the report is fresh", () => {
+    expect(
+      resolvePositionAnchorAt({
+        previousPosition: 30,
+        mediaPosition: 31,
+        mediaPositionUpdatedAt: 109_000,
+        now: 110_000,
+      }),
+    ).toBeUndefined();
   });
 
   it("formats m:ss and longer durations", () => {

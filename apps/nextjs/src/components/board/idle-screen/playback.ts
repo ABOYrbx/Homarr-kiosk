@@ -54,6 +54,32 @@ export const computePlaybackPosition = ({
 export const isBackwardSeek = (previous: number | undefined, next: number | undefined): boolean =>
   previous !== undefined && next !== undefined && next < previous - 1;
 
+const STALE_REPORT_MS = 2_000;
+
+/**
+ * HA reports may come from another device (a seek in Music Assistant, for
+ * example) and can keep an old `media_position_updated_at`. Anchor the clock at
+ * the moment such a report arrives: the bar then jumps back with the seek and
+ * keeps moving instead of extrapolating from stale data and freezing at the
+ * position-age cap. Fresh reports continue to use HA's own timestamp.
+ */
+export const resolvePositionAnchorAt = ({
+  previousPosition,
+  mediaPosition,
+  mediaPositionUpdatedAt,
+  now,
+}: {
+  previousPosition: number | undefined;
+  mediaPosition: number | undefined;
+  mediaPositionUpdatedAt: number | undefined;
+  now: number;
+}): number | undefined => {
+  if (mediaPosition === undefined) return undefined;
+  if (isBackwardSeek(previousPosition, mediaPosition)) return now;
+  if (mediaPositionUpdatedAt !== undefined && now - mediaPositionUpdatedAt > STALE_REPORT_MS) return now;
+  return undefined;
+};
+
 /** Compact m:ss (or h:mm:ss for long tracks) display used by the progress bar. */
 export const formatDuration = (seconds: number | null | undefined): string => {
   if (seconds === null || seconds === undefined || !Number.isFinite(seconds)) return "0:00";

@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { PlaybackState } from "./playback";
-import { computePlaybackPosition } from "./playback";
+import { computePlaybackPosition, resolvePositionAnchorAt } from "./playback";
 
 const TICK_MS = 250;
 
@@ -21,9 +21,20 @@ export const usePlaybackClock = ({
 }: PlaybackState & { enabled: boolean; seekOverrideAt?: number }): number | null => {
   const [now, setNow] = useState(() => Date.now());
   const playing = enabled && state === "playing";
+  const reportedPosition = useRef<number | undefined>(mediaPosition);
+  const [externalAnchorAt, setExternalAnchorAt] = useState<number | undefined>(undefined);
 
   useEffect(() => {
-    // Rebase the local clock when the player reports a fresh position.
+    const previous = reportedPosition.current;
+    reportedPosition.current = mediaPosition;
+    setExternalAnchorAt(
+      resolvePositionAnchorAt({
+        previousPosition: previous,
+        mediaPosition,
+        mediaPositionUpdatedAt,
+        now: Date.now(),
+      }),
+    );
     setNow(Date.now());
   }, [mediaPosition, mediaPositionUpdatedAt]);
 
@@ -41,6 +52,6 @@ export const usePlaybackClock = ({
     mediaPositionUpdatedAt,
     mediaDuration,
     now,
-    seekAnchorAt: seekOverrideAt,
+    seekAnchorAt: seekOverrideAt ?? externalAnchorAt,
   });
 };
