@@ -4,7 +4,7 @@ import type { PointerEvent as ReactPointerEvent, ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 
 import classes from "./idle-screen.module.css";
-import { isIdleBackgroundTarget, isIdleInteractiveTarget } from "./carousel-gesture";
+import { isIdleBackgroundTarget, isIdleOverlayInteractiveTarget } from "./carousel-gesture";
 import { classifyIdlePointer, getIdleLayerTarget, isIdleNavigationEvent } from "./carousel";
 import type { IdleLayer } from "./carousel";
 
@@ -38,7 +38,9 @@ export const IdleCarousel = ({
         onClose();
         return;
       }
-      if (event.defaultPrevented || isIdleInteractiveTarget(event.target) || !isIdleNavigationEvent(event)) return;
+      if (event.defaultPrevented || isIdleOverlayInteractiveTarget(event.target) || !isIdleNavigationEvent(event)) {
+        return;
+      }
       if (event.key === "ArrowLeft") {
         event.preventDefault();
         setActiveLayer((current) => getIdleLayerTarget(current, -1));

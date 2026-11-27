@@ -38,6 +38,9 @@ export const isIdleInteractiveTarget = (target: EventTarget | null): boolean => 
   );
 };
 
+export const isIdleOverlayInteractiveTarget = (target: EventTarget | null): boolean =>
+  target instanceof Element && target.closest("[data-idle-screen]") !== null && isIdleInteractiveTarget(target);
+
 export const isIdleBackgroundTarget = (target: EventTarget | null): boolean => {
   if (!(target instanceof Element) || target.closest("[data-idle-widget-slot]")) return false;
   return !isIdleInteractiveTarget(target);
