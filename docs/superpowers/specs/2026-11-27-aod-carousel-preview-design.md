@@ -98,3 +98,9 @@ Die alten Modi bleiben, einer kommt dazu.
 ## Entscheidung des Anwenders zur Vorschau
 
 Die Vorschau zeigt **das, was gebaut wurde** – also den gespeicherten Board-Zustand mit dem tatsächlich angelegten Widget-Layout. Es werden keine ungespeicherten Formular-Entwürfe in den Overlay übertragen; der Preview-Button löst nur `open()` aus. Wer eine Änderung sehen will, speichert zuerst (bzw. speichert im Layout-Editor). Damit bleibt die Vorschau eine getreue Ansicht des realen AOD, genau wie er nach dem Idle-Timer erscheint.
+
+## Testhinweis zur Musik-Ebene
+
+Die Musik-Ebene braucht eine Home-Assistant-Integration mit einem `media_player` (z. B. Music Assistant). In den Board-Einstellungen unter „Leerlaufbildschirm" werden Integration und Entity gewählt und gespeichert; die Vorschau übernimmt erst gespeicherte Werte. Von der Uhr aus erreicht man die Musik per Wisch **nach rechts** oder `ArrowLeft` (`carousel.ts` bildet positive DX auf die vorherige Ebene ab).
+
+Im Demo-Modus ohne Redis lässt sich die Ebene nicht prüfen: Der Smart-Home-Snapshot hängt am gemeinsamen Response-Cache von `@homarr/redis`; ohne laufenden Redis bleibt die Ebene bei „Loading music player…" und der tRPC-Call meldet `Connection is closed`. Der eingebaute Demo-Provider liefert zwar einen `media_player.living_room_tv`, aber ohne Cover-Bild. Für einen echten Test Redis starten (`bun run docker:dev:up`) oder eine echte HA-Integration auf einer Instanz mit Redis verwenden.
