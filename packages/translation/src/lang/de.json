@@ -7058,6 +7058,22 @@
       "idleScreenShowLyrics": {
         "label": "Lyrics anzeigen",
         "description": "Synchronisierte Lyrics von LRCLIB anzeigen"
+      },
+      "idleScreenWeatherLocation": {
+        "label": "Wetterstandort",
+        "description": "Standort für Wetter-Icon und Temperatur suchen",
+        "search": "Suchen",
+        "select": "Auswählen",
+        "unknown": "Unbekannt"
+      },
+      "idleScreenClockColor": {
+        "label": "Uhr-Hintergrundfarbe",
+        "description": "Dezenter Verlauf im Leerlauf-Hintergrund"
+      },
+      "idleScreenPreview": {
+        "label": "AOD-Vorschau",
+        "description": "Vorschau des gespeicherten Leerlaufbildschirms",
+        "button": "AOD-Vorschau"
       }
     },
     "content": {

@@ -101,6 +101,22 @@ const manageOverviewInputSchema = z
   })
   .optional();
 
+type IdleScreenWeatherLocation = z.infer<typeof boardSettingsSchema.shape.idleScreenWeatherLocation>;
+
+// The database keeps the location as a JSON string in a text column.
+const parseIdleScreenWeatherLocation = (value: string | null): IdleScreenWeatherLocation => {
+  if (value === null) return null;
+  try {
+    const decoded: unknown = JSON.parse(value);
+    return boardSavePartialSettingsSchema.shape.idleScreenWeatherLocation.parse(decoded) ?? null;
+  } catch {
+    return null;
+  }
+};
+
+const serializeIdleScreenWeatherLocation = (value: IdleScreenWeatherLocation | undefined) =>
+  value === undefined ? undefined : value === null ? null : JSON.stringify(value);
+
 const serializeBoardItemPlacementAsync = async <T>(boardId: string, operation: () => Promise<T>) => {
   const previous = boardItemPlacementTails.get(boardId) ?? Promise.resolve();
   const { promise: current, resolve: release } = Promise.withResolvers<void>();
@@ -1235,7 +1251,7 @@ export const boardRouter = createTRPCRouter({
       mcp: {
         enabled: true,
         description:
-          "Read the editable visual, behavior and idle-screen settings for one board, including its current custom CSS and idle screen options (idleScreenEnabled, idleScreenTimeoutMinutes, idleScreenMode, idleScreenHomeAssistantIntegrationId, idleScreenMediaPlayerEntityId, idleScreenLayoutId, idleScreenShowClockSeconds, idleScreenShowLyrics). Requires modify permission. REQUIRED: id (board ID). Call this before proposing board settings or custom CSS changes",
+          "Read the editable visual, behavior and idle-screen settings for one board, including its current custom CSS and idle screen options (idleScreenEnabled, idleScreenTimeoutMinutes, idleScreenMode, idleScreenHomeAssistantIntegrationId, idleScreenMediaPlayerEntityId, idleScreenLayoutId, idleScreenShowClockSeconds, idleScreenShowLyrics, idleScreenWeatherLocation, idleScreenClockColor). Requires modify permission. REQUIRED: id (board ID). Call this before proposing board settings or custom CSS changes",
       },
     })
     .input(z.object({ id: z.string() }))
@@ -1271,6 +1287,8 @@ export const boardRouter = createTRPCRouter({
           idleScreenMediaPlayerEntityId: true,
           idleScreenShowClockSeconds: true,
           idleScreenShowLyrics: true,
+          idleScreenWeatherLocation: true,
+          idleScreenClockColor: true,
         },
         where: boardWhere,
       });
@@ -1280,6 +1298,7 @@ export const boardRouter = createTRPCRouter({
 
       return {
         ...board,
+        idleScreenWeatherLocation: parseIdleScreenWeatherLocation(board.idleScreenWeatherLocation),
         pageTitle: board.pageTitle ?? "",
         metaTitle: board.metaTitle ?? "",
         logoImageUrl: board.logoImageUrl ?? "",
@@ -1755,7 +1774,7 @@ export const boardRouter = createTRPCRouter({
       mcp: {
         enabled: true,
         description:
-          "Update visual, behavior and idle-screen settings for a board. Requires modify permission. REQUIRED: id (board ID). Optional fields include pageTitle, metaTitle, logoImageUrl, faviconImageUrl, backgroundImageUrl, colors, opacity, customCss, itemRadius, disableStatus, idleScreenEnabled, idleScreenTimeoutMinutes, idleScreenMode, idleScreenHomeAssistantIntegrationId, idleScreenMediaPlayerEntityId, idleScreenLayoutId, idleScreenShowClockSeconds and idleScreenShowLyrics. Set primaryColor, secondaryColor, or itemRadius to null to inherit the instance theme.",
+          "Update visual, behavior and idle-screen settings for a board. Requires modify permission. REQUIRED: id (board ID). Optional fields include pageTitle, metaTitle, logoImageUrl, faviconImageUrl, backgroundImageUrl, colors, opacity, customCss, itemRadius, disableStatus, idleScreenEnabled, idleScreenTimeoutMinutes, idleScreenMode, idleScreenHomeAssistantIntegrationId, idleScreenMediaPlayerEntityId, idleScreenLayoutId, idleScreenShowClockSeconds, idleScreenShowLyrics, idleScreenWeatherLocation and idleScreenClockColor. Set primaryColor, secondaryColor, or itemRadius to null to inherit the instance theme.",
       },
     })
     .input(boardSavePartialSettingsSchema.extend({ id: z.string() }))
@@ -1800,6 +1819,8 @@ export const boardRouter = createTRPCRouter({
           idleScreenMediaPlayerEntityId: input.idleScreenMediaPlayerEntityId,
           idleScreenShowClockSeconds: input.idleScreenShowClockSeconds,
           idleScreenShowLyrics: input.idleScreenShowLyrics,
+          idleScreenWeatherLocation: serializeIdleScreenWeatherLocation(input.idleScreenWeatherLocation),
+          idleScreenClockColor: input.idleScreenClockColor,
         })
         .where(eq(boards.id, input.id));
     }),

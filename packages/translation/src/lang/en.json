@@ -7058,6 +7058,22 @@
       "idleScreenShowLyrics": {
         "label": "Show lyrics",
         "description": "Show synchronized lyrics from LRCLIB"
+      },
+      "idleScreenWeatherLocation": {
+        "label": "Weather location",
+        "description": "Search for a location for the weather icon and temperature",
+        "search": "Search",
+        "select": "Select",
+        "unknown": "Unknown"
+      },
+      "idleScreenClockColor": {
+        "label": "Clock background color",
+        "description": "Subtle gradient in the idle screen background"
+      },
+      "idleScreenPreview": {
+        "label": "AOD preview",
+        "description": "Preview of the saved idle screen",
+        "button": "AOD preview"
       }
     },
     "content": {

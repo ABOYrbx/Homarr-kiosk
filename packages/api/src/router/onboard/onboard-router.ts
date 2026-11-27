@@ -420,6 +420,8 @@ export const onboardRouter = createTRPCRouter({
               idleScreenMediaPlayerEntityId: null,
               idleScreenShowClockSeconds: false,
               idleScreenShowLyrics: true,
+              idleScreenWeatherLocation: null,
+              idleScreenClockColor: "#1b3a5c",
               sections: [],
               layouts: pendingLayouts,
               items: [],

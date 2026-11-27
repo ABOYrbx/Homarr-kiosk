@@ -1,4 +1,4 @@
-import { describe, expect, test } from "vitest";
+import { describe, expect, it, test } from "vitest";
 
 import { boardSavePartialSettingsSchema, responsiveBoardLayoutsSchema } from "./board";
 import { containerSectionOptionsDefaults, sectionSchema } from "./shared";
@@ -57,6 +57,27 @@ describe("boardSavePartialSettingsSchema", () => {
     ).toBe(true);
     expect(boardSavePartialSettingsSchema.safeParse({ idleScreenLayoutId: null }).success).toBe(true);
     expect(boardSavePartialSettingsSchema.safeParse({ idleScreenMode: "video" }).success).toBe(false);
+  });
+
+  it("accepts the idle weather location and clock color", () => {
+    expect(
+      boardSavePartialSettingsSchema.parse({
+        idleScreenWeatherLocation: { name: "Bern", latitude: 46.95, longitude: 7.45 },
+        idleScreenClockColor: "#1b3a5c",
+      }),
+    ).toMatchObject({
+      idleScreenWeatherLocation: { name: "Bern", latitude: 46.95, longitude: 7.45 },
+      idleScreenClockColor: "#1b3a5c",
+    });
+  });
+
+  it("rejects an invalid clock color and out-of-range coordinates", () => {
+    expect(() => boardSavePartialSettingsSchema.parse({ idleScreenClockColor: "blue" })).toThrow();
+    expect(() =>
+      boardSavePartialSettingsSchema.parse({
+        idleScreenWeatherLocation: { name: "X", latitude: 100, longitude: 0 },
+      }),
+    ).toThrow();
   });
 });
 

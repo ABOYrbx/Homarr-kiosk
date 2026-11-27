@@ -299,6 +299,8 @@ export const boards = sqliteTable("board", {
   idleScreenMediaPlayerEntityId: text(),
   idleScreenShowClockSeconds: int({ mode: "boolean" }).default(false).notNull(),
   idleScreenShowLyrics: int({ mode: "boolean" }).default(true).notNull(),
+  idleScreenWeatherLocation: text(),
+  idleScreenClockColor: text().default("#1b3a5c").notNull(),
 });
 
 export const boardUserPermissions = sqliteTable(

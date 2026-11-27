@@ -183,6 +183,13 @@
       "when": 1795772553178,
       "tag": "0025_tough_sue_storm",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1795782972911,
+      "tag": "0026_solid_domino",
+      "breakpoints": true
     }
   ]
 }

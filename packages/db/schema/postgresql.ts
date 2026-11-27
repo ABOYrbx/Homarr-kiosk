@@ -314,6 +314,8 @@ export const boards = pgTable("board", {
   idleScreenMediaPlayerEntityId: text(),
   idleScreenShowClockSeconds: boolean().default(false).notNull(),
   idleScreenShowLyrics: boolean().default(true).notNull(),
+  idleScreenWeatherLocation: text(),
+  idleScreenClockColor: text().default("#1b3a5c").notNull(),
 });
 
 export const boardUserPermissions = pgTable(
