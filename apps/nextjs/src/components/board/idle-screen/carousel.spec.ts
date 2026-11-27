@@ -16,8 +16,8 @@ describe("idle carousel navigation", () => {
   it("treats short or mostly vertical pointer movement as a tap", () => {
     expect(classifyIdlePointer(20, 0)).toBeNull();
     expect(classifyIdlePointer(10, 80)).toBeNull();
-    expect(classifyIdlePointer(-90, 10)).toBe(-1);
-    expect(classifyIdlePointer(90, -10)).toBe(1);
+    expect(classifyIdlePointer(-90, 10)).toBe(1);
+    expect(classifyIdlePointer(90, -10)).toBe(-1);
   });
 });
 

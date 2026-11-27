@@ -9,7 +9,7 @@ export const getIdleLayerTarget = (current: IdleLayer, delta: -1 | 1): IdleLayer
 };
 
 export const classifyIdlePointer = (dx: number, dy: number, threshold = 48): -1 | 1 | null => {
-  if (Math.abs(dx) >= threshold && Math.abs(dx) > Math.abs(dy)) return dx < 0 ? -1 : 1;
+  if (Math.abs(dx) >= threshold && Math.abs(dx) > Math.abs(dy)) return dx < 0 ? 1 : -1;
   return null;
 };
 
