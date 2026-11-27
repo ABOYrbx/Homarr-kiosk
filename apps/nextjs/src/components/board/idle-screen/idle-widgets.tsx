@@ -40,7 +40,11 @@ export const IdleWidgets = ({ layoutId }: { layoutId: string }) => {
           (viewport.width - 2 * viewportPadding) / contentWidth,
           (viewport.height - 2 * viewportPadding) / contentHeight,
         );
-  const style = { "--idle-widgets-scale": Math.max(0.2, scale) } as CSSProperties;
+  const style = {
+    width: contentWidth,
+    height: contentHeight,
+    "--idle-widgets-scale": Math.max(0.2, scale),
+  } as CSSProperties;
 
   return (
     <BoardAdvancedFocusProvider>
