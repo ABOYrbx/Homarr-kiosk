@@ -28,7 +28,7 @@ const controlVars = () => ({
 });
 import type { LyricsViewData } from "./lyrics-view";
 import { buildTrackKey } from "./lyrics-view";
-import { formatDuration } from "./playback";
+import { formatDuration, shouldClearSeekOverride } from "./playback";
 import { useLyrics } from "./use-lyrics";
 import { usePlaybackClock } from "./use-playback-clock";
 
@@ -83,10 +83,27 @@ export const NowPlaying = ({
   // A failed cover belongs to one track only; a new artwork gets a new chance.
   useEffect(() => setImageFailed(false), [artwork]);
 
+  // A new track always starts at zero. HA can briefly keep reporting the old
+  // position (or the snapshot can be cached), so the track identity is the
+  // reliable signal that the bar has to restart.
+  const seekTrackKey = useRef(trackKey);
+  useEffect(() => {
+    if (seekTrackKey.current === trackKey) return;
+    seekTrackKey.current = trackKey;
+    setSeekOverrideAt(Date.now());
+  }, [trackKey]);
+
   // Once HA reports real forward progress the optimistic seek can be dropped.
   useEffect(() => {
-    if (seekOverrideAt !== undefined && (attributes.mediaPosition ?? 0) > 1) setSeekOverrideAt(undefined);
-  }, [attributes.mediaPosition, seekOverrideAt]);
+    if (
+      shouldClearSeekOverride({
+        seekOverrideAt,
+        mediaPosition: attributes.mediaPosition,
+        mediaPositionUpdatedAt: attributes.mediaPositionUpdatedAt,
+      })
+    )
+      setSeekOverrideAt(undefined);
+  }, [attributes.mediaPosition, attributes.mediaPositionUpdatedAt, seekOverrideAt]);
 
   const position = usePlaybackClock({
     state: entity.state,

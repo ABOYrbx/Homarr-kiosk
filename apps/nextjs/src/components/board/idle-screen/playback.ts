@@ -37,7 +37,10 @@ export const computePlaybackPosition = ({
   const duration = Number.isFinite(mediaDuration) ? (mediaDuration as number) : undefined;
 
   if (state !== "playing" || !Number.isFinite(mediaPositionUpdatedAt)) {
-    return duration !== undefined ? clamp(base, 0, Math.max(0, duration)) : base;
+    // A seek anchor keeps counting locally even when the player stops sending
+    // fresh reports. Freezing at the reported 0 would rewind the bar on pause.
+    const frozen = seekAnchorAt !== undefined ? base + Math.max(0, (now - seekAnchorAt) / 1000) : base;
+    return duration !== undefined ? clamp(frozen, 0, Math.max(0, duration)) : frozen;
   }
 
   // After a seek, HA may keep reporting the old position_updated_at. Anchor the
@@ -53,6 +56,28 @@ export const computePlaybackPosition = ({
 /** A lower reported position means the user seeked backwards. */
 export const isBackwardSeek = (previous: number | undefined, next: number | undefined): boolean =>
   previous !== undefined && next !== undefined && next < previous - 1;
+
+const SEEK_REPORT_TOLERANCE_MS = 2_000;
+
+/**
+ * The optimistic zero anchor stays until the player confirms forward progress
+ * with a fresh report. Snapshot responses are cached for a few seconds, so a
+ * high position with an old timestamp is the previous track, not progress on
+ * the one the user just skipped to.
+ */
+export const shouldClearSeekOverride = ({
+  seekOverrideAt,
+  mediaPosition,
+  mediaPositionUpdatedAt,
+}: {
+  seekOverrideAt: number | undefined;
+  mediaPosition: number | undefined;
+  mediaPositionUpdatedAt: number | undefined;
+}): boolean =>
+  seekOverrideAt !== undefined &&
+  (mediaPosition ?? 0) > 1 &&
+  mediaPositionUpdatedAt !== undefined &&
+  mediaPositionUpdatedAt >= seekOverrideAt - SEEK_REPORT_TOLERANCE_MS;
 
 const STALE_REPORT_MS = 2_000;
 
