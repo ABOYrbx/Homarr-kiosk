@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ActionIcon, Group } from "@mantine/core";
 import {
   IconMusic,
@@ -27,6 +27,7 @@ const controlVars = () => ({
   },
 });
 import type { LyricsViewData } from "./lyrics-view";
+import { buildTrackKey } from "./lyrics-view";
 import { formatDuration } from "./playback";
 import { useLyrics } from "./use-lyrics";
 import { usePlaybackClock } from "./use-playback-clock";
@@ -45,6 +46,7 @@ export const NowPlaying = ({
   const t = useI18n("board");
   const [imageFailed, setImageFailed] = useState(false);
   const [seekOverrideAt, setSeekOverrideAt] = useState<number | undefined>(undefined);
+  const pendingTrackDirection = useRef<"next" | "previous">("next");
   const utils = clientApi.useUtils();
   const { mutate: executeAction } = clientApi.widget.smartHome.executeAction.useMutation({
     // The live patch can be delayed; refresh the player state right away so
@@ -52,6 +54,8 @@ export const NowPlaying = ({
     onSuccess: () => void utils.widget.smartHome.snapshot.invalidate(),
   });
   const run = (action: "mediaPrevious" | "mediaPlayPause" | "mediaNext") => {
+    if (action === "mediaNext") pendingTrackDirection.current = "next";
+    if (action === "mediaPrevious") pendingTrackDirection.current = "previous";
     if (action !== "mediaPlayPause") setSeekOverrideAt(Date.now());
     executeAction({ integrationId, entityId, action });
   };
@@ -62,6 +66,19 @@ export const NowPlaying = ({
   const album = attributes.mediaAlbum?.trim();
   const artwork = attributes.pictureUrl;
   const duration = Number.isFinite(attributes.mediaDuration) ? attributes.mediaDuration : undefined;
+
+  // A new track identity remounts the column so the slide keyframe plays.
+  // The direction comes from the button that caused the change; external
+  // changes arrive as "next". No animation on the very first render.
+  const trackKey = buildTrackKey(attributes);
+  const trackMotion = useRef<{ key: string; className: string | undefined }>({ key: trackKey, className: undefined });
+  if (trackMotion.current.key !== trackKey) {
+    trackMotion.current = {
+      key: trackKey,
+      className: pendingTrackDirection.current === "previous" ? classes.trackEnterPrevious : classes.trackEnterNext,
+    };
+    pendingTrackDirection.current = "next";
+  }
 
   // A failed cover belongs to one track only; a new artwork gets a new chance.
   useEffect(() => setImageFailed(false), [artwork]);
@@ -107,7 +124,10 @@ export const NowPlaying = ({
       <div className={classes.musicScrim} aria-hidden="true" />
 
       <div className={`${classes.musicContent} ${lyrics ? classes.musicTwoColumns : classes.musicOneColumn}`}>
-        <div className={classes.trackColumn}>
+        <div
+          key={trackKey}
+          className={`${classes.trackColumn}${trackMotion.current.className ? ` ${trackMotion.current.className}` : ""}`}
+        >
           {hasArtwork ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img

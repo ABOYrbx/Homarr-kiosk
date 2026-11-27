@@ -346,6 +346,46 @@
   width: 100%;
 }
 
+/* A new track arrives from the side the user skipped to. */
+@keyframes trackEnterFromRight {
+  from {
+    opacity: 0;
+    transform: translate3d(6%, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes trackEnterFromLeft {
+  from {
+    opacity: 0;
+    transform: translate3d(-6%, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes trackEnterFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.trackEnterNext {
+  animation: trackEnterFromRight 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.trackEnterPrevious {
+  animation: trackEnterFromLeft 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
 .cover {
   box-sizing: border-box;
   width: min(42vh, 460px);
@@ -567,6 +607,11 @@
   .carouselDot {
     animation: none;
     transition: none;
+  }
+
+  .trackEnterNext,
+  .trackEnterPrevious {
+    animation: trackEnterFade 140ms ease-out both;
   }
 
   .lyricsScroll {
