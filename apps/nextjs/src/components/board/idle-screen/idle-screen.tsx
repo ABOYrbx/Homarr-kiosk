@@ -9,6 +9,7 @@ import { useOptionalEditMode } from "@homarr/boards/edit-mode";
 import { useI18n } from "@homarr/translation/client";
 
 import { AnalogClock } from "./analog-clock";
+import { isIdleNavigationEvent } from "./carousel";
 import classes from "./idle-screen.module.css";
 import { IdleCarousel } from "./idle-carousel";
 import { IdleWidgets } from "./idle-widgets";
@@ -92,12 +93,17 @@ export const IdleScreen = ({ board, tourActive = false }: { board: IdleScreenSet
   const liveBoard = useOptionalBoard();
   const settings: IdleScreenSettings = liveBoard ?? board;
   const { previewOpen, closePreview } = useIdleScreenPreview();
-  const timerOpen = useIdleScreen({
+  const { open: timerOpen, dismiss: dismissTimer } = useIdleScreen({
     enabled: settings.idleScreenEnabled && !isEditMode && !tourActive && !onSettingsPage,
     timeoutMinutes: settings.idleScreenTimeoutMinutes,
     paused: previewOpen,
+    ignoreActivity: isIdleNavigationEvent,
   });
   const open = isIdleScreenOpen({ previewOpen, timerOpen });
+  const closeIdleScreen = () => {
+    closePreview();
+    dismissTimer();
+  };
   useWakeLock(open);
 
   if (!open) return null;
@@ -126,7 +132,7 @@ export const IdleScreen = ({ board, tourActive = false }: { board: IdleScreenSet
           }
           clockPane={<AnalogClock showSeconds={settings.idleScreenShowClockSeconds} />}
           widgetsPane={<IdleWidgets layoutId={idleLayoutId ?? ""} />}
-          onClose={closePreview}
+          onClose={closeIdleScreen}
         />
       </div>
     </Portal>

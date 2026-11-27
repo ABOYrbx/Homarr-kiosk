@@ -4,7 +4,7 @@ import type { PointerEvent as ReactPointerEvent, ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 
 import classes from "./idle-screen.module.css";
-import { classifyIdlePointer, getIdleLayerTarget } from "./carousel";
+import { classifyIdlePointer, getIdleLayerTarget, isIdleNavigationEvent } from "./carousel";
 import type { IdleLayer } from "./carousel";
 
 interface PointerStart {
@@ -12,6 +12,9 @@ interface PointerStart {
   x: number;
   y: number;
 }
+
+const isEditableTarget = (target: EventTarget | null): boolean =>
+  target instanceof HTMLElement && (target.isContentEditable || Boolean(target.closest("input, textarea, select")));
 
 export const IdleCarousel = ({
   initialLayer,
@@ -31,15 +34,19 @@ export const IdleCarousel = ({
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.defaultPrevented) return;
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onClose();
+        return;
+      }
+      if (isEditableTarget(event.target) || !isIdleNavigationEvent(event)) return;
       if (event.key === "ArrowLeft") {
         event.preventDefault();
         setActiveLayer((current) => getIdleLayerTarget(current, -1));
       } else if (event.key === "ArrowRight") {
         event.preventDefault();
         setActiveLayer((current) => getIdleLayerTarget(current, 1));
-      } else if (event.key === "Escape") {
-        event.preventDefault();
-        onClose();
       }
     };
 
@@ -58,7 +65,10 @@ export const IdleCarousel = ({
     pointerStart.current = null;
 
     const direction = classifyIdlePointer(event.clientX - start.x, event.clientY - start.y);
-    if (direction === null) return;
+    if (direction === null) {
+      if (event.target instanceof Element && event.target.hasAttribute("data-idle-layer")) onClose();
+      return;
+    }
     setActiveLayer((current) => getIdleLayerTarget(current, direction));
   };
 
@@ -73,8 +83,8 @@ export const IdleCarousel = ({
       className={classes.carousel}
       onPointerDown={handlePointerDown}
       onPointerUp={handlePointerUp}
-      onPointerCancel={() => {
-        pointerStart.current = null;
+      onPointerCancel={(event) => {
+        if (pointerStart.current?.pointerId === event.pointerId) pointerStart.current = null;
       }}
     >
       <div key={activeLayer} className={classes.layer} data-idle-layer={activeLayer}>

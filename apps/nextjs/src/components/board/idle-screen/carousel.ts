@@ -12,3 +12,8 @@ export const classifyIdlePointer = (dx: number, dy: number, threshold = 48): -1 
   if (Math.abs(dx) >= threshold && Math.abs(dx) > Math.abs(dy)) return dx < 0 ? -1 : 1;
   return null;
 };
+
+export const isIdleNavigationEvent = ({ type, key }: { type: string; key?: string }): boolean => {
+  if (type === "pointerdown" || type === "pointermove" || type === "touchstart") return true;
+  return type === "keydown" && (key === "ArrowLeft" || key === "ArrowRight");
+};

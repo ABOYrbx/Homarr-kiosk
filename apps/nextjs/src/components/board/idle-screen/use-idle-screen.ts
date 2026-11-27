@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const ACTIVITY_EVENTS = ["pointermove", "pointerdown", "keydown", "wheel", "touchstart"] as const;
 
@@ -13,16 +13,25 @@ export const useIdleScreen = ({
   enabled,
   timeoutMinutes,
   paused = false,
+  ignoreActivity,
 }: {
   enabled: boolean;
   timeoutMinutes: number;
   paused?: boolean;
-}): boolean => {
+  ignoreActivity?: (event: { type: string; key?: string }) => boolean;
+}): { open: boolean; dismiss: () => void } => {
   const [open, setOpen] = useState(false);
+  const openRef = useRef(false);
+  const scheduleRef = useRef<(() => void) | null>(null);
+  const updateOpen = useCallback((nextOpen: boolean) => {
+    openRef.current = nextOpen;
+    setOpen(nextOpen);
+  }, []);
 
   useEffect(() => {
     if (!enabled || paused) {
-      setOpen(false);
+      updateOpen(false);
+      scheduleRef.current = null;
       return;
     }
 
@@ -35,14 +44,17 @@ export const useIdleScreen = ({
       clear();
       if (document.hidden) return;
       const minutes = Number.isFinite(timeoutMinutes) ? Math.max(1, timeoutMinutes) : 5;
-      timer = setTimeout(() => setOpen(true), minutes * 60_000);
+      timer = setTimeout(() => updateOpen(true), minutes * 60_000);
     };
-    const onActivity = () => {
-      setOpen(false);
+    scheduleRef.current = schedule;
+    const onActivity = (event: Event) => {
+      const { key } = event as Event & { key?: string };
+      if (openRef.current && ignoreActivity?.({ type: event.type, key })) return;
+      updateOpen(false);
       schedule();
     };
     const onVisibilityChange = () => {
-      setOpen(false);
+      updateOpen(false);
       schedule();
     };
 
@@ -54,12 +66,18 @@ export const useIdleScreen = ({
 
     return () => {
       clear();
+      scheduleRef.current = null;
       for (const event of ACTIVITY_EVENTS) {
         window.removeEventListener(event, onActivity);
       }
       document.removeEventListener("visibilitychange", onVisibilityChange);
     };
-  }, [enabled, timeoutMinutes, paused]);
+  }, [enabled, timeoutMinutes, paused, ignoreActivity, updateOpen]);
 
-  return open;
+  const dismiss = useCallback(() => {
+    updateOpen(false);
+    scheduleRef.current?.();
+  }, [updateOpen]);
+
+  return { open, dismiss };
 };
