@@ -282,6 +282,19 @@
   gap: clamp(2rem, 5vw, 6rem);
 }
 
+/* The cover must leave room for the track details inside the same column. */
+.musicTwoColumns .trackColumn {
+  gap: clamp(1.25rem, 2.5vw, 2.5rem);
+}
+
+.musicTwoColumns .cover {
+  width: min(38vh, 45%, 420px);
+}
+
+.musicTwoColumns .trackDetails {
+  flex: 1;
+}
+
 .musicOneColumn .trackColumn {
   flex-direction: column;
   max-width: min(72vh, 720px);

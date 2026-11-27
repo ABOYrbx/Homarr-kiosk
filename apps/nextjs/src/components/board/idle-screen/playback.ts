@@ -12,6 +12,14 @@ export interface PlaybackState {
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 
 /**
+ * HA players that do not report live progress keep their original
+ * `media_position_updated_at` forever. Extrapolating from such a timestamp
+ * races the lyrics far ahead of the audio, so the local clock only ever
+ * advances this far without a fresh position report.
+ */
+const MAX_POSITION_AGE_SECONDS = 30;
+
+/**
  * Rebase the reported position on the timestamp HA attached to it, but only
  * while playing. Paused or stopped tracks freeze at their reported position.
  * Returns null when the integration did not report a usable position.
@@ -31,7 +39,10 @@ export const computePlaybackPosition = ({
     return duration !== undefined ? clamp(base, 0, Math.max(0, duration)) : base;
   }
 
-  const elapsedSeconds = Math.max(0, (now - (mediaPositionUpdatedAt as number)) / 1000);
+  const elapsedSeconds = Math.min(
+    MAX_POSITION_AGE_SECONDS,
+    Math.max(0, (now - (mediaPositionUpdatedAt as number)) / 1000),
+  );
   const position = base + elapsedSeconds;
   return duration !== undefined ? clamp(position, 0, Math.max(0, duration)) : position;
 };

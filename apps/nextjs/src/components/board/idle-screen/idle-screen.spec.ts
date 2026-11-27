@@ -56,7 +56,13 @@ describe("playback position", () => {
   });
 
   it("clamps to the reported duration", () => {
-    expect(computePlaybackPosition({ ...base, state: "playing", now: 120_000 })).toBe(100);
+    expect(computePlaybackPosition({ ...base, state: "playing", now: 4_000, mediaDuration: 12 })).toBe(12);
+  });
+
+  it("does not extrapolate from a stale HA position timestamp", () => {
+    // Some media players report position 0 once and never update it again.
+    // Extrapolating forever would run the lyrics far ahead of the audio.
+    expect(computePlaybackPosition({ ...base, state: "playing", now: 120_000 })).toBe(40);
   });
 
   it("returns null without a position", () => {

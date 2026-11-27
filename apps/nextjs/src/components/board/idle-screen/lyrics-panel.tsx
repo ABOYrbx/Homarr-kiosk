@@ -56,7 +56,11 @@ export const LyricsPanel = ({ lyrics, position }: { lyrics: LyricsViewData; posi
     const container = scrollRef.current;
     const element = activeIndex >= 0 ? lineRefs.current[activeIndex] : undefined;
     if (!container || !element) return;
-    container.scrollTop = Math.max(0, element.offsetTop - container.clientHeight / 2 + element.clientHeight / 2);
+    // offsetTop is measured against offsetParent (.musicContent), not the
+    // scroll container. Derive the offset from viewport rects so the active
+    // line is centred even with nested layout/padding.
+    const offset = element.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop;
+    container.scrollTop = Math.max(0, offset - container.clientHeight / 2 + element.clientHeight / 2);
   }, [activeIndex]);
 
   // A stable ref callback keeps the memoized lines from re-rendering on every
