@@ -1,12 +1,14 @@
 "use client";
 
 import type { PointerEvent as ReactPointerEvent, ReactNode } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import classes from "./idle-screen.module.css";
 import { isIdleBackgroundTarget, isIdleOverlayInteractiveTarget } from "./carousel-gesture";
-import { classifyIdlePointer, getIdleLayerTarget, isIdleNavigationEvent } from "./carousel";
+import { classifyIdlePointer, getIdleLayerTarget, idleLayerOrder, isIdleNavigationEvent } from "./carousel";
 import type { IdleLayer } from "./carousel";
+
+const DOTS_VISIBLE_MS = 3_000;
 
 interface PointerStart {
   pointerId: number;
@@ -31,6 +33,21 @@ export const IdleCarousel = ({
   const [activeLayer, setActiveLayer] = useState<IdleLayer>(initialLayer);
   const pointerStart = useRef<PointerStart | null>(null);
   const manuallyNavigated = useRef(false);
+  const [showDots, setShowDots] = useState(true);
+  const dotsTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const revealDots = useCallback(() => {
+    setShowDots(true);
+    if (dotsTimer.current) clearTimeout(dotsTimer.current);
+    dotsTimer.current = setTimeout(() => setShowDots(false), DOTS_VISIBLE_MS);
+  }, []);
+
+  useEffect(() => {
+    revealDots();
+    return () => {
+      if (dotsTimer.current) clearTimeout(dotsTimer.current);
+    };
+  }, [revealDots]);
 
   // Playback starting or stopping changes the preferred layer. Only follow it
   // until the user has navigated themselves.
@@ -49,6 +66,7 @@ export const IdleCarousel = ({
       if (event.defaultPrevented || isIdleOverlayInteractiveTarget(event.target) || !isIdleNavigationEvent(event)) {
         return;
       }
+      revealDots();
       if (event.key === "ArrowLeft") {
         event.preventDefault();
         manuallyNavigated.current = true;
@@ -62,7 +80,7 @@ export const IdleCarousel = ({
 
     window.addEventListener("keydown", handleKeyDown, true);
     return () => window.removeEventListener("keydown", handleKeyDown, true);
-  }, [onClose]);
+  }, [onClose, revealDots]);
 
   const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (!event.isPrimary || event.button !== 0) {
@@ -75,6 +93,7 @@ export const IdleCarousel = ({
       x: event.clientX,
       y: event.clientY,
     };
+    revealDots();
   };
 
   const handlePointerUp = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -109,6 +128,11 @@ export const IdleCarousel = ({
     >
       <div key={activeLayer} className={classes.layer} data-idle-layer={activeLayer}>
         {panes[activeLayer]}
+      </div>
+      <div className={classes.carouselDots} data-visible={showDots} aria-hidden="true">
+        {idleLayerOrder.map((layer) => (
+          <span key={layer} className={classes.carouselDot} data-active={layer === activeLayer} />
+        ))}
       </div>
     </div>
   );
