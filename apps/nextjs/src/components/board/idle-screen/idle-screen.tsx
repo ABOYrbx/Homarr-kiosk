@@ -31,6 +31,7 @@ export interface IdleScreenSettings {
   idleScreenMediaPlayerEntityId: string | null;
   idleScreenShowClockSeconds: boolean;
   idleScreenShowLyrics: boolean;
+  idleScreenLyricsOffsetSeconds: number;
 }
 
 type WakeLock = { release: () => Promise<void> };
@@ -70,12 +71,14 @@ const MusicIdleScreen = ({
   mode,
   showClockSeconds,
   showLyrics,
+  lyricsOffsetSeconds = 0,
 }: {
   integrationId: string;
   entityId: string;
   mode: IdleScreenMode;
   showClockSeconds: boolean;
   showLyrics: boolean;
+  lyricsOffsetSeconds?: number;
 }) => {
   const { entity, isLoading } = useNowPlaying({ integrationId, entityId });
   const attributes = entity?.attributes;
@@ -83,7 +86,15 @@ const MusicIdleScreen = ({
   const view = decideIdleView({ mode, hasTrack });
 
   if (isLoading || !entity || view === "clock") return <AnalogClock showSeconds={showClockSeconds} />;
-  return <NowPlaying entity={entity} showLyrics={showLyrics} integrationId={integrationId} entityId={entityId} />;
+  return (
+    <NowPlaying
+      entity={entity}
+      showLyrics={showLyrics}
+      integrationId={integrationId}
+      entityId={entityId}
+      lyricsOffsetSeconds={lyricsOffsetSeconds}
+    />
+  );
 };
 
 export { MusicIdleScreen };
@@ -188,7 +199,12 @@ export const IdleScreen = ({ board, tourActive = false }: { board: IdleScreenSet
           <IdleCarousel
             initialLayer={musicPresence.playing ? "music" : "clock"}
             musicPane={
-              <MusicPane integrationId={integrationId} entityId={entityId} showLyrics={settings.idleScreenShowLyrics} />
+              <MusicPane
+                integrationId={integrationId}
+                entityId={entityId}
+                showLyrics={settings.idleScreenShowLyrics}
+                lyricsOffsetSeconds={settings.idleScreenLyricsOffsetSeconds ?? 0}
+              />
             }
             clockPane={
               liveBoard ? (

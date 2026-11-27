@@ -28,7 +28,7 @@ const controlVars = () => ({
 });
 import type { LyricsViewData } from "./lyrics-view";
 import { buildTrackKey } from "./lyrics-view";
-import { formatDuration, shouldClearSeekOverride } from "./playback";
+import { formatDuration, offsetLyricsPosition, shouldClearSeekOverride } from "./playback";
 import { useLyrics } from "./use-lyrics";
 import { usePlaybackClock } from "./use-playback-clock";
 
@@ -37,11 +37,13 @@ export const NowPlaying = ({
   showLyrics,
   integrationId,
   entityId,
+  lyricsOffsetSeconds,
 }: {
   entity: SmartHomeEntity;
   showLyrics: boolean;
   integrationId: string;
   entityId: string;
+  lyricsOffsetSeconds: number;
 }) => {
   const t = useI18n("board");
   const [imageFailed, setImageFailed] = useState(false);
@@ -233,7 +235,7 @@ export const NowPlaying = ({
           </div>
         </div>
 
-        {lyrics && <LyricsPanel lyrics={lyrics} position={position} />}
+        {lyrics && <LyricsPanel lyrics={lyrics} position={offsetLyricsPosition(position, lyricsOffsetSeconds)} />}
       </div>
       <span className={classes.srOnly} aria-live="off">
         {`${title}${artist ? ` — ${artist}` : ""}`}

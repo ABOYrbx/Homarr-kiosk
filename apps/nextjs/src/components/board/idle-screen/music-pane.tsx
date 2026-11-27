@@ -40,12 +40,14 @@ const ConfiguredMusicPane = ({
   integrationId,
   entityId,
   showLyrics,
+  lyricsOffsetSeconds,
   emptyMessage,
   loadingMessage,
 }: {
   integrationId: string;
   entityId: string;
   showLyrics: boolean;
+  lyricsOffsetSeconds: number;
   emptyMessage: string;
   loadingMessage: string;
 }) => {
@@ -61,17 +63,27 @@ const ConfiguredMusicPane = ({
   });
 
   if (state !== "ready" || !entity) return <MusicPaneMessage message={emptyMessage} />;
-  return <NowPlaying entity={entity} showLyrics={showLyrics} integrationId={integrationId} entityId={entityId} />;
+  return (
+    <NowPlaying
+      entity={entity}
+      showLyrics={showLyrics}
+      integrationId={integrationId}
+      entityId={entityId}
+      lyricsOffsetSeconds={lyricsOffsetSeconds}
+    />
+  );
 };
 
 export const MusicPane = ({
   integrationId,
   entityId,
   showLyrics,
+  lyricsOffsetSeconds,
 }: {
   integrationId: string | null;
   entityId: string | null;
   showLyrics: boolean;
+  lyricsOffsetSeconds: number;
 }) => {
   const t = useI18n("board");
 
@@ -84,6 +96,7 @@ export const MusicPane = ({
       integrationId={integrationId}
       entityId={entityId}
       showLyrics={showLyrics}
+      lyricsOffsetSeconds={lyricsOffsetSeconds}
       emptyMessage={t("idleScreen.music.nothingPlaying")}
       loadingMessage={t("idleScreen.music.loading")}
     />
