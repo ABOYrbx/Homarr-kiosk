@@ -15,6 +15,7 @@ import { resolveIdleItems } from "./idle-widgets-layout";
 import { NowPlaying } from "./now-playing";
 import type { IdleScreenMode } from "./playback";
 import { decideIdleView } from "./playback";
+import { isIdleScreenOpen, useIdleScreenPreview } from "./preview-context";
 import { useIdleScreen } from "./use-idle-screen";
 import { useNowPlaying } from "./use-now-playing";
 
@@ -90,10 +91,13 @@ export const IdleScreen = ({ board, tourActive = false }: { board: IdleScreenSet
   // Read the live board so saved setting changes take effect without a reload.
   const liveBoard = useOptionalBoard();
   const settings: IdleScreenSettings = liveBoard ?? board;
-  const open = useIdleScreen({
+  const { previewOpen } = useIdleScreenPreview();
+  const timerOpen = useIdleScreen({
     enabled: settings.idleScreenEnabled && !isEditMode && !tourActive && !onSettingsPage,
     timeoutMinutes: settings.idleScreenTimeoutMinutes,
+    paused: previewOpen,
   });
+  const open = isIdleScreenOpen({ previewOpen, timerOpen });
   useWakeLock(open);
 
   if (!open) return null;

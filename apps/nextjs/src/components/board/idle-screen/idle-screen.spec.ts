@@ -1,9 +1,18 @@
 import { describe, expect, it } from "vitest";
 
+import { isIdleScreenOpen } from "./preview-context";
 import { getClockAngles } from "./angles";
 import type { LyricLine } from "./lyrics-view";
 import { buildTrackKey, effectiveLineEnd, findActiveLineIndex, findActiveWordIndex } from "./lyrics-view";
 import { computePlaybackPosition, decideIdleView, formatDuration } from "./playback";
+
+describe("idle screen open state", () => {
+  it("opens for either the timer or the preview", () => {
+    expect(isIdleScreenOpen({ previewOpen: true, timerOpen: false })).toBe(true);
+    expect(isIdleScreenOpen({ previewOpen: false, timerOpen: true })).toBe(true);
+    expect(isIdleScreenOpen({ previewOpen: false, timerOpen: false })).toBe(false);
+  });
+});
 
 describe("clock angles", () => {
   it("points straight up at 12:00:00", () => {

@@ -9,11 +9,19 @@ const ACTIVITY_EVENTS = ["pointermove", "pointerdown", "keydown", "wheel", "touc
  * now (never immediately open), restarts on every input and is paused while
  * the tab is hidden.
  */
-export const useIdleScreen = ({ enabled, timeoutMinutes }: { enabled: boolean; timeoutMinutes: number }): boolean => {
+export const useIdleScreen = ({
+  enabled,
+  timeoutMinutes,
+  paused = false,
+}: {
+  enabled: boolean;
+  timeoutMinutes: number;
+  paused?: boolean;
+}): boolean => {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    if (!enabled) {
+    if (!enabled || paused) {
       setOpen(false);
       return;
     }
@@ -51,7 +59,7 @@ export const useIdleScreen = ({ enabled, timeoutMinutes }: { enabled: boolean; t
       }
       document.removeEventListener("visibilitychange", onVisibilityChange);
     };
-  }, [enabled, timeoutMinutes]);
+  }, [enabled, timeoutMinutes, paused]);
 
   return open;
 };
