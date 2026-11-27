@@ -1,0 +1,38 @@
+---
+title: "Music Assistant"
+description: "Music Assistant is a self-hosted music server that manages your library and streams to your players."
+hide_title: true
+---
+
+import { IntegrationHeader } from "@site/src/components/integrations/header";
+import { AddingIntegration } from "@site/src/components/integrations/adding";
+import { IntegrationSecrets } from "@site/src/components/integrations/secrets";
+import { musicAssistantIntegration } from ".";
+
+<IntegrationHeader integration={musicAssistantIntegration} categories={["Music", "Media server"]} />
+
+Homarr reads player queues from Music Assistant over its WebSocket API. The always-on display (AOD) queue view uses this
+connection to show the upcoming tracks.
+
+### Adding the integration
+
+<AddingIntegration />
+
+Use the HTTP address of your Music Assistant server with its port, for example `http://music-assistant:8095`. The default
+port is `8095`; Homarr connects to the `/ws` endpoint on that host.
+
+### Secrets
+
+<IntegrationSecrets
+  secrets={[
+    {
+      credentials: ["apiKey"],
+      steps: [
+        "Sign in to the Music Assistant web interface.",
+        'Open "Settings" > "Profile" and find the long-lived access tokens section.',
+        'Create a token, for example named "Homarr", and copy it.',
+        "Paste the token into the API Key field when creating the integration in Homarr.",
+      ],
+    },
+  ]}
+/>

@@ -664,6 +664,15 @@ export const integrationDefs = {
     apiKeySettingsPath: "/profile/security",
     features: { docker: { aliases: ["homeassistant", "home-assistant", "hass"] } },
   },
+  musicAssistant: {
+    httpAuth: { type: "adapter" },
+    name: "Music Assistant",
+    secretKinds: [["apiKey"]],
+    iconUrl: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons@master/svg/music-assistant.svg",
+    category: ["mediaService"],
+    documentationSlug: "music-assistant",
+    defaultPort: 8095,
+  },
   homey: {
     httpAuth: { type: "adapter" },
     name: "Homey",
@@ -1253,6 +1262,7 @@ export type IntegrationCategory = (typeof integrationCategories)[number];
 export const integrationHttpUnavailableReasons = {
   ical: "iCalendar feeds use a saved calendar URL, not an arbitrary service API",
   truenas: "TrueNAS uses a WebSocket API; generic integration requests support HTTP only",
+  musicAssistant: "Music Assistant uses a WebSocket API; generic integration requests support HTTP only",
 } as const satisfies Partial<Record<IntegrationKind, string>>;
 
 export type HttpIntegrationKind = Exclude<IntegrationKind, keyof typeof integrationHttpUnavailableReasons>;
