@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
+import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Group, Input, NumberInput, Select, Slider, Stack, Switch, Text } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
@@ -25,6 +26,16 @@ interface IdleScreenProps extends Props {
 }
 
 const formatLyricsOffset = (seconds: number) => `${seconds > 0 ? "+" : ""}${seconds} s`;
+const lyricsOffsetFieldId = "idle-screen-lyrics-offset";
+const lyricsOffsetInputContainer = (children: ReactNode) => (
+  <fieldset
+    aria-labelledby={`${lyricsOffsetFieldId}-label`}
+    aria-describedby={`${lyricsOffsetFieldId}-description`}
+    style={{ border: 0, margin: 0, padding: 0 }}
+  >
+    {children}
+  </fieldset>
+);
 
 export const BehaviorSettingsContent = ({ form }: Props) => {
   const t = useI18n("board");
@@ -178,11 +189,15 @@ export const IdleScreenSettingsContent = ({ board, form, saveSettingsAsync }: Id
           />
           {form.values.idleScreenShowLyrics && (
             <Input.Wrapper
+              id={lyricsOffsetFieldId}
+              labelElement="div"
               label={t("field.idleScreenLyricsOffsetSeconds.label")}
               description={t("field.idleScreenLyricsOffsetSeconds.description")}
+              inputContainer={lyricsOffsetInputContainer}
             >
               <Slider
-                thumbLabel={`${formatLyricsOffset(lyricsOffset)}`}
+                thumbLabel={t("field.idleScreenLyricsOffsetSeconds.label")}
+                thumbValueText={formatLyricsOffset(lyricsOffset)}
                 label={formatLyricsOffset}
                 maw="80%"
                 mx="auto"
