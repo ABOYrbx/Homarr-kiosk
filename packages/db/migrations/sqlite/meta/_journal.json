@@ -414,6 +414,13 @@
       "when": 1795792586289,
       "tag": "0058_cute_patch",
       "breakpoints": true
+    },
+    {
+      "idx": 59,
+      "version": "6",
+      "when": 1795792902129,
+      "tag": "0059_blue_blue_shield",
+      "breakpoints": true
     }
   ]
 }

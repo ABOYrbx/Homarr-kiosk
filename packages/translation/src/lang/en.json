@@ -7083,6 +7083,20 @@
         "label": "AOD widget scale",
         "description": "Scale the widget layer in the idle screen"
       },
+      "idleScreenWidgetBackground": {
+        "label": "AOD widget background",
+        "description": "Background image for the widget layer in the idle screen",
+        "placeholder": "Image URL or media file",
+        "clear": "Remove background",
+        "group": {
+          "your": "Your media",
+          "other": "Other media"
+        }
+      },
+      "idleScreenWidgetBackgroundFrost": {
+        "label": "Frost background",
+        "description": "Blur and darken the background so widgets stay readable"
+      },
       "idleScreenPreview": {
         "label": "AOD preview",
         "description": "Preview of the saved idle screen",

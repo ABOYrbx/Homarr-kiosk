@@ -1235,7 +1235,7 @@ export const boardRouter = createTRPCRouter({
       mcp: {
         enabled: true,
         description:
-          "Read the editable visual, behavior and idle-screen settings for one board, including its current custom CSS and idle screen options (idleScreenEnabled, idleScreenTimeoutMinutes, idleScreenMode, idleScreenHomeAssistantIntegrationId, idleScreenMediaPlayerEntityId, idleScreenLayoutId, idleScreenShowClockSeconds, idleScreenShowLyrics, idleScreenWeatherLocation, idleScreenClockColor, idleScreenWidgetScale). Requires modify permission. REQUIRED: id (board ID). Call this before proposing board settings or custom CSS changes",
+          "Read the editable visual, behavior and idle-screen settings for one board, including its current custom CSS and idle screen options (idleScreenEnabled, idleScreenTimeoutMinutes, idleScreenMode, idleScreenHomeAssistantIntegrationId, idleScreenMediaPlayerEntityId, idleScreenLayoutId, idleScreenShowClockSeconds, idleScreenShowLyrics, idleScreenWeatherLocation, idleScreenClockColor, idleScreenWidgetScale, idleScreenWidgetBackground, idleScreenWidgetBackgroundFrost). Requires modify permission. REQUIRED: id (board ID). Call this before proposing board settings or custom CSS changes",
       },
     })
     .input(z.object({ id: z.string() }))
@@ -1274,6 +1274,8 @@ export const boardRouter = createTRPCRouter({
           idleScreenWeatherLocation: true,
           idleScreenClockColor: true,
           idleScreenWidgetScale: true,
+          idleScreenWidgetBackground: true,
+          idleScreenWidgetBackgroundFrost: true,
         },
         where: boardWhere,
       });
@@ -1758,7 +1760,7 @@ export const boardRouter = createTRPCRouter({
       mcp: {
         enabled: true,
         description:
-          "Update visual, behavior and idle-screen settings for a board. Requires modify permission. REQUIRED: id (board ID). Optional fields include pageTitle, metaTitle, logoImageUrl, faviconImageUrl, backgroundImageUrl, colors, opacity, customCss, itemRadius, disableStatus, idleScreenEnabled, idleScreenTimeoutMinutes, idleScreenMode, idleScreenHomeAssistantIntegrationId, idleScreenMediaPlayerEntityId, idleScreenLayoutId, idleScreenShowClockSeconds, idleScreenShowLyrics, idleScreenWeatherLocation, idleScreenClockColor and idleScreenWidgetScale (0.5-2). Set primaryColor, secondaryColor, or itemRadius to null to inherit the instance theme.",
+          "Update visual, behavior and idle-screen settings for a board. Requires modify permission. REQUIRED: id (board ID). Optional fields include pageTitle, metaTitle, logoImageUrl, faviconImageUrl, backgroundImageUrl, colors, opacity, customCss, itemRadius, disableStatus, idleScreenEnabled, idleScreenTimeoutMinutes, idleScreenMode, idleScreenHomeAssistantIntegrationId, idleScreenMediaPlayerEntityId, idleScreenLayoutId, idleScreenShowClockSeconds, idleScreenShowLyrics, idleScreenWeatherLocation, idleScreenClockColor, idleScreenWidgetScale (0.5-2), idleScreenWidgetBackground and idleScreenWidgetBackgroundFrost. Set primaryColor, secondaryColor, or itemRadius to null to inherit the instance theme.",
       },
     })
     .input(boardSavePartialSettingsSchema.extend({ id: z.string() }))
@@ -1806,6 +1808,8 @@ export const boardRouter = createTRPCRouter({
           idleScreenWeatherLocation: input.idleScreenWeatherLocation,
           idleScreenClockColor: input.idleScreenClockColor,
           idleScreenWidgetScale: input.idleScreenWidgetScale,
+          idleScreenWidgetBackground: input.idleScreenWidgetBackground,
+          idleScreenWidgetBackgroundFrost: input.idleScreenWidgetBackgroundFrost,
         })
         .where(eq(boards.id, input.id));
     }),

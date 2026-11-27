@@ -320,6 +320,8 @@ export const boards = pgTable("board", {
   idleScreenWeatherLocation: pgIdleWeatherLocationText(),
   idleScreenClockColor: text().default("#1b3a5c").notNull(),
   idleScreenWidgetScale: doublePrecision().default(1).notNull(),
+  idleScreenWidgetBackground: text(),
+  idleScreenWidgetBackgroundFrost: boolean().default(true).notNull(),
 });
 
 export const boardUserPermissions = pgTable(

@@ -423,6 +423,8 @@ export const onboardRouter = createTRPCRouter({
               idleScreenWeatherLocation: null,
               idleScreenClockColor: "#1b3a5c",
               idleScreenWidgetScale: 1,
+              idleScreenWidgetBackground: null,
+              idleScreenWidgetBackgroundFrost: true,
               sections: [],
               layouts: pendingLayouts,
               items: [],

@@ -71,6 +71,8 @@ const PARTIAL_FORM_KEYS = [
   "idleScreenWeatherLocation",
   "idleScreenClockColor",
   "idleScreenWidgetScale",
+  "idleScreenWidgetBackground",
+  "idleScreenWidgetBackgroundFrost",
 ] as const;
 
 const buildInitialValues = (board: Board): FormValues => ({
@@ -100,6 +102,8 @@ const buildInitialValues = (board: Board): FormValues => ({
   idleScreenWeatherLocation: board.idleScreenWeatherLocation,
   idleScreenClockColor: board.idleScreenClockColor,
   idleScreenWidgetScale: board.idleScreenWidgetScale ?? 1,
+  idleScreenWidgetBackground: board.idleScreenWidgetBackground ?? null,
+  idleScreenWidgetBackgroundFrost: board.idleScreenWidgetBackgroundFrost ?? true,
   layouts: normalizeMobileLayoutGutters(board.layouts),
 });
 

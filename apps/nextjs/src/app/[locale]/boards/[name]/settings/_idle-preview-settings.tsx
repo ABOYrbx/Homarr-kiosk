@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ActionIcon, Alert, Button, ColorInput, Group, Stack, Text, TextInput } from "@mantine/core";
+import { ActionIcon, Alert, Button, ColorInput, Group, Input, Slider, Stack, Text, TextInput } from "@mantine/core";
 import { IconSearch, IconX } from "@tabler/icons-react";
 
 import type { RouterOutputs } from "@homarr/api";
@@ -12,6 +12,7 @@ import { useI18n } from "@homarr/translation/client";
 import { useIdleScreenPreview } from "~/components/board/idle-screen/preview-context";
 
 import type { Board } from "../../_types";
+import { IdleWidgetBackgroundFrost, IdleWidgetBackgroundSettings } from "./_idle-widget-background";
 import type { FormValues } from "./_settings-form";
 
 type CitySearchResult = RouterOutputs["location"]["searchCity"]["results"][number];
@@ -20,6 +21,8 @@ interface Props {
   form: UseFormReturnType<FormValues>;
   board: Board;
 }
+
+export const formatWidgetScale = (value: number) => `${Math.round(value * 100)} %`;
 
 export const toIdleWeatherLocation = (
   city: Pick<CitySearchResult, "name" | "latitude" | "longitude">,
@@ -149,6 +152,7 @@ export const IdlePreviewSettings = ({ form, board }: Props) => {
   const t = useI18n("board");
   const { openPreview } = useIdleScreenPreview();
   const clockColor = form.values.idleScreenClockColor ?? board.idleScreenClockColor ?? "#1b3a5c";
+  const widgetScale = form.values.idleScreenWidgetScale ?? board.idleScreenWidgetScale ?? 1;
 
   return (
     <Stack gap="sm">
@@ -161,6 +165,27 @@ export const IdlePreviewSettings = ({ form, board }: Props) => {
         value={clockColor}
         onChange={(value) => form.setFieldValue("idleScreenClockColor", value)}
       />
+      <Input.Wrapper
+        label={t("field.idleScreenWidgetScale.label")}
+        description={t("field.idleScreenWidgetScale.description")}
+      >
+        <Slider
+          thumbLabel={formatWidgetScale(widgetScale)}
+          mt="xs"
+          min={0.5}
+          max={2}
+          step={0.05}
+          marks={[
+            { value: 0.5, label: "50 %" },
+            { value: 1, label: "100 %" },
+            { value: 2, label: "200 %" },
+          ]}
+          value={widgetScale}
+          onChange={(value) => form.setFieldValue("idleScreenWidgetScale", value)}
+        />
+      </Input.Wrapper>
+      <IdleWidgetBackgroundSettings form={form} />
+      <IdleWidgetBackgroundFrost form={form} />
       <Stack gap={2}>
         <Text fw={500}>{t("field.idleScreenPreview.label")}</Text>
         <Text size="sm" c="dimmed">

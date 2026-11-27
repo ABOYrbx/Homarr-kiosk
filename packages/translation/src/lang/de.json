@@ -7083,6 +7083,20 @@
         "label": "AOD-Widget-Skala",
         "description": "Skaliert die Widget-Ebene im Leerlaufbildschirm"
       },
+      "idleScreenWidgetBackground": {
+        "label": "AOD-Widget-Hintergrund",
+        "description": "Hintergrundbild für die Widget-Ebene im Leerlaufbildschirm",
+        "placeholder": "Bild-URL oder Mediendatei",
+        "clear": "Hintergrund entfernen",
+        "group": {
+          "your": "Eigene Medien",
+          "other": "Andere Medien"
+        }
+      },
+      "idleScreenWidgetBackgroundFrost": {
+        "label": "Hintergrund frosten",
+        "description": "Hintergrund weichzeichnen und abdunkeln, damit Widgets lesbar bleiben"
+      },
       "idleScreenPreview": {
         "label": "AOD-Vorschau",
         "description": "Vorschau des gespeicherten Leerlaufbildschirms",

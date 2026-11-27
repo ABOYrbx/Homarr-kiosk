@@ -304,6 +304,8 @@ export const boards = sqliteTable("board", {
   idleScreenWeatherLocation: sqliteIdleWeatherLocationText(),
   idleScreenClockColor: text().default("#1b3a5c").notNull(),
   idleScreenWidgetScale: real().default(1).notNull(),
+  idleScreenWidgetBackground: text(),
+  idleScreenWidgetBackgroundFrost: int({ mode: "boolean" }).default(true).notNull(),
 });
 
 export const boardUserPermissions = sqliteTable(

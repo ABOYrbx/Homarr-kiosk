@@ -39,6 +39,8 @@ export class BoardMockBuilder {
       idleScreenWeatherLocation: null,
       idleScreenClockColor: "#1b3a5c",
       idleScreenWidgetScale: 1,
+      idleScreenWidgetBackground: null,
+      idleScreenWidgetBackgroundFrost: true,
       customCss: "",
       creatorId: createId(),
       creator: {

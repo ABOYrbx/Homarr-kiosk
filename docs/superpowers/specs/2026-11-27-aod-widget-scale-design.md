@@ -45,3 +45,12 @@ Der Slider vergrößert bis zur maximal passenden Skala und stoppt dort. Kein Ab
 - Slider in der AOD-Sektion der Board-Einstellungen, direkt bei der AOD-Vorschau, mit deutschem und englischem Label/Hinweis.
 - `IdleWidgets` multipliziert die bestehende Fit-Skala mit dem Board-Wert; der Frame erhält `overflow: auto`, sobald die Fläche größer als der Viewport ist, und versteckt die Scrollbars.
 - Ebenen-Wischen bleibt auf Hintergrundflächen; Verschieben der Kartenfläche passiert auf den Karten selbst.
+
+## Ergänzung: Hintergrund und Frostung der Widget-Ebene
+
+Der Anwender möchte zusätzlich ein Hintergrundbild für die Widget-Ebene wählen und es optional frosten (Blur + Abdunklung), damit die Karten lesbar bleiben.
+
+- Neue Board-Felder `idleScreenWidgetBackground` (nullable String, Medien-URL oder externe URL) und `idleScreenWidgetBackgroundFrost` (Boolean, Default `true`), wieder additiv migriert.
+- UI: Medien-Auswahl mit Upload-Button im selben AOD-Settings-Block, dazu ein Switch „Hintergrund frosten".
+- Rendering: Eine absolute Fläche hinter den Karten in `IdleWidgets`; ohne Bild bleibt der aktuelle schwarze Hintergrund. Frostung wendet `filter: blur(...) brightness(...)` plus Abdunklung an; unabhängig davon liegt ein leichter Scrim über dem Bild, damit Widget-Texte lesbar sind.
+- Kein Video-Hintergrund, keine Animation, keine Änderung an Musik-/Uhr-Ebene.
