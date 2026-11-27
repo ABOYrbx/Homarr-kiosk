@@ -270,6 +270,8 @@ const integrationCreators = {
     (await import("../technitium/technitium-integration-factory")).createTechnitiumDnsIntegrationAsync(input),
   homeAssistant: async (input: IntegrationInput) =>
     new (await import("../homeassistant/homeassistant-integration")).HomeAssistantIntegration(input),
+  musicAssistant: async (input: IntegrationInput) =>
+    new (await import("../music-assistant/music-assistant-integration")).MusicAssistantIntegration(input),
   homey: async (input: IntegrationInput) => new (await import("../homey/homey-integration")).HomeyIntegration(input),
   jellyfin: async (input: IntegrationInput) =>
     new (await import("../jellyfin/jellyfin-integration")).JellyfinIntegration(input),
