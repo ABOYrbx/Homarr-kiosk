@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { PlaybackState } from "./playback";
-import { computePlaybackPosition } from "./playback";
+import { computePlaybackPosition, isBackwardSeek } from "./playback";
 
 const TICK_MS = 250;
 
@@ -20,10 +20,15 @@ export const usePlaybackClock = ({
 }: PlaybackState & { enabled: boolean }): number | null => {
   const [now, setNow] = useState(() => Date.now());
   const playing = enabled && state === "playing";
+  const reportedPosition = useRef<number | undefined>(mediaPosition);
 
   useEffect(() => {
-    setNow(Date.now());
-  }, [mediaPositionUpdatedAt]);
+    // A rewind must move the lyrics back with the audio. Anchor the clock at
+    // the new timestamp so no leftover extrapolation keeps the old position.
+    const seekedBack = isBackwardSeek(reportedPosition.current, mediaPosition);
+    reportedPosition.current = mediaPosition;
+    setNow(seekedBack ? (mediaPositionUpdatedAt ?? Date.now()) : Date.now());
+  }, [mediaPosition, mediaPositionUpdatedAt]);
 
   useEffect(() => {
     if (!playing) return;

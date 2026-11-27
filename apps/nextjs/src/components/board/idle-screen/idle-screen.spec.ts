@@ -4,7 +4,7 @@ import { isIdleScreenOpen } from "./preview-context";
 import { getClockAngles } from "./angles";
 import type { LyricLine } from "./lyrics-view";
 import { buildTrackKey, effectiveLineEnd, findActiveLineIndex, findActiveWordIndex } from "./lyrics-view";
-import { computePlaybackPosition, decideIdleView, formatDuration } from "./playback";
+import { computePlaybackPosition, decideIdleView, formatDuration, isBackwardSeek } from "./playback";
 
 describe("idle screen open state", () => {
   it("opens for either the timer or the preview", () => {
@@ -67,6 +67,12 @@ describe("playback position", () => {
 
   it("returns null without a position", () => {
     expect(computePlaybackPosition({ state: "playing", now: 1000 })).toBeNull();
+  });
+
+  it("detects a backward seek but ignores normal playhead drift", () => {
+    expect(isBackwardSeek(90, 12)).toBe(true);
+    expect(isBackwardSeek(90, 91)).toBe(false);
+    expect(isBackwardSeek(undefined, 12)).toBe(false);
   });
 
   it("formats m:ss and longer durations", () => {

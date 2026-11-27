@@ -47,6 +47,10 @@ export const computePlaybackPosition = ({
   return duration !== undefined ? clamp(position, 0, Math.max(0, duration)) : position;
 };
 
+/** A lower reported position means the user seeked backwards. */
+export const isBackwardSeek = (previous: number | undefined, next: number | undefined): boolean =>
+  previous !== undefined && next !== undefined && next < previous - 1;
+
 /** Compact m:ss (or h:mm:ss for long tracks) display used by the progress bar. */
 export const formatDuration = (seconds: number | null | undefined): string => {
   if (seconds === null || seconds === undefined || !Number.isFinite(seconds)) return "0:00";

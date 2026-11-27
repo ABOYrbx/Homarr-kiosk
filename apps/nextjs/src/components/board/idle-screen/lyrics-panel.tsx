@@ -54,8 +54,15 @@ export const LyricsPanel = ({ lyrics, position }: { lyrics: LyricsViewData; posi
 
   useEffect(() => {
     const container = scrollRef.current;
-    const element = activeIndex >= 0 ? lineRefs.current[activeIndex] : undefined;
-    if (!container || !element) return;
+    if (!container) return;
+    // Seeking back before the first line removes the highlight. Scroll back
+    // to the start instead of leaving the view on the old lines.
+    if (activeIndex < 0) {
+      container.scrollTop = 0;
+      return;
+    }
+    const element = lineRefs.current[activeIndex];
+    if (!element) return;
     // offsetTop is measured against offsetParent (.musicContent), not the
     // scroll container. Derive the offset from viewport rects so the active
     // line is centred even with nested layout/padding.
