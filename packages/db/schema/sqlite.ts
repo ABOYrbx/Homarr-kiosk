@@ -33,6 +33,8 @@ import type { ByteUnitSystem } from "@homarr/common";
 import type { CustomWidgetSecretKind } from "@homarr/custom-widgets/core";
 import { defaultHeaderPreferencesSerialized } from "@homarr/validation/header-preferences";
 
+import { sqliteIdleWeatherLocationText } from "./idle-screen-location";
+
 export * from "@homarr/core/infrastructure/certificates/hostnames/db/sqlite";
 
 export const apiKeys = sqliteTable("apiKey", {
@@ -299,7 +301,7 @@ export const boards = sqliteTable("board", {
   idleScreenMediaPlayerEntityId: text(),
   idleScreenShowClockSeconds: int({ mode: "boolean" }).default(false).notNull(),
   idleScreenShowLyrics: int({ mode: "boolean" }).default(true).notNull(),
-  idleScreenWeatherLocation: text(),
+  idleScreenWeatherLocation: sqliteIdleWeatherLocationText(),
   idleScreenClockColor: text().default("#1b3a5c").notNull(),
 });
 

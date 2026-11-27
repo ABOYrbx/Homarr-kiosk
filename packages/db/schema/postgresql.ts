@@ -45,6 +45,8 @@ import type { ByteUnitSystem } from "@homarr/common";
 import type { CustomWidgetSecretKind } from "@homarr/custom-widgets/core";
 import { defaultHeaderPreferencesSerialized } from "@homarr/validation/header-preferences";
 
+import { pgIdleWeatherLocationText } from "./idle-screen-location";
+
 const customBlob = customType<{ data: Buffer }>({
   dataType() {
     return "bytea";
@@ -314,7 +316,7 @@ export const boards = pgTable("board", {
   idleScreenMediaPlayerEntityId: text(),
   idleScreenShowClockSeconds: boolean().default(false).notNull(),
   idleScreenShowLyrics: boolean().default(true).notNull(),
-  idleScreenWeatherLocation: text(),
+  idleScreenWeatherLocation: pgIdleWeatherLocationText(),
   idleScreenClockColor: text().default("#1b3a5c").notNull(),
 });
 

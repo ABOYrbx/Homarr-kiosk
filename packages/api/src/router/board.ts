@@ -101,22 +101,6 @@ const manageOverviewInputSchema = z
   })
   .optional();
 
-type IdleScreenWeatherLocation = z.infer<typeof boardSettingsSchema.shape.idleScreenWeatherLocation>;
-
-// The database keeps the location as a JSON string in a text column.
-const parseIdleScreenWeatherLocation = (value: string | null): IdleScreenWeatherLocation => {
-  if (value === null) return null;
-  try {
-    const decoded: unknown = JSON.parse(value);
-    return boardSavePartialSettingsSchema.shape.idleScreenWeatherLocation.parse(decoded) ?? null;
-  } catch {
-    return null;
-  }
-};
-
-const serializeIdleScreenWeatherLocation = (value: IdleScreenWeatherLocation | undefined) =>
-  value === undefined ? undefined : value === null ? null : JSON.stringify(value);
-
 const serializeBoardItemPlacementAsync = async <T>(boardId: string, operation: () => Promise<T>) => {
   const previous = boardItemPlacementTails.get(boardId) ?? Promise.resolve();
   const { promise: current, resolve: release } = Promise.withResolvers<void>();
@@ -1298,7 +1282,6 @@ export const boardRouter = createTRPCRouter({
 
       return {
         ...board,
-        idleScreenWeatherLocation: parseIdleScreenWeatherLocation(board.idleScreenWeatherLocation),
         pageTitle: board.pageTitle ?? "",
         metaTitle: board.metaTitle ?? "",
         logoImageUrl: board.logoImageUrl ?? "",
@@ -1819,7 +1802,7 @@ export const boardRouter = createTRPCRouter({
           idleScreenMediaPlayerEntityId: input.idleScreenMediaPlayerEntityId,
           idleScreenShowClockSeconds: input.idleScreenShowClockSeconds,
           idleScreenShowLyrics: input.idleScreenShowLyrics,
-          idleScreenWeatherLocation: serializeIdleScreenWeatherLocation(input.idleScreenWeatherLocation),
+          idleScreenWeatherLocation: input.idleScreenWeatherLocation,
           idleScreenClockColor: input.idleScreenClockColor,
         })
         .where(eq(boards.id, input.id));

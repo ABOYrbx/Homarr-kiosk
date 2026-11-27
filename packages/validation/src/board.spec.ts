@@ -1,6 +1,6 @@
 import { describe, expect, it, test } from "vitest";
 
-import { boardSavePartialSettingsSchema, responsiveBoardLayoutsSchema } from "./board";
+import { boardSavePartialSettingsSchema, boardSettingsSchema, responsiveBoardLayoutsSchema } from "./board";
 import { containerSectionOptionsDefaults, sectionSchema } from "./shared";
 
 const mobile = {
@@ -78,6 +78,14 @@ describe("boardSavePartialSettingsSchema", () => {
         idleScreenWeatherLocation: { name: "X", latitude: 100, longitude: 0 },
       }),
     ).toThrow();
+  });
+
+  it("keeps an omitted clock color undefined in partial settings", () => {
+    expect(boardSavePartialSettingsSchema.parse({ idleScreenEnabled: true })).toEqual({ idleScreenEnabled: true });
+  });
+
+  it("defaults the clock color in complete settings", () => {
+    expect(boardSettingsSchema.shape.idleScreenClockColor.parse(undefined)).toBe("#1b3a5c");
   });
 });
 

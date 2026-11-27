@@ -97,13 +97,14 @@ export const boardSavePartialSettingsSchema = z
         longitude: z.number().min(-180).max(180),
       })
       .nullable(),
-    idleScreenClockColor: hexColorSchema.default("#1b3a5c"),
+    idleScreenClockColor: hexColorSchema,
   })
   .partial();
 
 export const boardSettingsSchema = boardSavePartialSettingsSchema.required().extend({
   id: z.string(),
   name: z.string(),
+  idleScreenClockColor: hexColorSchema.default("#1b3a5c"),
 });
 
 export const boardLayoutSchema = z
