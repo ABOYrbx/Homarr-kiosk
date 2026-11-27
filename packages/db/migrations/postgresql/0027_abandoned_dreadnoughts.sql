@@ -1,0 +1,1 @@
+ALTER TABLE "board" ADD COLUMN "idle_screen_widget_scale" double precision DEFAULT 1 NOT NULL;

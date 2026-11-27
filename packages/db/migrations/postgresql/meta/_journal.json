@@ -190,6 +190,13 @@
       "when": 1795782972911,
       "tag": "0026_solid_domino",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1795792587214,
+      "tag": "0027_abandoned_dreadnoughts",
+      "breakpoints": true
     }
   ]
 }

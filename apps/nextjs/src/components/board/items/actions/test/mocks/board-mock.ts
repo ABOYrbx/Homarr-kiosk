@@ -38,6 +38,7 @@ export class BoardMockBuilder {
       idleScreenShowLyrics: true,
       idleScreenWeatherLocation: null,
       idleScreenClockColor: "#1b3a5c",
+      idleScreenWidgetScale: 1,
       customCss: "",
       creatorId: createId(),
       creator: {

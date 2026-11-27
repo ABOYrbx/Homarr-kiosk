@@ -7079,6 +7079,10 @@
         "label": "Uhr-Hintergrundfarbe",
         "description": "Dezenter Verlauf im Leerlauf-Hintergrund"
       },
+      "idleScreenWidgetScale": {
+        "label": "AOD-Widget-Skala",
+        "description": "Skaliert die Widget-Ebene im Leerlaufbildschirm"
+      },
       "idleScreenPreview": {
         "label": "AOD-Vorschau",
         "description": "Vorschau des gespeicherten Leerlaufbildschirms",

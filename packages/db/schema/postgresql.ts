@@ -6,6 +6,7 @@ import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import {
   boolean,
   customType,
+  doublePrecision,
   foreignKey,
   index,
   integer,
@@ -318,6 +319,7 @@ export const boards = pgTable("board", {
   idleScreenShowLyrics: boolean().default(true).notNull(),
   idleScreenWeatherLocation: pgIdleWeatherLocationText(),
   idleScreenClockColor: text().default("#1b3a5c").notNull(),
+  idleScreenWidgetScale: doublePrecision().default(1).notNull(),
 });
 
 export const boardUserPermissions = pgTable(

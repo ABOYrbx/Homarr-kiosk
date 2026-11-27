@@ -87,6 +87,18 @@ describe("boardSavePartialSettingsSchema", () => {
   it("defaults the clock color in complete settings", () => {
     expect(boardSettingsSchema.shape.idleScreenClockColor.parse(undefined)).toBe("#1b3a5c");
   });
+
+  it("parses the idle widget scale with its default", () => {
+    expect(boardSavePartialSettingsSchema.parse({ idleScreenWidgetScale: 1.35 })).toMatchObject({
+      idleScreenWidgetScale: 1.35,
+    });
+    expect(boardSettingsSchema.shape.idleScreenWidgetScale.parse(undefined)).toBe(1);
+  });
+
+  it("rejects idle widget scales outside 0.5 to 2", () => {
+    expect(() => boardSavePartialSettingsSchema.parse({ idleScreenWidgetScale: 0.4 })).toThrow();
+    expect(() => boardSavePartialSettingsSchema.parse({ idleScreenWidgetScale: 2.1 })).toThrow();
+  });
 });
 
 describe("section behavior validation", () => {

@@ -41,6 +41,7 @@ const headerWidgetBoard: RouterOutputs["board"]["getBoardByName"] = {
   idleScreenShowLyrics: true,
   idleScreenWeatherLocation: null,
   idleScreenClockColor: "#1b3a5c",
+  idleScreenWidgetScale: 1,
   groupPermissions: [],
   userPermissions: [{ permission: "modify" }],
   sections: [],

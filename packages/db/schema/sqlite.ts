@@ -3,7 +3,7 @@ import type { MantineSize } from "@mantine/core";
 import type { DayOfWeek } from "@mantine/dates";
 import { relations, sql } from "drizzle-orm";
 import type { AnySQLiteColumn } from "drizzle-orm/sqlite-core";
-import { blob, foreignKey, index, int, primaryKey, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { blob, foreignKey, index, int, primaryKey, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 import {
   backgroundImageAttachments,
@@ -303,6 +303,7 @@ export const boards = sqliteTable("board", {
   idleScreenShowLyrics: int({ mode: "boolean" }).default(true).notNull(),
   idleScreenWeatherLocation: sqliteIdleWeatherLocationText(),
   idleScreenClockColor: text().default("#1b3a5c").notNull(),
+  idleScreenWidgetScale: real().default(1).notNull(),
 });
 
 export const boardUserPermissions = sqliteTable(

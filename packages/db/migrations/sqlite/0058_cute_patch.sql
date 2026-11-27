@@ -1,0 +1,1 @@
+ALTER TABLE `board` ADD `idle_screen_widget_scale` real DEFAULT 1 NOT NULL;

@@ -93,6 +93,7 @@ const normalizeFormValues = (
     idleScreenShowLyrics: values.idleScreenShowLyrics,
     idleScreenWeatherLocation: values.idleScreenWeatherLocation,
     idleScreenClockColor: values.idleScreenClockColor,
+    idleScreenWidgetScale: values.idleScreenWidgetScale,
   };
 };
 

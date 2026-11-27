@@ -7079,6 +7079,10 @@
         "label": "Clock background color",
         "description": "Subtle gradient in the idle screen background"
       },
+      "idleScreenWidgetScale": {
+        "label": "AOD widget scale",
+        "description": "Scale the widget layer in the idle screen"
+      },
       "idleScreenPreview": {
         "label": "AOD preview",
         "description": "Preview of the saved idle screen",

@@ -98,6 +98,7 @@ export const boardSavePartialSettingsSchema = z
       })
       .nullable(),
     idleScreenClockColor: hexColorSchema,
+    idleScreenWidgetScale: z.number().min(0.5).max(2),
   })
   .partial();
 
@@ -105,6 +106,7 @@ export const boardSettingsSchema = boardSavePartialSettingsSchema.required().ext
   id: z.string(),
   name: z.string(),
   idleScreenClockColor: hexColorSchema.default("#1b3a5c"),
+  idleScreenWidgetScale: z.number().min(0.5).max(2).default(1),
 });
 
 export const boardLayoutSchema = z
