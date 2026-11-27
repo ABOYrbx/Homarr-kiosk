@@ -33,6 +33,7 @@ export const appRouter = createTRPCRouter({
   info: lazy(() => import("./router/info").then((mod) => mod.infoRouter)),
   customWidget: lazy(() => import("./router/custom-widget/custom-widget-router").then((mod) => mod.customWidgetRouter)),
   lyrics: lazy(() => import("./router/lyrics").then((mod) => mod.lyricsRouter)),
+  musicAssistant: lazy(() => import("./router/music-assistant").then((mod) => mod.musicAssistantRouter)),
 });
 
 // export type definition of API
