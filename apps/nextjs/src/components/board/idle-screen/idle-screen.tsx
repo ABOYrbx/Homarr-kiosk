@@ -95,6 +95,8 @@ const MusicIdleScreen = ({
       integrationId={integrationId}
       entityId={entityId}
       lyricsOffsetSeconds={lyricsOffsetSeconds}
+      queue={undefined}
+      queueAvailable={false}
     />
   );
 };
@@ -204,6 +206,8 @@ export const IdleScreen = ({ board, tourActive = false }: { board: IdleScreenSet
               <MusicPane
                 integrationId={integrationId}
                 entityId={entityId}
+                musicAssistantIntegrationId={settings.idleScreenMusicAssistantIntegrationId}
+                musicAssistantQueueId={settings.idleScreenMusicAssistantQueueId}
                 showLyrics={settings.idleScreenShowLyrics}
                 lyricsOffsetSeconds={settings.idleScreenLyricsOffsetSeconds ?? 0}
               />

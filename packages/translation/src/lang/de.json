@@ -6759,6 +6759,10 @@
       "playPause": "Abspielen oder pausieren",
       "nextTrack": "Nächster Titel",
       "lyricsLabel": "Synchronisierte Lyrics",
+      "lyricsButton": "Lyrics",
+      "queueButton": "Warteschlange",
+      "queueLabel": "Musikwarteschlange",
+      "queueEmpty": "Die Warteschlange ist leer.",
       "attribution": "Lyrics: LRCLIB",
       "uploader": "Uploader: {name}",
       "maker": "Ersteller: {name}",
@@ -7073,6 +7077,15 @@
       "idleScreenLyricsOffsetSeconds": {
         "label": "Lyrics-Zeitversatz",
         "description": "Verschiebt nur die Lyrics-Hervorhebung, in Sekunden. Positive Werte verzögern die Lyrics: Wenn die Lyrics dem Gesang voraus sind, Wert erhöhen; wenn sie hinterherhinken, Wert verringern. Fortschrittsbalken und Wiedergabezeit bleiben unverändert."
+      },
+      "idleScreenMusicAssistantIntegrationId": {
+        "label": "Music-Assistant-Integration",
+        "description": "Music-Assistant-Integration, die die AOD-Warteschlange bereitstellt. URL und Token werden in der Integration konfiguriert, nicht hier.",
+        "none": "Keine Music-Assistant-Integration verfügbar"
+      },
+      "idleScreenMusicAssistantQueueId": {
+        "label": "Music-Assistant-Warteschlange",
+        "description": "Warteschlange oder Player, der in der AOD-Warteschlangenansicht angezeigt wird"
       },
       "idleScreenWeatherLocation": {
         "label": "Wetterstandort",

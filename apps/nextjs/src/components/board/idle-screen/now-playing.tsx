@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { ActionIcon, Group } from "@mantine/core";
 import {
+  IconList,
+  IconMessage,
   IconMusic,
   IconPlayerPause,
   IconPlayerPlay,
@@ -17,10 +19,23 @@ import { useI18n } from "@homarr/translation/client";
 
 import classes from "./idle-screen.module.css";
 import { LyricsPanel } from "./lyrics-panel";
+import { QueuePanel } from "./queue-panel";
+import type { QueueView } from "./use-music-assistant-queue";
 
 const controlVars = () => ({
   root: {
     "--ai-bg": "rgb(255 255 255 / 8%)",
+    "--ai-hover": "rgb(255 255 255 / 18%)",
+    "--ai-color": "rgb(255 255 255 / 88%)",
+    "--ai-hover-color": "#fff",
+  },
+});
+
+// Same translucent styling as the playback controls, with the selected view
+// held at a slightly stronger fill.
+const activeControlVars = () => ({
+  root: {
+    "--ai-bg": "rgb(255 255 255 / 22%)",
     "--ai-hover": "rgb(255 255 255 / 18%)",
     "--ai-color": "rgb(255 255 255 / 88%)",
     "--ai-hover-color": "#fff",
@@ -38,14 +53,21 @@ export const NowPlaying = ({
   integrationId,
   entityId,
   lyricsOffsetSeconds,
+  queue,
+  queueAvailable,
 }: {
   entity: SmartHomeEntity;
   showLyrics: boolean;
   integrationId: string;
   entityId: string;
   lyricsOffsetSeconds: number;
+  queue: QueueView | undefined;
+  queueAvailable: boolean;
 }) => {
   const t = useI18n("board");
+  // Local to this mount: closing the AOD unmounts the music layer and resets
+  // the view to the default. Lyrics stay the default whenever they are enabled.
+  const [activeView, setActiveView] = useState<"lyrics" | "queue">(showLyrics ? "lyrics" : "queue");
   const [imageFailed, setImageFailed] = useState(false);
   const [seekOverrideAt, setSeekOverrideAt] = useState<number | undefined>(undefined);
   const pendingTrackDirection = useRef<"next" | "previous">("next");
@@ -134,6 +156,7 @@ export const NowPlaying = ({
     : undefined;
   const hasArtwork = Boolean(artwork) && !imageFailed;
   const progress = position !== null && duration !== undefined && duration > 0 ? (position / duration) * 100 : null;
+  const hasSidePanel = activeView === "lyrics" ? Boolean(lyrics) : true;
 
   return (
     <div className={classes.musicRoot}>
@@ -142,7 +165,7 @@ export const NowPlaying = ({
       )}
       <div className={classes.musicScrim} aria-hidden="true" />
 
-      <div className={`${classes.musicContent} ${lyrics ? classes.musicTwoColumns : classes.musicOneColumn}`}>
+      <div className={`${classes.musicContent} ${hasSidePanel ? classes.musicTwoColumns : classes.musicOneColumn}`}>
         <div
           key={trackKey}
           className={`${classes.trackColumn}${trackMotion.current.className ? ` ${trackMotion.current.className}` : ""}`}
@@ -235,8 +258,38 @@ export const NowPlaying = ({
           </div>
         </div>
 
-        {lyrics && <LyricsPanel lyrics={lyrics} position={offsetLyricsPosition(position, lyricsOffsetSeconds)} />}
+        {activeView === "lyrics" && lyrics && (
+          <LyricsPanel lyrics={lyrics} position={offsetLyricsPosition(position, lyricsOffsetSeconds)} />
+        )}
+        {activeView === "queue" && <QueuePanel queue={queue} />}
       </div>
+
+      <Group className={classes.viewSwitch} gap="sm" justify="flex-end" wrap="nowrap" data-idle-interactive>
+        <ActionIcon
+          variant="subtle"
+          size={54}
+          radius="xl"
+          vars={activeView === "lyrics" ? activeControlVars : controlVars}
+          aria-label={t("idleScreen.lyricsButton")}
+          aria-pressed={activeView === "lyrics"}
+          disabled={!showLyrics}
+          onClick={() => setActiveView("lyrics")}
+        >
+          <IconMessage size={26} />
+        </ActionIcon>
+        <ActionIcon
+          variant="subtle"
+          size={54}
+          radius="xl"
+          vars={activeView === "queue" ? activeControlVars : controlVars}
+          aria-label={t("idleScreen.queueButton")}
+          aria-pressed={activeView === "queue"}
+          disabled={!queueAvailable}
+          onClick={() => setActiveView("queue")}
+        >
+          <IconList size={26} />
+        </ActionIcon>
+      </Group>
       <span className={classes.srOnly} aria-live="off">
         {`${title}${artist ? ` — ${artist}` : ""}`}
       </span>

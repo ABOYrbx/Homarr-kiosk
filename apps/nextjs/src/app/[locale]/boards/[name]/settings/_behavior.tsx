@@ -198,11 +198,10 @@ export const IdleScreenSettingsContent = ({ board, form, saveSettingsAsync }: Id
             searchable
             disabled={!integrationId}
           />
-          {/* TODO: swap these literal strings for board.idleScreenMusicAssistant* messages when Task 5 adds the translations. */}
           <Select
             {...form.getInputProps("idleScreenMusicAssistantIntegrationId")}
-            label="Music Assistant integration"
-            description="Music Assistant integration providing the AOD queue. Its URL and token are configured in the integration, not here."
+            label={t("field.idleScreenMusicAssistantIntegrationId.label")}
+            description={t("field.idleScreenMusicAssistantIntegrationId.description")}
             data={musicAssistantIntegrations.map((integration) => ({
               value: integration.id,
               label: integration.name,
@@ -212,13 +211,13 @@ export const IdleScreenSettingsContent = ({ board, form, saveSettingsAsync }: Id
           />
           {musicAssistantIntegrations.length === 0 && (
             <Text size="sm" c="dimmed">
-              No Music Assistant integration available
+              {t("field.idleScreenMusicAssistantIntegrationId.none")}
             </Text>
           )}
           <Select
             {...form.getInputProps("idleScreenMusicAssistantQueueId")}
-            label="Music Assistant queue"
-            description="Queue or player shown in the AOD queue view"
+            label={t("field.idleScreenMusicAssistantQueueId.label")}
+            description={t("field.idleScreenMusicAssistantQueueId.description")}
             data={musicAssistantQueues.map((queue) => ({
               value: queue.id,
               label: queue.name,

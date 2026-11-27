@@ -6,6 +6,8 @@ import { IconMusic } from "@tabler/icons-react";
 import { useI18n } from "@homarr/translation/client";
 
 import { NowPlaying } from "./now-playing";
+import type { QueueView } from "./use-music-assistant-queue";
+import { useMusicAssistantQueue } from "./use-music-assistant-queue";
 import { useNowPlaying } from "./use-now-playing";
 
 export type MusicPaneState = "not-configured" | "no-track" | "ready";
@@ -39,6 +41,9 @@ const MusicPaneMessage = ({ message }: { message: string }) => (
 const ConfiguredMusicPane = ({
   integrationId,
   entityId,
+  musicAssistantIntegrationId,
+  musicAssistantQueueId,
+  queue,
   showLyrics,
   lyricsOffsetSeconds,
   emptyMessage,
@@ -46,6 +51,9 @@ const ConfiguredMusicPane = ({
 }: {
   integrationId: string;
   entityId: string;
+  musicAssistantIntegrationId: string | null;
+  musicAssistantQueueId: string | null;
+  queue: QueueView | undefined;
   showLyrics: boolean;
   lyricsOffsetSeconds: number;
   emptyMessage: string;
@@ -70,6 +78,8 @@ const ConfiguredMusicPane = ({
       integrationId={integrationId}
       entityId={entityId}
       lyricsOffsetSeconds={lyricsOffsetSeconds}
+      queue={queue}
+      queueAvailable={Boolean(musicAssistantIntegrationId && musicAssistantQueueId && queue?.tracks.length)}
     />
   );
 };
@@ -77,15 +87,26 @@ const ConfiguredMusicPane = ({
 export const MusicPane = ({
   integrationId,
   entityId,
+  musicAssistantIntegrationId,
+  musicAssistantQueueId,
   showLyrics,
   lyricsOffsetSeconds,
 }: {
   integrationId: string | null;
   entityId: string | null;
+  musicAssistantIntegrationId: string | null;
+  musicAssistantQueueId: string | null;
   showLyrics: boolean;
   lyricsOffsetSeconds: number;
 }) => {
   const t = useI18n("board");
+  // This pane is mounted only while the carousel shows the music layer, so
+  // the queue is never polled on the dashboard or on the other layers.
+  const { queue } = useMusicAssistantQueue({
+    integrationId: musicAssistantIntegrationId,
+    queueId: musicAssistantQueueId,
+    enabled: true,
+  });
 
   if (!integrationId || !entityId) {
     return <MusicPaneMessage message={t("idleScreen.music.notConfigured")} />;
@@ -95,6 +116,9 @@ export const MusicPane = ({
     <ConfiguredMusicPane
       integrationId={integrationId}
       entityId={entityId}
+      musicAssistantIntegrationId={musicAssistantIntegrationId}
+      musicAssistantQueueId={musicAssistantQueueId}
+      queue={queue}
       showLyrics={showLyrics}
       lyricsOffsetSeconds={lyricsOffsetSeconds}
       emptyMessage={t("idleScreen.music.nothingPlaying")}

@@ -6759,6 +6759,10 @@
       "playPause": "Play or pause",
       "nextTrack": "Next track",
       "lyricsLabel": "Synchronized lyrics",
+      "lyricsButton": "Lyrics",
+      "queueButton": "Queue",
+      "queueLabel": "Music queue",
+      "queueEmpty": "The queue is empty.",
       "attribution": "Lyrics: LRCLIB",
       "uploader": "Uploader: {name}",
       "maker": "Maker: {name}",
@@ -7073,6 +7077,15 @@
       "idleScreenLyricsOffsetSeconds": {
         "label": "Lyrics timing offset",
         "description": "Shift only the lyrics highlight, in seconds. Positive values delay the lyrics: if the lyrics run ahead of the singing, increase the value; if they lag behind, decrease it. The progress bar and playback time stay unchanged."
+      },
+      "idleScreenMusicAssistantIntegrationId": {
+        "label": "Music Assistant integration",
+        "description": "Music Assistant integration providing the AOD queue. Its URL and token are configured in the integration, not here.",
+        "none": "No Music Assistant integration available"
+      },
+      "idleScreenMusicAssistantQueueId": {
+        "label": "Music Assistant queue",
+        "description": "Queue or player shown in the AOD queue view"
       },
       "idleScreenWeatherLocation": {
         "label": "Weather location",
