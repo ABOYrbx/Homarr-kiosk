@@ -52,129 +52,17 @@ export const lrclibRecordSchema = z.object({
 export type LrclibRecord = z.infer<typeof lrclibRecordSchema>;
 
 /**
- * Legacy shape still produced by `normalizeSpicyLyrics`. It remains until the
- * router switches to LRCLIB; it is deliberately not part of `NormalizedLyrics`.
+ * Router response. `unconfigured` is no longer produced now that LRCLIB needs
+ * no API key, but stays in the enum for existing clients.
  */
-export const legacyNormalizedLyricsSchema = z.object({
-  type: z.enum(["syllable", "line", "static"]),
-  lines: z.array(normalizedLyricLineSchema),
-  source: z.string(),
-  provider: z.string(),
+export const lyricsResultSchema = z.object({
+  status: z.enum(["found", "not_found", "unconfigured", "error"]),
+  type: z.enum(["syllable", "line", "static"]).optional(),
+  lines: z.array(normalizedLyricLineSchema).optional(),
+  source: z.string().optional(),
+  provider: z.string().optional(),
   uploader: lyricAttributionSchema.optional(),
   maker: lyricAttributionSchema.optional(),
 });
 
-export type LegacyNormalizedLyrics = z.infer<typeof legacyNormalizedLyricsSchema>;
-
-/**
- * Defensive schema for the Spicy Lyrics responses. Unknown fields are
- * intentionally kept out of the normalized result (translations, background
- * vocals, avatars, ...) so they can never leak to the client or logs.
- */
-const spicySyllableSchema = z
-  .object({
-    Text: z.string().nullish(),
-    StartTime: z.number().nullish(),
-    EndTime: z.number().nullish(),
-    IsPartOfWord: z.boolean().nullish(),
-  })
-  .passthrough();
-
-export type SpicySyllable = z.infer<typeof spicySyllableSchema>;
-
-const spicyLeadSchema = z
-  .object({
-    Syllables: z.array(spicySyllableSchema).nullish(),
-    Text: z.string().nullish(),
-    StartTime: z.number().nullish(),
-    EndTime: z.number().nullish(),
-  })
-  .passthrough();
-
-const spicyContentSchema = z
-  .object({
-    Type: z.string().nullish(),
-    Lead: spicyLeadSchema.nullish(),
-  })
-  .passthrough();
-
-const spicyAttributionSchema = z
-  .object({
-    username: z.string().nullish(),
-    Username: z.string().nullish(),
-    url: z.string().nullish(),
-    Url: z.string().nullish(),
-  })
-  .passthrough();
-
-export const spicyLyricsResponseSchema = z
-  .object({
-    Body: z
-      .object({
-        Type: z.enum(["Syllable", "Line", "Static"]).nullish(),
-        Content: z.array(spicyContentSchema).nullish(),
-        source: z.string().nullish(),
-        UploadAttribution: z
-          .object({
-            Uploader: spicyAttributionSchema.nullish(),
-            Maker: spicyAttributionSchema.nullish(),
-          })
-          .nullish(),
-        uploadAttribution: z
-          .object({
-            Uploader: spicyAttributionSchema.nullish(),
-            Maker: spicyAttributionSchema.nullish(),
-          })
-          .nullish(),
-      })
-      .nullish(),
-    Status: z.number().nullish(),
-  })
-  .passthrough();
-
-export const spicySearchResponseSchema = z
-  .object({
-    Body: z
-      .union([
-        z.array(
-          z
-            .object({
-              id: z.string().nullish(),
-              ids: z.record(z.string(), z.string().nullish()).nullish(),
-              title: z.string().nullish(),
-              artists: z.union([z.array(z.string()), z.string()]).nullish(),
-              duration: z.union([z.number(), z.string()]).nullish(),
-              tier: z.string().nullish(),
-            })
-            .passthrough(),
-        ),
-        z.object({
-          results: z
-            .array(
-              z
-                .object({
-                  id: z.string().nullish(),
-                  ids: z.record(z.string(), z.string().nullish()).nullish(),
-                  title: z.string().nullish(),
-                  artists: z.union([z.array(z.string()), z.string()]).nullish(),
-                  duration: z.union([z.number(), z.string()]).nullish(),
-                  tier: z.string().nullish(),
-                })
-                .passthrough(),
-            )
-            .nullish(),
-          Results: z.array(z.unknown()).nullish(),
-        }),
-      ])
-      .nullish(),
-    results: z.array(z.unknown()).nullish(),
-    Results: z.array(z.unknown()).nullish(),
-  })
-  .passthrough();
-
-export type SpicySearchHit = {
-  id?: string | null;
-  duration?: number | string | null;
-  tier?: string | null;
-  ids?: Record<string, string | null | undefined> | null;
-};
+export type LyricsResult = z.infer<typeof lyricsResultSchema>;
