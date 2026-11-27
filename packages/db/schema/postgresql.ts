@@ -322,6 +322,7 @@ export const boards = pgTable("board", {
   idleScreenWidgetScale: doublePrecision().default(1).notNull(),
   idleScreenWidgetBackground: text(),
   idleScreenWidgetBackgroundFrost: boolean().default(true).notNull(),
+  idleScreenLyricsOffsetSeconds: doublePrecision().default(0).notNull(),
 });
 
 export const boardUserPermissions = pgTable(

@@ -1,0 +1,1 @@
+ALTER TABLE "board" ADD COLUMN "idle_screen_lyrics_offset_seconds" double precision DEFAULT 0 NOT NULL;

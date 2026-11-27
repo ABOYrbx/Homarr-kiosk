@@ -421,6 +421,13 @@
       "when": 1795792902129,
       "tag": "0059_blue_blue_shield",
       "breakpoints": true
+    },
+    {
+      "idx": 60,
+      "version": "6",
+      "when": 1795814465227,
+      "tag": "0060_bitter_mother_askani",
+      "breakpoints": true
     }
   ]
 }

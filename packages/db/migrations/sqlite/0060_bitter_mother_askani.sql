@@ -1,0 +1,1 @@
+ALTER TABLE `board` ADD `idle_screen_lyrics_offset_seconds` real DEFAULT 0 NOT NULL;
