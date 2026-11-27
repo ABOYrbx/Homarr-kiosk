@@ -12,6 +12,7 @@ import { useI18n } from "@homarr/translation/client";
 
 import { SectionCard } from "@homarr/ui";
 import type { Board } from "../../_types";
+import { IdlePreviewSettings } from "./_idle-preview-settings";
 import type { FormValues } from "./_settings-form";
 
 interface Props {
@@ -119,17 +120,6 @@ export const IdleScreenSettingsContent = ({ board, form, saveSettingsAsync }: Id
             min={1}
             max={120}
           />
-          <Select
-            {...form.getInputProps("idleScreenMode")}
-            label={t("field.idleScreenMode.label")}
-            description={t("field.idleScreenMode.description")}
-            data={[
-              { value: "auto", label: t("field.idleScreenMode.option.auto") },
-              { value: "clock", label: t("field.idleScreenMode.option.clock") },
-              { value: "music", label: t("field.idleScreenMode.option.music") },
-              { value: "widgets", label: t("field.idleScreenMode.option.widgets") },
-            ]}
-          />
           <Group justify="space-between" align="flex-start" wrap="wrap">
             <Stack gap={2} maw="52rem">
               <Text fw={500}>{t("field.idleScreenLayout.label")}</Text>
@@ -185,6 +175,8 @@ export const IdleScreenSettingsContent = ({ board, form, saveSettingsAsync }: Id
           />
         </Stack>
       )}
+
+      <IdlePreviewSettings form={form} board={board} />
     </SectionCard>
   );
 };
