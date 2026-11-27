@@ -14,6 +14,7 @@ import classes from "./idle-screen.module.css";
 import { IdleCarousel } from "./idle-carousel";
 import { IdleClockSurface } from "./idle-clock-surface";
 import { IdleWidgets } from "./idle-widgets";
+import { MusicPane } from "./music-pane";
 import { NowPlaying } from "./now-playing";
 import type { IdleScreenMode } from "./playback";
 import { decideIdleView } from "./playback";
@@ -85,6 +86,8 @@ const MusicIdleScreen = ({
   return <NowPlaying entity={entity} showLyrics={showLyrics} />;
 };
 
+export { MusicIdleScreen };
+
 export const IdleScreen = ({ board, tourActive = false }: { board: IdleScreenSettings; tourActive?: boolean }) => {
   const t = useI18n("board");
   const [isEditMode] = useOptionalEditMode() ?? [false];
@@ -119,17 +122,12 @@ export const IdleScreen = ({ board, tourActive = false }: { board: IdleScreenSet
         <IdleCarousel
           initialLayer="clock"
           musicPane={
-            integrationId && entityId ? (
-              <MusicIdleScreen
-                integrationId={integrationId}
-                entityId={entityId}
-                mode={settings.idleScreenMode}
-                showClockSeconds={settings.idleScreenShowClockSeconds}
-                showLyrics={settings.idleScreenShowLyrics}
-              />
-            ) : (
-              <AnalogClock showSeconds={settings.idleScreenShowClockSeconds} />
-            )
+            <MusicPane
+              integrationId={integrationId}
+              entityId={entityId}
+              showClockSeconds={settings.idleScreenShowClockSeconds}
+              showLyrics={settings.idleScreenShowLyrics}
+            />
           }
           clockPane={
             liveBoard ? (

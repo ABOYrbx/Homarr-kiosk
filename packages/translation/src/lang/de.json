@@ -6758,7 +6758,11 @@
       "lyricsLabel": "Synchronisierte Lyrics",
       "attribution": "Lyrics: LRCLIB",
       "uploader": "Uploader: {name}",
-      "maker": "Ersteller: {name}"
+      "maker": "Ersteller: {name}",
+      "music": {
+        "notConfigured": "Kein Musikplayer konfiguriert.",
+        "nothingPlaying": "Es wird nichts abgespielt."
+      }
     },
     "emptyState": {
       "title": "Erstelle deine erste Ansicht",

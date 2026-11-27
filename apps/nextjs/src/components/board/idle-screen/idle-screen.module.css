@@ -178,7 +178,17 @@
   background-size: cover;
   filter: blur(60px) brightness(0.42);
   transform: scale(1.05);
+  animation: idleArtworkDrift 24s ease-in-out alternate infinite;
   pointer-events: none;
+}
+
+@keyframes idleArtworkDrift {
+  from {
+    transform: translate3d(-1%, -0.5%, 0) scale(1.05);
+  }
+  to {
+    transform: translate3d(1%, 0.5%, 0) scale(1.11);
+  }
 }
 
 .musicScrim {
@@ -437,6 +447,7 @@
 @media (prefers-reduced-motion: reduce) {
   .overlay,
   .layer,
+  .musicBackdrop,
   .lyricLine {
     animation: none;
     transition: none;

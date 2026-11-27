@@ -6758,7 +6758,11 @@
       "lyricsLabel": "Synchronized lyrics",
       "attribution": "Lyrics: LRCLIB",
       "uploader": "Uploader: {name}",
-      "maker": "Maker: {name}"
+      "maker": "Maker: {name}",
+      "music": {
+        "notConfigured": "No music player configured.",
+        "nothingPlaying": "Nothing is playing."
+      }
     },
     "emptyState": {
       "title": "Build your first view",
