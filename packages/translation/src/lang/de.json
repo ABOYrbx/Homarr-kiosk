@@ -7050,7 +7050,7 @@
       },
       "idleScreenShowLyrics": {
         "label": "Lyrics anzeigen",
-        "description": "Synchronisierte Lyrics von Spicy Lyrics anzeigen"
+        "description": "Synchronisierte Lyrics von LRCLIB anzeigen"
       }
     },
     "content": {

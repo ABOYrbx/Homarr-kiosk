@@ -7050,7 +7050,7 @@
       },
       "idleScreenShowLyrics": {
         "label": "Show lyrics",
-        "description": "Show synchronized lyrics from Spicy Lyrics"
+        "description": "Show synchronized lyrics from LRCLIB"
       }
     },
     "content": {
