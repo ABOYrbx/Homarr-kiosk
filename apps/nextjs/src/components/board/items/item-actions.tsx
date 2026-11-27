@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 
-import { useCurrentLayout } from "@homarr/boards/context";
+import { useCurrentLayout, useOptionalBoard } from "@homarr/boards/context";
 import { useActiveBoardTabId } from "@homarr/boards/tabs";
 import { useUpdateBoard } from "@homarr/boards/updater";
 import type { BoardItemAdvancedOptions } from "@homarr/validation/shared";
@@ -33,13 +33,24 @@ interface UpdateItemIntegrations {
 
 export const useItemActions = () => {
   const { updateBoard } = useUpdateBoard();
+  const board = useOptionalBoard();
   const currentLayoutId = useCurrentLayout();
   const activeTabId = useActiveBoardTabId();
+  const idleScreenLayoutId = board?.idleScreenLayoutId;
 
   const createItem = useCallback(
-    (input: CreateItemInput) =>
-      updateBoard(createItemCallback({ ...input, targetSectionId: input.targetSectionId ?? activeTabId })),
-    [activeTabId, updateBoard],
+    (input: CreateItemInput) => {
+      const layoutFilter = idleScreenLayoutId
+        ? idleScreenLayoutId === currentLayoutId
+          ? { only: [currentLayoutId] }
+          : { except: [idleScreenLayoutId] }
+        : undefined;
+
+      return updateBoard(
+        createItemCallback({ ...input, targetSectionId: input.targetSectionId ?? activeTabId, layoutFilter }),
+      );
+    },
+    [activeTabId, currentLayoutId, idleScreenLayoutId, updateBoard],
   );
 
   const duplicateItem = useCallback(

@@ -21,6 +21,7 @@ export interface CreateItemInput {
   advancedOptions?: BoardItemAdvancedOptions;
   size?: { width: number; height: number };
   position?: { layoutId: string; x: number; y: number };
+  layoutFilter?: { only?: string[]; except?: string[] };
 }
 
 export const createItemCallback =
@@ -33,6 +34,7 @@ export const createItemCallback =
     advancedOptions,
     size,
     position,
+    layoutFilter,
   }: CreateItemInput) =>
   (previous: Board): Board => {
     const firstCanvasSection = getBoardTabs(previous).at(0);
@@ -46,10 +48,10 @@ export const createItemCallback =
 
     if (!targetSection) return previous;
 
-    let itemLayouts = createItemLayouts(previous, targetSection, kind, size, position);
+    let itemLayouts = createItemLayouts(previous, targetSection, kind, size, position, layoutFilter);
     if (itemLayouts.length === 0 && firstCanvasSection && targetSection.id !== firstCanvasSection.id) {
       targetSection = firstCanvasSection;
-      itemLayouts = createItemLayouts(previous, targetSection, kind, size, position);
+      itemLayouts = createItemLayouts(previous, targetSection, kind, size, position, layoutFilter);
     }
     if (itemLayouts.length === 0) return previous;
     const widget = {
@@ -95,8 +97,11 @@ const createItemLayouts = (
   kind: WidgetKind,
   requestedSize?: { width: number; height: number },
   position?: { layoutId: string; x: number; y: number },
+  layoutFilter?: CreateItemInput["layoutFilter"],
 ): ItemLayout[] => {
-  const layouts = getBoardLayouts(board);
+  const layouts = layoutFilter?.only
+    ? layoutFilter.only
+    : getBoardLayouts(board).filter((id) => !layoutFilter?.except?.includes(id));
   const itemSize = requestedSize ?? getWidgetItemSize(kind);
 
   return layouts.flatMap((layoutId) => {

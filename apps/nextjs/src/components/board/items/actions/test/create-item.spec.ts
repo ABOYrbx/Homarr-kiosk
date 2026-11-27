@@ -9,6 +9,17 @@ import { ContainerSectionMockBuilder } from "./mocks/container-section-mock";
 import { ItemMockBuilder } from "./mocks/item-mock";
 import { LayoutMockBuilder } from "./mocks/layout-mock";
 
+const boardWithIdleLayout = () => {
+  const board = new BoardMockBuilder().addEmptySection({ id: "canvas" }).build();
+  const baseLayout = board.layouts.find((layout) => layout.role === "base");
+  if (!baseLayout) throw new Error("Expected a base layout");
+  baseLayout.id = "base";
+  board.layouts.push(
+    new LayoutMockBuilder({ id: "idle", name: "Idle", role: "custom", columnCount: 12, breakpoint: 768 }).build(),
+  );
+  return board;
+};
+
 describe("item actions create-item", () => {
   afterEach(() => {
     vi.restoreAllMocks();
@@ -283,5 +294,23 @@ describe("item actions create-item", () => {
     vi.spyOn(emptyPositionModule, "getFirstEmptyPosition").mockReturnValue(undefined);
 
     expect(hasRoomForItem(board, "app")).toBe(false);
+  });
+
+  test("creates an item only in the idle layout when restricted", () => {
+    const board = boardWithIdleLayout();
+
+    const result = createItemCallback({ kind: "clock", layoutFilter: { only: ["idle"] } })(board);
+
+    expect(result).not.toBe(board);
+    expect(result.items.at(-1)?.layouts.map((layout) => layout.layoutId)).toEqual(["idle"]);
+  });
+
+  test("skips the idle layout when creating a normal board item", () => {
+    const board = boardWithIdleLayout();
+
+    const result = createItemCallback({ kind: "clock", layoutFilter: { except: ["idle"] } })(board);
+
+    expect(result.items.at(-1)?.layouts.map((layout) => layout.layoutId)).not.toContain("idle");
+    expect(result.items.at(-1)?.layouts.length).toBeGreaterThan(0);
   });
 });
