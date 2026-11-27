@@ -100,7 +100,10 @@ export const IdleScreen = ({ board, tourActive = false }: { board: IdleScreenSet
 
   const integrationId = settings.idleScreenHomeAssistantIntegrationId;
   const entityId = settings.idleScreenMediaPlayerEntityId;
-  const canShowMusic = settings.idleScreenMode !== "clock" && Boolean(integrationId && entityId);
+  // In widgets mode without a widget layout the view is the clock, so mounting the
+  // music screen (and its Home Assistant query) would be pointless polling.
+  const canShowMusic =
+    settings.idleScreenMode !== "clock" && settings.idleScreenMode !== "widgets" && Boolean(integrationId && entityId);
   const idleLayoutId = settings.idleScreenLayoutId;
   const hasWidgetLayout = Boolean(
     liveBoard &&

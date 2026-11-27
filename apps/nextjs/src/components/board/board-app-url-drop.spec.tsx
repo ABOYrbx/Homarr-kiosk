@@ -11,6 +11,8 @@ const mocks = vi.hoisted(() => ({
   invalidateApp: vi.fn(),
   detectMetadataAsync: vi.fn(),
   hasRoomForItem: vi.fn(),
+  getIdleScreenLayoutFilter: vi.fn(),
+  currentLayout: "base",
   showErrorNotification: vi.fn(),
   showSuccessNotification: vi.fn(),
 }));
@@ -21,10 +23,12 @@ vi.mock("@homarr/boards/edit-mode", () => ({
 
 vi.mock("@homarr/boards/context", () => ({
   useRequiredBoard: () => ({ name: "board" }),
+  useCurrentLayout: () => mocks.currentLayout,
 }));
 
 vi.mock("./items/actions/create-item", () => ({
   hasRoomForItem: mocks.hasRoomForItem,
+  getIdleScreenLayoutFilter: mocks.getIdleScreenLayoutFilter,
 }));
 
 vi.mock("@homarr/auth/client", () => ({
@@ -115,6 +119,7 @@ describe("BoardAppUrlDrop", () => {
     mocks.invalidateApp.mockClear();
     mocks.detectMetadataAsync.mockReset().mockResolvedValue({ name: "App", iconUrl: null });
     mocks.hasRoomForItem.mockReset().mockReturnValue(true);
+    mocks.getIdleScreenLayoutFilter.mockReset().mockReturnValue(undefined);
     mocks.showErrorNotification.mockClear();
     mocks.showSuccessNotification.mockClear();
     createResolvers = [];
@@ -158,6 +163,21 @@ describe("BoardAppUrlDrop", () => {
     expect(mocks.createItem).not.toHaveBeenCalled();
     expect(mocks.showErrorNotification).toHaveBeenCalledWith(
       expect.objectContaining({ message: "board.urlDrop.notification.full.message" }),
+    );
+  });
+
+  test("checks capacity with the current layout's idle-screen filter", async () => {
+    const layoutFilter = { only: ["idle"] };
+    mocks.getIdleScreenLayoutFilter.mockReturnValue(layoutFilter);
+
+    await dropUrl("https://first.example.com");
+
+    expect(mocks.getIdleScreenLayoutFilter).toHaveBeenCalledWith(undefined, "base");
+    expect(mocks.hasRoomForItem).toHaveBeenCalledWith(
+      expect.objectContaining({ name: "board" }),
+      "app",
+      undefined,
+      layoutFilter,
     );
   });
 });

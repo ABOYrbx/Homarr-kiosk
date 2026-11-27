@@ -88,9 +88,14 @@ export const createItemCallback =
  * so a caller that needs the result of a step before placement (for example persisting a
  * record server side, which it cannot easily undo) can check first instead of after.
  */
-export const hasRoomForItem = (board: Board, kind: WidgetKind, size?: { width: number; height: number }): boolean => {
+export const hasRoomForItem = (
+  board: Board,
+  kind: WidgetKind,
+  size?: { width: number; height: number },
+  layoutFilter?: CreateItemInput["layoutFilter"],
+): boolean => {
   try {
-    return createItemCallback({ kind, size })(board) !== board;
+    return createItemCallback({ kind, size, layoutFilter })(board) !== board;
   } catch {
     return false;
   }

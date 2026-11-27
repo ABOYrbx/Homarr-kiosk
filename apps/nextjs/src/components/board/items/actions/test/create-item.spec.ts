@@ -296,6 +296,25 @@ describe("item actions create-item", () => {
     expect(hasRoomForItem(board, "app")).toBe(false);
   });
 
+  test("hasRoomForItem applies the layout filter when one layout is full and the target has room", () => {
+    const board = boardWithIdleLayout();
+    const idleLayout = board.layouts.find((layout) => layout.id === "idle");
+    if (!idleLayout) throw new Error("Expected an idle layout");
+    // Distinguish the layouts for the probe: the base layout is full, the idle one has room.
+    idleLayout.columnCount = 6;
+    vi.spyOn(emptyPositionModule, "getFirstEmptyPosition").mockImplementation((_elements, columnCount) =>
+      columnCount === 12 ? undefined : { xOffset: 0, yOffset: 0 },
+    );
+
+    // Without a filter the probe still hits the full base layout and wrongly reports "full".
+    expect(hasRoomForItem(board, "app")).toBe(false);
+    // Editing the idle layout restricts placement to it, where room exists.
+    expect(hasRoomForItem(board, "app", undefined, { only: ["idle"] })).toBe(true);
+    // The wrong filter keeps probing the full base layout.
+    expect(hasRoomForItem(board, "app", undefined, { only: ["base"] })).toBe(false);
+    expect(hasRoomForItem(board, "app", undefined, { except: ["idle"] })).toBe(false);
+  });
+
   test("creates an item only in the idle layout when restricted", () => {
     const board = boardWithIdleLayout();
 

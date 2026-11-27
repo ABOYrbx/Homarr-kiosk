@@ -6,12 +6,12 @@ import { IconLink } from "@tabler/icons-react";
 
 import { clientApi } from "@homarr/api/client";
 import { useSession } from "@homarr/auth/client";
-import { useRequiredBoard } from "@homarr/boards/context";
+import { useCurrentLayout, useRequiredBoard } from "@homarr/boards/context";
 import { useEditMode } from "@homarr/boards/edit-mode";
 import { showErrorNotification, showSuccessNotification } from "@homarr/notifications";
 import { useI18n } from "@homarr/translation/client";
 
-import { hasRoomForItem } from "./items/actions/create-item";
+import { getIdleScreenLayoutFilter, hasRoomForItem } from "./items/actions/create-item";
 import { useItemActions } from "./items/item-actions";
 
 // Firefox sends text/x-moz-url (the url, then the page title on the next line) instead of text/uri-list.
@@ -50,6 +50,7 @@ export const BoardAppUrlDrop = () => {
   const { data: session } = useSession();
   const canCreateApp = session?.user.permissions.includes("app-create") ?? false;
   const board = useRequiredBoard();
+  const currentLayoutId = useCurrentLayout();
   const [isDragging, setIsDragging] = useState(false);
   const [isResolving, setIsResolving] = useState(false);
   // Counts drops still in flight, so the overlay only hides once all of them are done
@@ -78,13 +79,17 @@ export const BoardAppUrlDrop = () => {
       pendingDropCountRef.current++;
       setIsResolving(true);
 
+      // Placement must use the same layout scope as the real create action, otherwise
+      // a full layout (e.g. the normal board while editing the idle one) rejects the drop.
+      const layoutFilter = getIdleScreenLayoutFilter(board.idleScreenLayoutId, currentLayoutId);
+
       // Serialize placement so two drops cannot both pass a capacity check for the
       // same last position. Always inspect the current cache, not the render snapshot.
       const pendingDrop = dropQueueRef.current.then(async () => {
         if (editSessionRef.current !== editSession) return;
         const checkCapacity = () => {
           const currentBoard = utils.board.getBoardByName.getData({ name: board.name });
-          if (currentBoard && hasRoomForItem(currentBoard, "app")) return true;
+          if (currentBoard && hasRoomForItem(currentBoard, "app", undefined, layoutFilter)) return true;
           showErrorNotification({
             title: t("common.notification.create.error"),
             message: t("board.urlDrop.notification.full.message"),
@@ -120,7 +125,7 @@ export const BoardAppUrlDrop = () => {
         if (pendingDropCountRef.current === 0) setIsResolving(false);
       }
     },
-    [board.name, createAppAsync, createItem, detectMetadataAsync, t, utils],
+    [board.idleScreenLayoutId, board.name, createAppAsync, createItem, currentLayoutId, detectMetadataAsync, t, utils],
   );
 
   useEffect(() => {
