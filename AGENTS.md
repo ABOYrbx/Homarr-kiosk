@@ -107,6 +107,8 @@ Only after this user-need test passes, use these locations:
 
 Add tests only when requested, and only when the test is extremely relevant and will plausibly prevent a future regression in user-visible behavior or a security boundary. Do not add tests that restate implementation details or duplicate stronger coverage. For focused changes, run only the relevant existing or newly requested checks when validation is needed. Do not run broad test, Docker, or E2E suites by default.
 
+For a focused live check of board UI without a pre-existing `.env`, copy `.env.example` to a gitignored `.env`, set `AUTH_SECRET`/`SECRET_ENCRYPTION_KEY` to different 64-character hex values, `DB_DRIVER='better-sqlite3'`, `DB_URL` to an absolute writable path outside the repo, plus `DEMO_MODE=true`, `DEMO_READ_ONLY=false`, `UNSAFE_ENABLE_MOCK_INTEGRATION=true`. Run `bun run db:migration:sqlite:run` (it seeds the demo user) before `bun run dev`; log in as `demo`/`demo`. For scripted fixture setup, call tRPC as that session with `POST /api/trpc/<router>.<procedure>` and a `{"json":{...}}` body (the credentials field is `name`, not `username`), using cookies from `curl -c`. Remove the temporary `.env` and DB when finished.
+
 ## AI-assisted pull requests
 
 These rules apply to every PR an agent prepares or opens, including contributor PRs. A PR that does not meet them will be closed.
