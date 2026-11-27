@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { TtlLruCache } from "./cache";
+import { fetchLrclibLyrics } from "./lrclib";
 import { createCacheKey, findExactSearchId, isDurationMatch, parseTrackId } from "./match";
 import { normalizeLrclibRecord, normalizeSpicyLyrics } from "./normalize";
 
@@ -272,5 +273,162 @@ describe("normalizeLrclibRecord", () => {
     });
     expect(result?.lines[0]?.words[0]?.end).toBe(2);
     expect(result?.lines[0]?.words[1]?.end).toBe(3);
+  });
+});
+
+describe("fetchLrclibLyrics", () => {
+  const validRecord = {
+    id: 5,
+    trackName: "T",
+    artistName: "A",
+    duration: 200,
+    instrumental: false,
+    hasWordSync: false,
+    plainLyrics: "x",
+    syncedLyrics: null,
+    lyricsfile: "",
+  };
+
+  it("maps 404 to not_found and 429 to error", async () => {
+    try {
+      const fetchMock = vi
+        .fn()
+        .mockResolvedValueOnce({ status: 404, json: async () => ({}) })
+        .mockResolvedValueOnce({ status: 429, json: async () => ({}) });
+      vi.stubGlobal("fetch", fetchMock);
+      const base = { title: "T", artist: "A" };
+      expect((await fetchLrclibLyrics(base)).status).toBe("not_found");
+      expect((await fetchLrclibLyrics(base)).status).toBe("error");
+      // One request per call: no retries on 404 or 429.
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("queries the signature and validates the body", async () => {
+    try {
+      const fetchMock = vi.fn().mockResolvedValue({ status: 200, json: async () => validRecord });
+      vi.stubGlobal("fetch", fetchMock);
+      const result = await fetchLrclibLyrics({ title: "T", artist: "A", album: "Album", durationSeconds: 200 });
+      expect(result.status).toBe("ok");
+      if (result.status === "ok") expect(result.record).toEqual(validRecord);
+      expect(String(fetchMock.mock.calls[0][0])).toContain("track_name=T&artist_name=A&album_name=Album&duration=200");
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("returns not_found without fetching when the artist is missing", async () => {
+    try {
+      const fetchMock = vi.fn();
+      vi.stubGlobal("fetch", fetchMock);
+      expect(await fetchLrclibLyrics({ title: "T", artist: "  ", durationSeconds: 200 })).toEqual({
+        status: "not_found",
+      });
+      expect(fetchMock).not.toHaveBeenCalled();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("maps other non-2xx responses to error without retrying", async () => {
+    try {
+      const fetchMock = vi
+        .fn()
+        .mockResolvedValueOnce({ status: 503, json: async () => ({}) })
+        .mockResolvedValueOnce({ status: 500, json: async () => ({}) });
+      vi.stubGlobal("fetch", fetchMock);
+      const base = { title: "T", artist: "A" };
+      expect((await fetchLrclibLyrics(base)).status).toBe("error");
+      expect((await fetchLrclibLyrics(base)).status).toBe("error");
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("maps an invalid 2xx body to error", async () => {
+    try {
+      const fetchMock = vi.fn().mockResolvedValue({ status: 200, json: async () => ({ id: "not-a-number" }) });
+      vi.stubGlobal("fetch", fetchMock);
+      expect((await fetchLrclibLyrics({ title: "T", artist: "A" })).status).toBe("error");
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("uses the fixed host with the required headers and no credentials", async () => {
+    try {
+      const fetchMock = vi.fn().mockResolvedValue({ status: 404, json: async () => ({}) });
+      vi.stubGlobal("fetch", fetchMock);
+      await fetchLrclibLyrics({ title: "T", artist: "A" });
+      const [url, init] = fetchMock.mock.calls[0];
+      expect(String(url).startsWith("https://lrclib.net/api/get?")).toBe(true);
+      const headers = new Headers(init.headers);
+      expect(headers.get("Accept")).toBe("application/json");
+      expect(headers.get("User-Agent")).toBe("Homarr idle screen (+https://github.com/ABOYrbx/Homarr-kiosk)");
+      expect(headers.has("Authorization")).toBe(false);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("omits optional query parameters when they are undefined", async () => {
+    try {
+      const fetchMock = vi.fn().mockResolvedValue({ status: 404, json: async () => ({}) });
+      vi.stubGlobal("fetch", fetchMock);
+      await fetchLrclibLyrics({ title: "Some Song", artist: "Some Artist" });
+      expect(String(fetchMock.mock.calls[0][0])).toBe(
+        "https://lrclib.net/api/get?track_name=Some+Song&artist_name=Some+Artist",
+      );
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("aborts the request after five seconds and reports an error", async () => {
+    vi.useFakeTimers();
+    try {
+      let signal: AbortSignal | undefined;
+      const fetchMock = vi.fn().mockImplementation((_url: unknown, init: { signal?: AbortSignal }) => {
+        signal = init.signal;
+        return new Promise((_resolve, reject) => {
+          signal?.addEventListener("abort", () => reject(new Error("aborted")), { once: true });
+        });
+      });
+      vi.stubGlobal("fetch", fetchMock);
+
+      const promise = fetchLrclibLyrics({ title: "T", artist: "A" });
+      expect(signal?.aborted).toBe(false);
+      await vi.advanceTimersByTimeAsync(4999);
+      expect(signal?.aborted).toBe(false);
+      await vi.advanceTimersByTimeAsync(1);
+      expect(signal?.aborted).toBe(true);
+      await expect(promise).resolves.toEqual({ status: "error" });
+    } finally {
+      vi.useRealTimers();
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("clears the timeout once the response has settled", async () => {
+    vi.useFakeTimers();
+    try {
+      let signal: AbortSignal | undefined;
+      const fetchMock = vi.fn().mockImplementation((_url: unknown, init: { signal?: AbortSignal }) => {
+        signal = init.signal;
+        return Promise.resolve({ status: 404, json: async () => ({}) });
+      });
+      vi.stubGlobal("fetch", fetchMock);
+
+      expect((await fetchLrclibLyrics({ title: "T", artist: "A" })).status).toBe("not_found");
+      await vi.advanceTimersByTimeAsync(10_000);
+      expect(signal?.aborted).toBe(false);
+    } finally {
+      vi.useRealTimers();
+      vi.unstubAllGlobals();
+    }
   });
 });
