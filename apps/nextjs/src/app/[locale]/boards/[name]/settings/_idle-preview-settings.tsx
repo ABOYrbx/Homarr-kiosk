@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ActionIcon, Alert, Button, ColorInput, Group, Input, Slider, Stack, Text, TextInput } from "@mantine/core";
-import { IconSearch, IconX } from "@tabler/icons-react";
+import { IconSearch } from "@tabler/icons-react";
 
 import type { RouterOutputs } from "@homarr/api";
 import { clientApi } from "@homarr/api/client";
@@ -84,29 +84,25 @@ const IdleWeatherLocationInput = ({ form, board }: Props) => {
         }}
         loading={submittedQuery !== null && isPending}
         rightSectionPointerEvents="all"
-        rightSectionWidth={56}
+        rightSectionWidth={60}
         rightSection={
-          <Group gap={4} wrap="nowrap" justify="flex-end">
+          <Group gap={4} wrap="nowrap" justify="center">
             {(selectedLocationName || searchInput) && (
-              <ActionIcon
+              <Input.ClearButton
                 type="button"
-                variant="subtle"
-                size="input-sm"
                 aria-label={t("field.idleScreenWeatherLocation.clear")}
                 onClick={clearLocation}
-              >
-                <IconX size={18} />
-              </ActionIcon>
+              />
             )}
             <ActionIcon
               type="button"
               variant="subtle"
-              size="input-sm"
+              size="sm"
               aria-label={t("field.idleScreenWeatherLocation.search")}
               disabled={!searchInput.trim()}
               onClick={search}
             >
-              <IconSearch size={18} />
+              <IconSearch size={16} />
             </ActionIcon>
           </Group>
         }
