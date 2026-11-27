@@ -30,6 +30,14 @@ export const IdleCarousel = ({
 }) => {
   const [activeLayer, setActiveLayer] = useState<IdleLayer>(initialLayer);
   const pointerStart = useRef<PointerStart | null>(null);
+  const manuallyNavigated = useRef(false);
+
+  // Playback starting or stopping changes the preferred layer. Only follow it
+  // until the user has navigated themselves.
+  useEffect(() => {
+    if (manuallyNavigated.current) return;
+    setActiveLayer(initialLayer);
+  }, [initialLayer]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -43,9 +51,11 @@ export const IdleCarousel = ({
       }
       if (event.key === "ArrowLeft") {
         event.preventDefault();
+        manuallyNavigated.current = true;
         setActiveLayer((current) => getIdleLayerTarget(current, -1));
       } else if (event.key === "ArrowRight") {
         event.preventDefault();
+        manuallyNavigated.current = true;
         setActiveLayer((current) => getIdleLayerTarget(current, 1));
       }
     };
@@ -78,6 +88,7 @@ export const IdleCarousel = ({
       onClose();
       return;
     }
+    manuallyNavigated.current = true;
     setActiveLayer((current) => getIdleLayerTarget(current, direction));
   };
 

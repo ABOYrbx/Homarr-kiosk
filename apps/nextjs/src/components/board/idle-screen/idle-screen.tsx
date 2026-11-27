@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Portal } from "@mantine/core";
 import { usePathname } from "next/navigation";
 
@@ -88,6 +88,48 @@ const MusicIdleScreen = ({
 
 export { MusicIdleScreen };
 
+interface MusicPresenceState {
+  playing: boolean;
+  ready: boolean;
+}
+
+const PlayingWatcher = ({
+  integrationId,
+  entityId,
+  onChange,
+}: {
+  integrationId: string;
+  entityId: string;
+  onChange: (state: MusicPresenceState) => void;
+}) => {
+  const { entity } = useNowPlaying({ integrationId, entityId });
+  const playing = entity?.state === "playing";
+
+  useEffect(() => {
+    onChange({ playing, ready: true });
+  }, [playing, onChange]);
+
+  return null;
+};
+
+/** Subscribes only while the overlay is open, so no player is polled on the dashboard. */
+const MusicPresence = ({
+  integrationId,
+  entityId,
+  onChange,
+}: {
+  integrationId: string | null;
+  entityId: string | null;
+  onChange: (state: MusicPresenceState) => void;
+}) => {
+  useEffect(() => {
+    if (!integrationId || !entityId) onChange({ playing: false, ready: true });
+  }, [integrationId, entityId, onChange]);
+
+  if (!integrationId || !entityId) return null;
+  return <PlayingWatcher integrationId={integrationId} entityId={entityId} onChange={onChange} />;
+};
+
 export const IdleScreen = ({ board, tourActive = false }: { board: IdleScreenSettings; tourActive?: boolean }) => {
   const t = useI18n("board");
   const [isEditMode] = useOptionalEditMode() ?? [false];
@@ -97,6 +139,10 @@ export const IdleScreen = ({ board, tourActive = false }: { board: IdleScreenSet
   const liveBoard = useOptionalBoard();
   const settings: IdleScreenSettings = liveBoard ?? board;
   const { previewOpen, closePreview } = useIdleScreenPreview();
+  const [musicPresence, setMusicPresence] = useState<MusicPresenceState>({ playing: false, ready: false });
+  const handleMusicPresence = useCallback((next: MusicPresenceState) => {
+    setMusicPresence((current) => (current.playing === next.playing && current.ready === next.ready ? current : next));
+  }, []);
   const { open: timerOpen, dismiss: dismissTimer } = useIdleScreen({
     enabled: settings.idleScreenEnabled && !isEditMode && !tourActive && !onSettingsPage,
     timeoutMinutes: settings.idleScreenTimeoutMinutes,
@@ -132,21 +178,29 @@ export const IdleScreen = ({ board, tourActive = false }: { board: IdleScreenSet
   return (
     <Portal>
       <div className={classes.overlay} role="region" aria-label={t("idleScreen.title")} data-idle-screen="true">
-        <IdleCarousel
-          initialLayer="clock"
-          musicPane={
-            <MusicPane integrationId={integrationId} entityId={entityId} showLyrics={settings.idleScreenShowLyrics} />
-          }
-          clockPane={
-            liveBoard ? (
-              <IdleClockSurface board={liveBoard} settings={liveBoard} />
-            ) : (
-              <AnalogClock showSeconds={settings.idleScreenShowClockSeconds} />
-            )
-          }
-          widgetsPane={<IdleWidgets layoutId={idleLayoutId ?? ""} />}
-          onClose={closeIdleScreen}
+        <MusicPresence
+          key={`${integrationId ?? ""}:${entityId ?? ""}`}
+          integrationId={integrationId}
+          entityId={entityId}
+          onChange={handleMusicPresence}
         />
+        {musicPresence.ready && (
+          <IdleCarousel
+            initialLayer={musicPresence.playing ? "music" : "clock"}
+            musicPane={
+              <MusicPane integrationId={integrationId} entityId={entityId} showLyrics={settings.idleScreenShowLyrics} />
+            }
+            clockPane={
+              liveBoard ? (
+                <IdleClockSurface board={liveBoard} settings={liveBoard} />
+              ) : (
+                <AnalogClock showSeconds={settings.idleScreenShowClockSeconds} />
+              )
+            }
+            widgetsPane={<IdleWidgets layoutId={idleLayoutId ?? ""} />}
+            onClose={closeIdleScreen}
+          />
+        )}
       </div>
     </Portal>
   );
