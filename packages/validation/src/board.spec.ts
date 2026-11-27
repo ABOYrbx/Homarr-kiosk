@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { responsiveBoardLayoutsSchema } from "./board";
+import { boardSavePartialSettingsSchema, responsiveBoardLayoutsSchema } from "./board";
 import { containerSectionOptionsDefaults, sectionSchema } from "./shared";
 
 const mobile = {
@@ -47,6 +47,16 @@ describe("responsiveBoardLayoutsSchema", () => {
     },
   ])("rejects $name", ({ layouts }) => {
     expect(responsiveBoardLayoutsSchema.safeParse(layouts).success).toBe(false);
+  });
+});
+
+describe("boardSavePartialSettingsSchema", () => {
+  test("board settings accept the idle widget layout", () => {
+    expect(
+      boardSavePartialSettingsSchema.safeParse({ idleScreenMode: "widgets", idleScreenLayoutId: "idle-1" }).success,
+    ).toBe(true);
+    expect(boardSavePartialSettingsSchema.safeParse({ idleScreenLayoutId: null }).success).toBe(true);
+    expect(boardSavePartialSettingsSchema.safeParse({ idleScreenMode: "video" }).success).toBe(false);
   });
 });
 

@@ -86,6 +86,7 @@ const normalizeFormValues = (
     idleScreenEnabled: values.idleScreenEnabled,
     idleScreenTimeoutMinutes: values.idleScreenTimeoutMinutes,
     idleScreenMode: values.idleScreenMode,
+    idleScreenLayoutId: values.idleScreenLayoutId,
     idleScreenHomeAssistantIntegrationId: values.idleScreenHomeAssistantIntegrationId,
     idleScreenMediaPlayerEntityId: values.idleScreenMediaPlayerEntityId,
     idleScreenShowClockSeconds: values.idleScreenShowClockSeconds,

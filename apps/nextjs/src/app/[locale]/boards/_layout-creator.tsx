@@ -116,7 +116,7 @@ export const createBoardLayout = <TParams extends Params>({
                 board={{
                   idleScreenEnabled: initialBoard.idleScreenEnabled,
                   idleScreenTimeoutMinutes: initialBoard.idleScreenTimeoutMinutes,
-                  idleScreenMode: initialBoard.idleScreenMode as "auto" | "clock" | "music",
+                  idleScreenMode: initialBoard.idleScreenMode as "auto" | "clock" | "music" | "widgets",
                   idleScreenHomeAssistantIntegrationId: initialBoard.idleScreenHomeAssistantIntegrationId,
                   idleScreenMediaPlayerEntityId: initialBoard.idleScreenMediaPlayerEntityId,
                   idleScreenShowClockSeconds: initialBoard.idleScreenShowClockSeconds,

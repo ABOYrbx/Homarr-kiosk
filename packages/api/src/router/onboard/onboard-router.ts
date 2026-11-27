@@ -415,6 +415,7 @@ export const onboardRouter = createTRPCRouter({
               idleScreenEnabled: false,
               idleScreenTimeoutMinutes: 5,
               idleScreenMode: "auto",
+              idleScreenLayoutId: null,
               idleScreenHomeAssistantIntegrationId: null,
               idleScreenMediaPlayerEntityId: null,
               idleScreenShowClockSeconds: false,

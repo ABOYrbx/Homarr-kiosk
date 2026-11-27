@@ -1,0 +1,1 @@
+ALTER TABLE `board` ADD `idle_screen_layout_id` text;
