@@ -36,7 +36,6 @@ export const NowPlaying = ({ entity, showLyrics }: { entity: SmartHomeEntity; sh
 
   const lyricsQuery = useLyrics({
     enabled: showLyrics && Boolean(attributes.mediaTitle),
-    trackId: attributes.mediaContentId,
     title,
     artist,
     album,
@@ -49,8 +48,6 @@ export const NowPlaying = ({ entity, showLyrics }: { entity: SmartHomeEntity; sh
         lines: found.lines,
         source: found.source,
         provider: found.provider,
-        uploader: found.uploader,
-        maker: found.maker,
       }
     : undefined;
   const hasArtwork = Boolean(artwork) && !imageFailed;

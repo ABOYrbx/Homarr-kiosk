@@ -12,14 +12,12 @@ const GC_TIME_MS = 24 * 60 * 60 * 1000;
  */
 export const useLyrics = ({
   enabled,
-  trackId,
   title,
   artist,
   album,
   durationSeconds,
 }: {
   enabled: boolean;
-  trackId?: string;
   title: string;
   artist?: string;
   album?: string;
@@ -27,7 +25,6 @@ export const useLyrics = ({
 }) =>
   clientApi.lyrics.get.useQuery(
     {
-      trackId,
       title,
       artist,
       album,

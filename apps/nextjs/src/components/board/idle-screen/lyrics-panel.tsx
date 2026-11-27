@@ -9,7 +9,7 @@ import { effectiveLineEnd, findActiveLineIndex, findActiveWordIndex } from "./ly
 import type { LyricsViewData } from "./lyrics-view";
 import classes from "./idle-screen.module.css";
 
-const PROVIDER_URL = "https://spicylyrics.org";
+const PROVIDER_URL = "https://lrclib.net";
 
 interface LineProps {
   index: number;
@@ -104,24 +104,8 @@ export const LyricsPanel = ({ lyrics, position }: { lyrics: LyricsViewData; posi
       </div>
       <div className={classes.lyricsAttribution}>
         <a href={PROVIDER_URL} target="_blank" rel="noreferrer">
-          {t("idleScreen.attribution", { provider: lyrics.provider ?? "Spicy Lyrics" })}
+          {t("idleScreen.attribution")}
         </a>
-        {lyrics.source === "spicy_lyrics" && lyrics.uploader && (
-          <>
-            {" · "}
-            <a href={lyrics.uploader.url} target="_blank" rel="noreferrer">
-              {t("idleScreen.uploader", { name: lyrics.uploader.username })}
-            </a>
-          </>
-        )}
-        {lyrics.source === "spicy_lyrics" && lyrics.maker && (
-          <>
-            {" · "}
-            <a href={lyrics.maker.url} target="_blank" rel="noreferrer">
-              {t("idleScreen.maker", { name: lyrics.maker.username })}
-            </a>
-          </>
-        )}
       </div>
     </section>
   );

@@ -126,4 +126,35 @@ describe("lyrics sync view", () => {
     expect(buildTrackKey(track)).not.toBe(buildTrackKey({ ...track, mediaContentId: undefined }));
     expect(buildTrackKey({ mediaTitle: "A", mediaArtist: "B", mediaDuration: undefined })).toContain("|0");
   });
+
+  it("syncs LRCLIB lines and word timings in seconds", () => {
+    const lrclibLines: LyricLine[] = [
+      {
+        start: 12.5,
+        end: 14.75,
+        words: [
+          { text: "I'm", start: 12.5, end: 12.9 },
+          { text: " singing", start: 13.0, end: 13.6 },
+          { text: " now", start: 13.8, end: 14.4 },
+        ],
+      },
+      {
+        start: 15.2,
+        end: 17,
+        words: [
+          { text: "You're", start: 15.2, end: 15.8 },
+          { text: " listening", start: 16, end: 16.7 },
+        ],
+      },
+    ];
+
+    expect(findActiveLineIndex(lrclibLines, 12.4)).toBe(-1);
+    expect(findActiveLineIndex(lrclibLines, 13.5)).toBe(0);
+    expect(findActiveLineIndex(lrclibLines, 16.5)).toBe(1);
+    expect(findActiveWordIndex(lrclibLines[0], 12.7)).toBe(0);
+    expect(findActiveWordIndex(lrclibLines[0], 13.2)).toBe(1);
+    expect(findActiveWordIndex(lrclibLines[0], 14)).toBe(2);
+    expect(findActiveWordIndex(lrclibLines[1], 15.9)).toBe(0);
+    expect(findActiveWordIndex(lrclibLines[1], 16.5)).toBe(1);
+  });
 });

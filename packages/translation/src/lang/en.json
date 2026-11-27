@@ -6756,7 +6756,7 @@
       "progress": "Playback progress",
       "progressLabel": "Playback progress",
       "lyricsLabel": "Synchronized lyrics",
-      "attribution": "Lyrics: {provider}",
+      "attribution": "Lyrics: LRCLIB",
       "uploader": "Uploader: {name}",
       "maker": "Maker: {name}"
     },
@@ -7050,8 +7050,7 @@
       },
       "idleScreenShowLyrics": {
         "label": "Show lyrics",
-        "description": "Show synchronized lyrics from Spicy Lyrics",
-        "hint": "Requires SPICY_LYRICS_API_KEY in the server configuration."
+        "description": "Show synchronized lyrics from Spicy Lyrics"
       }
     },
     "content": {

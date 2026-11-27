@@ -125,9 +125,6 @@ export const IdleScreenSettingsContent = ({ form }: Props) => {
             description={t("field.idleScreenShowLyrics.description")}
             {...form.getInputProps("idleScreenShowLyrics", { type: "checkbox" })}
           />
-          <Text size="xs" c="dimmed">
-            {t("field.idleScreenShowLyrics.hint")}
-          </Text>
         </Stack>
       )}
     </SectionCard>
