@@ -7101,8 +7101,6 @@
         "description": "Blur and darken the background so widgets stay readable"
       },
       "idleScreenPreview": {
-        "label": "AOD preview",
-        "description": "Preview of the saved idle screen",
         "button": "AOD preview"
       }
     },

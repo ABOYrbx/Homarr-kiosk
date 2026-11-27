@@ -7101,8 +7101,6 @@
         "description": "Hintergrund weichzeichnen und abdunkeln, damit Widgets lesbar bleiben"
       },
       "idleScreenPreview": {
-        "label": "AOD-Vorschau",
-        "description": "Vorschau des gespeicherten Leerlaufbildschirms",
         "button": "AOD-Vorschau"
       }
     },

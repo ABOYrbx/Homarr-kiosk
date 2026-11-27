@@ -185,15 +185,9 @@ export const IdlePreviewSettings = ({ form, board }: Props) => {
       </Input.Wrapper>
       <IdleWidgetBackgroundSettings form={form} />
       <IdleWidgetBackgroundFrost form={form} />
-      <Stack gap={2}>
-        <Text fw={500}>{t("field.idleScreenPreview.label")}</Text>
-        <Text size="sm" c="dimmed">
-          {t("field.idleScreenPreview.description")}
-        </Text>
-        <Button type="button" variant="light" mt="xs" onClick={openPreview}>
-          {t("field.idleScreenPreview.button")}
-        </Button>
-      </Stack>
+      <Button type="button" variant="light" onClick={openPreview}>
+        {t("field.idleScreenPreview.button")}
+      </Button>
     </Stack>
   );
 };
