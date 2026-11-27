@@ -7070,6 +7070,10 @@
         "label": "Lyrics anzeigen",
         "description": "Synchronisierte Lyrics von LRCLIB anzeigen"
       },
+      "idleScreenLyricsOffsetSeconds": {
+        "label": "Lyrics-Zeitversatz",
+        "description": "Verschiebt nur die Lyrics-Hervorhebung, in Sekunden. Positive Werte verzögern die Lyrics: Wenn die Lyrics dem Gesang voraus sind, Wert erhöhen; wenn sie hinterherhinken, Wert verringern. Fortschrittsbalken und Wiedergabezeit bleiben unverändert."
+      },
       "idleScreenWeatherLocation": {
         "label": "Wetterstandort",
         "description": "Standort für Wetter-Icon und Temperatur suchen",

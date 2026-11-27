@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Group, NumberInput, Select, Stack, Switch, Text } from "@mantine/core";
+import { Button, Group, Input, NumberInput, Select, Slider, Stack, Switch, Text } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
 
 import { clientApi } from "@homarr/api/client";
@@ -23,6 +23,8 @@ interface IdleScreenProps extends Props {
   board: Board;
   saveSettingsAsync: () => Promise<unknown>;
 }
+
+const formatLyricsOffset = (seconds: number) => `${seconds > 0 ? "+" : ""}${seconds} s`;
 
 export const BehaviorSettingsContent = ({ form }: Props) => {
   const t = useI18n("board");
@@ -81,6 +83,7 @@ export const IdleScreenSettingsContent = ({ board, form, saveSettingsAsync }: Id
   }, [integrationId, catalog, mediaPlayers, form]);
 
   const enabled = form.values.idleScreenEnabled;
+  const lyricsOffset = form.values.idleScreenLyricsOffsetSeconds ?? 0;
 
   const handleEditIdleScreenLayout = async () => {
     let layoutId = form.values.idleScreenLayoutId;
@@ -173,6 +176,33 @@ export const IdleScreenSettingsContent = ({ board, form, saveSettingsAsync }: Id
             description={t("field.idleScreenShowLyrics.description")}
             {...form.getInputProps("idleScreenShowLyrics", { type: "checkbox" })}
           />
+          {form.values.idleScreenShowLyrics && (
+            <Input.Wrapper
+              label={t("field.idleScreenLyricsOffsetSeconds.label")}
+              description={t("field.idleScreenLyricsOffsetSeconds.description")}
+            >
+              <Slider
+                thumbLabel={`${formatLyricsOffset(lyricsOffset)}`}
+                label={formatLyricsOffset}
+                maw="80%"
+                mx="auto"
+                mt="xs"
+                mb="sm"
+                min={-15}
+                max={15}
+                step={0.5}
+                marks={[
+                  { value: -10, label: "-10 s" },
+                  { value: -5, label: "-5 s" },
+                  { value: 0, label: "0 s" },
+                  { value: 5, label: "+5 s" },
+                  { value: 10, label: "+10 s" },
+                ]}
+                value={lyricsOffset}
+                onChange={(value) => form.setFieldValue("idleScreenLyricsOffsetSeconds", value)}
+              />
+            </Input.Wrapper>
+          )}
         </Stack>
       )}
 

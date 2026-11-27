@@ -7070,6 +7070,10 @@
         "label": "Show lyrics",
         "description": "Show synchronized lyrics from LRCLIB"
       },
+      "idleScreenLyricsOffsetSeconds": {
+        "label": "Lyrics timing offset",
+        "description": "Shift only the lyrics highlight, in seconds. Positive values delay the lyrics: if the lyrics run ahead of the singing, increase the value; if they lag behind, decrease it. The progress bar and playback time stay unchanged."
+      },
       "idleScreenWeatherLocation": {
         "label": "Weather location",
         "description": "Search for a location for the weather icon and temperature",
