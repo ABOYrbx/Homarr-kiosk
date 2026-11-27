@@ -45,12 +45,15 @@ describe("LRCLIB helpers", () => {
   });
   it("expires entries with an explicit TTL", () => {
     vi.useFakeTimers();
-    vi.setSystemTime(new Date("2026-01-01T00:00:00Z"));
-    const cache = new TtlLruCache<string>(2);
-    cache.set("a", "lyrics", 1000);
-    vi.setSystemTime(new Date("2026-01-01T00:00:01Z"));
-    expect(cache.get("a")).toBeUndefined();
-    vi.useRealTimers();
+    try {
+      vi.setSystemTime(new Date("2026-01-01T00:00:00Z"));
+      const cache = new TtlLruCache<string>(2);
+      cache.set("a", "lyrics", 1000);
+      vi.setSystemTime(new Date("2026-01-01T00:00:01Z"));
+      expect(cache.get("a")).toBeUndefined();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
 
@@ -304,6 +307,81 @@ describe("resolveLyrics", () => {
       expect((await resolveLyrics({ title: "T", artist: "A" })).status).toBe("error");
       expect(fetchMock).toHaveBeenCalledTimes(1);
     } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+  it("returns not_found for a duration mismatch and caches it under the requested duration", async () => {
+    try {
+      // The record is 210 s but the caller asked for 200 s: 10 s outside the ±2 s guard.
+      const record = {
+        id: 10,
+        trackName: "Mismatch",
+        artistName: "A",
+        albumName: null,
+        duration: 210,
+        instrumental: false,
+        hasWordSync: false,
+        plainLyrics: "Never shown",
+        syncedLyrics: null,
+        lyricsfile: "",
+      };
+      const fetchMock = vi.fn().mockResolvedValue({ status: 200, json: async () => record });
+      vi.stubGlobal("fetch", fetchMock);
+      const { resolveLyrics } = await import("./router-resolve");
+      const input = { title: "Mismatch", artist: "A", durationSeconds: 200 };
+      expect((await resolveLyrics(input)).status).toBe("not_found");
+      expect((await resolveLyrics(input)).status).toBe("not_found");
+      // createCacheKey includes the input duration, so the negative result is reused.
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+  it("returns found with source, provider and normalized lines for a matching duration", async () => {
+    try {
+      const record = {
+        id: 11,
+        trackName: "Match",
+        artistName: "A",
+        albumName: null,
+        duration: 200,
+        instrumental: false,
+        hasWordSync: false,
+        plainLyrics: "Line one\nLine two",
+        syncedLyrics: null,
+        lyricsfile: "",
+      };
+      const fetchMock = vi.fn().mockResolvedValue({ status: 200, json: async () => record });
+      vi.stubGlobal("fetch", fetchMock);
+      const { resolveLyrics } = await import("./router-resolve");
+      const result = await resolveLyrics({ title: "Match", artist: "A", durationSeconds: 200 });
+      expect(result.status).toBe("found");
+      expect(result.source).toBe("lrclib");
+      expect(result.provider).toBe("LRCLIB");
+      expect(result.type).toBe("static");
+      expect(result.lines).toEqual([
+        { start: 0, end: 0, words: [{ text: "Line one", start: 0, end: 0 }] },
+        { start: 0, end: 0, words: [{ text: "Line two", start: 0, end: 0 }] },
+      ]);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+  it("caches an error for 60 seconds and refetches afterwards", async () => {
+    vi.useFakeTimers();
+    try {
+      const fetchMock = vi.fn().mockResolvedValue({ status: 429, json: async () => ({}) });
+      vi.stubGlobal("fetch", fetchMock);
+      const { resolveLyrics } = await import("./router-resolve");
+      const input = { title: "TtlProbe", artist: "A" };
+      expect((await resolveLyrics(input)).status).toBe("error");
+      expect((await resolveLyrics(input)).status).toBe("error");
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      await vi.advanceTimersByTimeAsync(60_001);
+      expect((await resolveLyrics(input)).status).toBe("error");
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    } finally {
+      vi.useRealTimers();
       vi.unstubAllGlobals();
     }
   });
