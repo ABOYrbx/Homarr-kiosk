@@ -1,17 +1,26 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
-import { NumberInput, Select, Stack, Switch, Text } from "@mantine/core";
+import { useRouter } from "next/navigation";
+import { Button, Group, NumberInput, Select, Stack, Switch, Text } from "@mantine/core";
+import { IconPlus } from "@tabler/icons-react";
 
 import { clientApi } from "@homarr/api/client";
 import type { UseFormReturnType } from "@homarr/form";
+import { showErrorNotification } from "@homarr/notifications";
 import { useI18n } from "@homarr/translation/client";
 
 import { SectionCard } from "@homarr/ui";
+import type { Board } from "../../_types";
 import type { FormValues } from "./_settings-form";
 
 interface Props {
   form: UseFormReturnType<FormValues>;
+}
+
+interface IdleScreenProps extends Props {
+  board: Board;
+  saveSettingsAsync: () => Promise<unknown>;
 }
 
 export const BehaviorSettingsContent = ({ form }: Props) => {
@@ -28,8 +37,20 @@ export const BehaviorSettingsContent = ({ form }: Props) => {
   );
 };
 
-export const IdleScreenSettingsContent = ({ form }: Props) => {
+export const IdleScreenSettingsContent = ({ board, form, saveSettingsAsync }: IdleScreenProps) => {
   const t = useI18n("board");
+  const tCommon = useI18n("common");
+  const router = useRouter();
+
+  const { mutateAsync: createIdleScreenLayout, isPending: isCreatingLayout } =
+    clientApi.board.createIdleScreenLayout.useMutation({
+      onError() {
+        showErrorNotification({
+          title: tCommon("notification.update.error"),
+          message: tCommon("notification.update.error"),
+        });
+      },
+    });
 
   const { data: integrations = [] } = clientApi.integration.all.useQuery(undefined, {
     staleTime: 60_000,
@@ -60,6 +81,27 @@ export const IdleScreenSettingsContent = ({ form }: Props) => {
 
   const enabled = form.values.idleScreenEnabled;
 
+  const handleEditIdleScreenLayout = async () => {
+    let layoutId = form.values.idleScreenLayoutId;
+
+    if (!layoutId) {
+      try {
+        const { layoutId: createdLayoutId } = await createIdleScreenLayout({
+          boardId: board.id,
+          name: t("field.idleScreenLayout.layoutName"),
+        });
+        layoutId = createdLayoutId;
+        form.setFieldValue("idleScreenLayoutId", layoutId);
+      } catch {
+        // The mutation callback displays the error notification.
+        return;
+      }
+    }
+
+    if (form.isDirty()) await saveSettingsAsync();
+    router.push(`/boards/${board.name}?layout=${encodeURIComponent(layoutId)}&edit=true&returnTo=settings`);
+  };
+
   return (
     <SectionCard title={t("setting.section.idleScreen.title")}>
       <Switch
@@ -85,8 +127,24 @@ export const IdleScreenSettingsContent = ({ form }: Props) => {
               { value: "auto", label: t("field.idleScreenMode.option.auto") },
               { value: "clock", label: t("field.idleScreenMode.option.clock") },
               { value: "music", label: t("field.idleScreenMode.option.music") },
+              { value: "widgets", label: t("field.idleScreenMode.option.widgets") },
             ]}
           />
+          <Group justify="space-between" align="flex-start" wrap="wrap">
+            <Stack gap={2} maw="52rem">
+              <Text fw={500}>{t("field.idleScreenLayout.label")}</Text>
+              <Text size="sm">{t("field.idleScreenLayout.description")}</Text>
+            </Stack>
+            <Button
+              type="button"
+              variant="light"
+              loading={isCreatingLayout}
+              leftSection={<IconPlus size={16} />}
+              onClick={() => void handleEditIdleScreenLayout()}
+            >
+              {t("field.idleScreenLayout.edit")}
+            </Button>
+          </Group>
           <Select
             {...form.getInputProps("idleScreenHomeAssistantIntegrationId")}
             label={t("field.idleScreenHomeAssistantIntegrationId.label")}

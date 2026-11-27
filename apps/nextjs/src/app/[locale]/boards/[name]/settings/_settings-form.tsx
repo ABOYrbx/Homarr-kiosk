@@ -63,6 +63,7 @@ const PARTIAL_FORM_KEYS = [
   "idleScreenEnabled",
   "idleScreenTimeoutMinutes",
   "idleScreenMode",
+  "idleScreenLayoutId",
   "idleScreenHomeAssistantIntegrationId",
   "idleScreenMediaPlayerEntityId",
   "idleScreenShowClockSeconds",
@@ -88,6 +89,7 @@ const buildInitialValues = (board: Board): FormValues => ({
   idleScreenEnabled: board.idleScreenEnabled,
   idleScreenTimeoutMinutes: board.idleScreenTimeoutMinutes,
   idleScreenMode: board.idleScreenMode,
+  idleScreenLayoutId: board.idleScreenLayoutId,
   idleScreenHomeAssistantIntegrationId: board.idleScreenHomeAssistantIntegrationId,
   idleScreenMediaPlayerEntityId: board.idleScreenMediaPlayerEntityId,
   idleScreenShowClockSeconds: board.idleScreenShowClockSeconds,
@@ -205,7 +207,12 @@ export const BoardSettingsForm = ({ board, permissions, hasFullAccess, hideVisib
           <BackgroundSettingsContent form={form} />
           <ColorSettingsContent form={form} />
           <BehaviorSettingsContent form={form} />
-          <IdleScreenSettingsContent form={form} />
+          <IdleScreenSettingsContent
+            board={board}
+            form={form}
+            // getValues() reads the current state even when the layout id was just set in the click handler.
+            saveSettingsAsync={() => saveSettingsAsync(form.getValues())}
+          />
           <AdvancedSettings>
             <CustomCssSettingsContent form={form} />
           </AdvancedSettings>

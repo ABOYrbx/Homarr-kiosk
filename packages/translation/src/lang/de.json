@@ -7032,8 +7032,15 @@
         "option": {
           "auto": "Automatisch",
           "clock": "Nur Uhr",
-          "music": "Musik"
+          "music": "Musik",
+          "widgets": "Widgets"
         }
+      },
+      "idleScreenLayout": {
+        "label": "Idle-Screen-Layout",
+        "description": "Gestalte die Widgets des Leerlaufbildschirms im Layout-Editor",
+        "edit": "Idle-Screen-Layout bearbeiten",
+        "layoutName": "Idle Screen"
       },
       "idleScreenHomeAssistantIntegrationId": {
         "label": "Home-Assistant-Integration",

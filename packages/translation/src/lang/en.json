@@ -7032,8 +7032,15 @@
         "option": {
           "auto": "Automatic",
           "clock": "Clock only",
-          "music": "Music"
+          "music": "Music",
+          "widgets": "Widgets"
         }
+      },
+      "idleScreenLayout": {
+        "label": "Idle screen layout",
+        "description": "Design the widgets shown on the idle screen in the layout editor",
+        "edit": "Edit idle screen layout",
+        "layoutName": "Idle Screen"
       },
       "idleScreenHomeAssistantIntegrationId": {
         "label": "Home Assistant integration",
