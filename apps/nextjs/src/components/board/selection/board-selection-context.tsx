@@ -15,7 +15,7 @@ import { showErrorNotification, showSuccessNotification } from "@homarr/notifica
 import { useI18n } from "@homarr/translation/client";
 
 import type { ContainerSection, ItemLayout } from "~/app/[locale]/boards/_types";
-import { createItemCallback } from "~/components/board/items/actions/create-item";
+import { createItemCallback, getIdleScreenLayoutFilter } from "~/components/board/items/actions/create-item";
 import { getFirstEmptyPosition } from "~/components/board/items/actions/empty-position";
 import { getCrossTabMoveSnapshots } from "~/components/board/items/actions/move-entry-across-tabs";
 import { commitSectionGridsCallback } from "~/components/board/sections/grid/use-grid-layout-actions";
@@ -148,7 +148,12 @@ export const BoardSelectionProvider = ({ children }: PropsWithChildren) => {
           payload.items.forEach((item, index) => {
             const id = pastedIds[index];
             if (!id) throw new Error("Missing pasted item ID");
-            next = createItemCallback({ ...item, id, targetSectionId: activeTabId })(next);
+            next = createItemCallback({
+              ...item,
+              id,
+              targetSectionId: activeTabId,
+              layoutFilter: getIdleScreenLayoutFilter(board.idleScreenLayoutId, currentLayoutId),
+            })(next);
           });
         } catch {
           return previous;
@@ -170,7 +175,7 @@ export const BoardSelectionProvider = ({ children }: PropsWithChildren) => {
         message: tSelection("pasted", { count: pastedIds.length }),
       });
     },
-    [activeTabId, persistBoard, tCommon, tSelection],
+    [activeTabId, board.idleScreenLayoutId, currentLayoutId, persistBoard, tCommon, tSelection],
   );
 
   const pasteItems = useCallback(async () => {

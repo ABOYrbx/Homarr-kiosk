@@ -24,6 +24,15 @@ export interface CreateItemInput {
   layoutFilter?: { only?: string[]; except?: string[] };
 }
 
+export const getIdleScreenLayoutFilter = (
+  idleScreenLayoutId: string | null | undefined,
+  currentLayoutId: string,
+): CreateItemInput["layoutFilter"] => {
+  if (idleScreenLayoutId === currentLayoutId) return { only: [currentLayoutId] };
+  if (idleScreenLayoutId) return { except: [idleScreenLayoutId] };
+  return undefined;
+};
+
 export const createItemCallback =
   ({
     id,

@@ -2,7 +2,7 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 
 import * as boardContext from "@homarr/boards/context";
 
-import { createItemCallback, hasRoomForItem } from "../create-item";
+import { createItemCallback, getIdleScreenLayoutFilter, hasRoomForItem } from "../create-item";
 import * as emptyPositionModule from "../empty-position";
 import { BoardMockBuilder } from "./mocks/board-mock";
 import { ContainerSectionMockBuilder } from "./mocks/container-section-mock";
@@ -312,5 +312,12 @@ describe("item actions create-item", () => {
 
     expect(result.items.at(-1)?.layouts.map((layout) => layout.layoutId)).not.toContain("idle");
     expect(result.items.at(-1)?.layouts.length).toBeGreaterThan(0);
+  });
+
+  test("getIdleScreenLayoutFilter resolves the layout scope for the current layout", () => {
+    expect(getIdleScreenLayoutFilter("idle", "idle")).toEqual({ only: ["idle"] });
+    expect(getIdleScreenLayoutFilter("idle", "base")).toEqual({ except: ["idle"] });
+    expect(getIdleScreenLayoutFilter(null, "base")).toBeUndefined();
+    expect(getIdleScreenLayoutFilter(undefined, "base")).toBeUndefined();
   });
 });

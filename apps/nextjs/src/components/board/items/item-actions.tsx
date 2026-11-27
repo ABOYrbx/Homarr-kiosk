@@ -6,7 +6,7 @@ import { useUpdateBoard } from "@homarr/boards/updater";
 import type { BoardItemAdvancedOptions } from "@homarr/validation/shared";
 
 import type { CreateItemInput } from "./actions/create-item";
-import { createItemCallback } from "./actions/create-item";
+import { createItemCallback, getIdleScreenLayoutFilter } from "./actions/create-item";
 import type { DuplicateItemInput } from "./actions/duplicate-item";
 import { duplicateItemCallback } from "./actions/duplicate-item";
 import type { MoveAndResizeItemInput } from "./actions/move-and-resize-item";
@@ -40,11 +40,7 @@ export const useItemActions = () => {
 
   const createItem = useCallback(
     (input: CreateItemInput) => {
-      const layoutFilter = idleScreenLayoutId
-        ? idleScreenLayoutId === currentLayoutId
-          ? { only: [currentLayoutId] }
-          : { except: [idleScreenLayoutId] }
-        : undefined;
+      const layoutFilter = getIdleScreenLayoutFilter(idleScreenLayoutId, currentLayoutId);
 
       return updateBoard(
         createItemCallback({ ...input, targetSectionId: input.targetSectionId ?? activeTabId, layoutFilter }),
