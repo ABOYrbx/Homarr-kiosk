@@ -11,15 +11,13 @@ import { BoardAdvancedFocusProvider } from "../advanced-focus/context";
 import { BoardItemContent } from "../items/item-content";
 import { getLogicalGridSize } from "../layout";
 import { BoardGridPortalHost } from "../sections/grid/grid-portal-host";
+import { toIdleBackgroundImage } from "./idle-background";
 import classes from "./idle-screen.module.css";
 import { resolveIdleItems } from "./idle-widgets-layout";
 
 const viewportPadding = 32;
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
-
-const toBackgroundImage = (value: string) =>
-  `url("${value.replace(/["\\\n\r]/g, (character) => encodeURIComponent(character))}")`;
 
 export const getIdleWidgetScale = ({ fitScale, userScale }: { fitScale: number; userScale: number }): number => {
   if (!Number.isFinite(fitScale) || !Number.isFinite(userScale)) return 1;
@@ -166,7 +164,7 @@ export const IdleWidgets = ({ layoutId }: { layoutId: string }) => {
               <div
                 aria-hidden="true"
                 className={frosted ? classes.widgetBackgroundFrosted : classes.widgetBackground}
-                style={{ backgroundImage: toBackgroundImage(background) }}
+                style={{ backgroundImage: toIdleBackgroundImage(background) }}
               />
               <div aria-hidden="true" className={classes.widgetBackgroundScrim} />
             </>

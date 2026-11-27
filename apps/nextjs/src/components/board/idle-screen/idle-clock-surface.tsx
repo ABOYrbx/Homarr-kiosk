@@ -8,6 +8,7 @@ import type { Board } from "@homarr/boards/layout-data";
 import { WeatherIcon } from "@homarr/widgets/weather-icon";
 
 import { AnalogClock } from "./analog-clock";
+import { toIdleBackgroundImage } from "./idle-background";
 import classes from "./idle-screen.module.css";
 
 interface IdleWeatherSettings {
@@ -21,6 +22,8 @@ interface IdleWeatherSettings {
 interface IdleClockSurfaceSettings extends IdleWeatherSettings {
   idleScreenShowClockSeconds: boolean;
   idleScreenClockColor: string;
+  idleScreenWidgetBackground: string | null;
+  idleScreenWidgetBackgroundFrost: boolean;
 }
 
 const defaultIdleWeatherLocation = {
@@ -66,13 +69,22 @@ export const getIdleWeatherInput = (board: Board, settings: IdleWeatherSettings)
 export const IdleClockSurface = ({ board, settings }: { board: Board; settings: IdleClockSurfaceSettings }) => {
   const input = getIdleWeatherInput(board, settings);
   const { data: weather } = clientApi.widget.weather.atLocation.useQuery(input);
+  const background = settings.idleScreenWidgetBackground?.trim() || null;
+  const frosted = settings.idleScreenWidgetBackgroundFrost ?? true;
 
   return (
     <Box
       className={classes.clockSurface}
       style={{ "--idle-clock-color": settings.idleScreenClockColor } as CSSProperties}
     >
-      <Box className={classes.clockFrost} aria-hidden="true" />
+      {background && (
+        <Box
+          aria-hidden="true"
+          className={frosted ? classes.clockBackgroundFrosted : classes.clockBackground}
+          style={{ backgroundImage: toIdleBackgroundImage(background) }}
+        />
+      )}
+      <Box className={background && !frosted ? classes.clockScrim : classes.clockFrost} aria-hidden="true" />
       <Stack className={classes.clockContent} align="center" gap="xl">
         {weather && (
           <Group align="center" gap="md" wrap="nowrap">
