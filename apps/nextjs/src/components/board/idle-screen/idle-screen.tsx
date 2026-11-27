@@ -122,12 +122,7 @@ export const IdleScreen = ({ board, tourActive = false }: { board: IdleScreenSet
         <IdleCarousel
           initialLayer="clock"
           musicPane={
-            <MusicPane
-              integrationId={integrationId}
-              entityId={entityId}
-              showClockSeconds={settings.idleScreenShowClockSeconds}
-              showLyrics={settings.idleScreenShowLyrics}
-            />
+            <MusicPane integrationId={integrationId} entityId={entityId} showLyrics={settings.idleScreenShowLyrics} />
           }
           clockPane={
             liveBoard ? (

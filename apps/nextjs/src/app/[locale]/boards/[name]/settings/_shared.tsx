@@ -5,9 +5,11 @@ import type { Board } from "../../_types";
 export const useSavePartialSettingsMutation = (board: Board) => {
   const utils = clientApi.useUtils();
   return clientApi.board.savePartialBoardSettings.useMutation({
-    onSettled() {
-      void utils.board.getBoardByName.invalidate({ name: board.name });
-      void utils.board.getHomeBoard.invalidate();
+    async onSettled() {
+      await Promise.all([
+        utils.board.getBoardByName.refetch({ name: board.name }),
+        utils.board.getHomeBoard.invalidate(),
+      ]);
     },
   });
 };
@@ -15,9 +17,11 @@ export const useSavePartialSettingsMutation = (board: Board) => {
 export const useSaveLayoutsMutation = (board: Board) => {
   const utils = clientApi.useUtils();
   return clientApi.board.saveLayouts.useMutation({
-    onSettled() {
-      void utils.board.getBoardByName.invalidate({ name: board.name });
-      void utils.board.getHomeBoard.invalidate();
+    async onSettled() {
+      await Promise.all([
+        utils.board.getBoardByName.refetch({ name: board.name }),
+        utils.board.getHomeBoard.invalidate(),
+      ]);
     },
   });
 };

@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ActionIcon, Alert, Button, ColorInput, Stack, Text, TextInput } from "@mantine/core";
-import { IconSearch } from "@tabler/icons-react";
+import { ActionIcon, Alert, Button, ColorInput, Group, Stack, Text, TextInput } from "@mantine/core";
+import { IconSearch, IconX } from "@tabler/icons-react";
 
 import type { RouterOutputs } from "@homarr/api";
 import { clientApi } from "@homarr/api/client";
@@ -57,6 +57,12 @@ const IdleWeatherLocationInput = ({ form, board }: Props) => {
     setSubmittedQuery(null);
   };
 
+  const clearLocation = () => {
+    form.setFieldValue("idleScreenWeatherLocation", null);
+    setSearchInput("");
+    setSubmittedQuery(null);
+  };
+
   return (
     <Stack gap="xs">
       <TextInput
@@ -75,17 +81,31 @@ const IdleWeatherLocationInput = ({ form, board }: Props) => {
         }}
         loading={submittedQuery !== null && isPending}
         rightSectionPointerEvents="all"
+        rightSectionWidth={56}
         rightSection={
-          <ActionIcon
-            type="button"
-            variant="subtle"
-            size="input-sm"
-            aria-label={t("field.idleScreenWeatherLocation.search")}
-            disabled={!searchInput.trim()}
-            onClick={search}
-          >
-            <IconSearch size={18} />
-          </ActionIcon>
+          <Group gap={4} wrap="nowrap" justify="flex-end">
+            {(selectedLocationName || searchInput) && (
+              <ActionIcon
+                type="button"
+                variant="subtle"
+                size="input-sm"
+                aria-label={t("field.idleScreenWeatherLocation.clear")}
+                onClick={clearLocation}
+              >
+                <IconX size={18} />
+              </ActionIcon>
+            )}
+            <ActionIcon
+              type="button"
+              variant="subtle"
+              size="input-sm"
+              aria-label={t("field.idleScreenWeatherLocation.search")}
+              disabled={!searchInput.trim()}
+              onClick={search}
+            >
+              <IconSearch size={18} />
+            </ActionIcon>
+          </Group>
         }
       />
 

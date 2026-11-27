@@ -4,17 +4,16 @@ import type { PointerEvent as ReactPointerEvent, ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 
 import classes from "./idle-screen.module.css";
+import { isIdleBackgroundTarget, isIdleInteractiveTarget } from "./carousel-gesture";
 import { classifyIdlePointer, getIdleLayerTarget, isIdleNavigationEvent } from "./carousel";
 import type { IdleLayer } from "./carousel";
 
 interface PointerStart {
   pointerId: number;
+  target: EventTarget | null;
   x: number;
   y: number;
 }
-
-const isEditableTarget = (target: EventTarget | null): boolean =>
-  target instanceof HTMLElement && (target.isContentEditable || Boolean(target.closest("input, textarea, select")));
 
 export const IdleCarousel = ({
   initialLayer,
@@ -34,13 +33,12 @@ export const IdleCarousel = ({
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.defaultPrevented) return;
       if (event.key === "Escape") {
         event.preventDefault();
         onClose();
         return;
       }
-      if (isEditableTarget(event.target) || !isIdleNavigationEvent(event)) return;
+      if (event.defaultPrevented || isIdleInteractiveTarget(event.target) || !isIdleNavigationEvent(event)) return;
       if (event.key === "ArrowLeft") {
         event.preventDefault();
         setActiveLayer((current) => getIdleLayerTarget(current, -1));
@@ -50,23 +48,32 @@ export const IdleCarousel = ({
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown, true);
+    return () => window.removeEventListener("keydown", handleKeyDown, true);
   }, [onClose]);
 
   const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (!event.isPrimary || event.button !== 0) return;
-    pointerStart.current = { pointerId: event.pointerId, x: event.clientX, y: event.clientY };
+    if (!event.isPrimary || event.button !== 0) {
+      pointerStart.current = null;
+      return;
+    }
+    pointerStart.current = {
+      pointerId: event.pointerId,
+      target: event.target,
+      x: event.clientX,
+      y: event.clientY,
+    };
   };
 
   const handlePointerUp = (event: ReactPointerEvent<HTMLDivElement>) => {
     const start = pointerStart.current;
     if (!start || start.pointerId !== event.pointerId) return;
     pointerStart.current = null;
+    if (!isIdleBackgroundTarget(start.target)) return;
 
     const direction = classifyIdlePointer(event.clientX - start.x, event.clientY - start.y);
     if (direction === null) {
-      if (event.target instanceof Element && event.target.hasAttribute("data-idle-layer")) onClose();
+      onClose();
       return;
     }
     setActiveLayer((current) => getIdleLayerTarget(current, direction));

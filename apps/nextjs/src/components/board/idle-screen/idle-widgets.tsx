@@ -2,8 +2,10 @@
 
 import type { CSSProperties } from "react";
 import { useLayoutEffect, useMemo, useState } from "react";
+import { Center, Text } from "@mantine/core";
 
 import { useOptionalBoard } from "@homarr/boards/context";
+import { useI18n } from "@homarr/translation/client";
 
 import { BoardAdvancedFocusProvider } from "../advanced-focus/context";
 import { BoardItemContent } from "../items/item-content";
@@ -15,6 +17,7 @@ import { resolveIdleItems } from "./idle-widgets-layout";
 const viewportPadding = 32;
 
 export const IdleWidgets = ({ layoutId }: { layoutId: string }) => {
+  const t = useI18n("board");
   const board = useOptionalBoard();
   const items = useMemo(() => (board ? resolveIdleItems(board, layoutId) : []), [board, layoutId]);
   const [viewport, setViewport] = useState({ width: 0, height: 0 });
@@ -26,7 +29,15 @@ export const IdleWidgets = ({ layoutId }: { layoutId: string }) => {
     return () => window.removeEventListener("resize", update);
   }, []);
 
-  if (!board || !board.layouts.some((layout) => layout.id === layoutId) || items.length === 0) return null;
+  if (!board || !board.layouts.some((layout) => layout.id === layoutId) || items.length === 0) {
+    return (
+      <Center h="100%" p="xl">
+        <Text c="gray.4" size="lg" ta="center">
+          {t("idleScreen.widgets.empty")}
+        </Text>
+      </Center>
+    );
+  }
 
   const contentWidth = Math.max(1, ...items.map(({ item, x }) => x + getLogicalGridSize(item.width)));
   const contentHeight = Math.max(1, ...items.map(({ item, y }) => y + getLogicalGridSize(item.height)));
@@ -49,21 +60,24 @@ export const IdleWidgets = ({ layoutId }: { layoutId: string }) => {
   return (
     <BoardAdvancedFocusProvider>
       <BoardGridPortalHost>
-        <div className={classes.widgets} style={style}>
-          {items.map(({ item, x, y }) => (
-            <div
-              key={item.id}
-              className={classes.widgetSlot}
-              style={{
-                left: x,
-                top: y,
-                width: getLogicalGridSize(item.width),
-                height: getLogicalGridSize(item.height),
-              }}
-            >
-              <BoardItemContent item={item} />
-            </div>
-          ))}
+        <div className={classes.widgetsFrame}>
+          <div className={classes.widgets} style={style}>
+            {items.map(({ item, x, y }) => (
+              <div
+                key={item.id}
+                className={classes.widgetSlot}
+                data-idle-widget-slot=""
+                style={{
+                  left: x,
+                  top: y,
+                  width: getLogicalGridSize(item.width),
+                  height: getLogicalGridSize(item.height),
+                }}
+              >
+                <BoardItemContent item={item} />
+              </div>
+            ))}
+          </div>
         </div>
       </BoardGridPortalHost>
     </BoardAdvancedFocusProvider>

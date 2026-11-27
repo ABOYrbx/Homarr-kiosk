@@ -5,7 +5,6 @@ import { IconMusic } from "@tabler/icons-react";
 
 import { useI18n } from "@homarr/translation/client";
 
-import { AnalogClock } from "./analog-clock";
 import { NowPlaying } from "./now-playing";
 import { useNowPlaying } from "./use-now-playing";
 
@@ -40,19 +39,19 @@ const MusicPaneMessage = ({ message }: { message: string }) => (
 const ConfiguredMusicPane = ({
   integrationId,
   entityId,
-  showClockSeconds,
   showLyrics,
   emptyMessage,
+  loadingMessage,
 }: {
   integrationId: string;
   entityId: string;
-  showClockSeconds: boolean;
   showLyrics: boolean;
   emptyMessage: string;
+  loadingMessage: string;
 }) => {
   const { entity, isLoading } = useNowPlaying({ integrationId, entityId });
 
-  if (isLoading) return <AnalogClock showSeconds={showClockSeconds} />;
+  if (isLoading) return <MusicPaneMessage message={loadingMessage} />;
 
   const state = getMusicPaneState({
     integrationId,
@@ -68,12 +67,10 @@ const ConfiguredMusicPane = ({
 export const MusicPane = ({
   integrationId,
   entityId,
-  showClockSeconds,
   showLyrics,
 }: {
   integrationId: string | null;
   entityId: string | null;
-  showClockSeconds: boolean;
   showLyrics: boolean;
 }) => {
   const t = useI18n("board");
@@ -86,9 +83,9 @@ export const MusicPane = ({
     <ConfiguredMusicPane
       integrationId={integrationId}
       entityId={entityId}
-      showClockSeconds={showClockSeconds}
       showLyrics={showLyrics}
       emptyMessage={t("idleScreen.music.nothingPlaying")}
+      loadingMessage={t("idleScreen.music.loading")}
     />
   );
 };

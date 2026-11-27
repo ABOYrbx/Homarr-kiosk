@@ -18,12 +18,28 @@ describe("idle clock weather location", () => {
     ).toEqual({ latitude: 46.9, longitude: 7.4 });
   });
 
-  it("falls back to the first weather/clock widget location and tolerates none", () => {
+  it("falls back to the first weather/clock widget location and then to Paris", () => {
     expect(getIdleWeatherInput(boardWithWeatherWidget, { idleScreenWeatherLocation: null })).toEqual({
       latitude: 48.85,
       longitude: 2.35,
     });
-    expect(getIdleWeatherInput(board, { idleScreenWeatherLocation: null })).toBeNull();
+    expect(getIdleWeatherInput(board, { idleScreenWeatherLocation: null })).toEqual({
+      latitude: 48.85341,
+      longitude: 2.3488,
+    });
+  });
+
+  it("uses the Paris fallback for invalid configured coordinates", () => {
+    expect(
+      getIdleWeatherInput(board, {
+        idleScreenWeatherLocation: { latitude: Number.NaN, longitude: 2.3488 },
+      }),
+    ).toEqual({ latitude: 48.85341, longitude: 2.3488 });
+    expect(
+      getIdleWeatherInput(board, {
+        idleScreenWeatherLocation: { latitude: 91, longitude: 2.3488 },
+      }),
+    ).toEqual({ latitude: 48.85341, longitude: 2.3488 });
   });
 
   it("falls back to a clock widget weatherLocation", () => {
@@ -42,7 +58,7 @@ describe("idle clock weather location", () => {
     });
   });
 
-  it("does not skip an invalid first candidate for a later valid location", () => {
+  it("does not skip an invalid first candidate and uses the deterministic fallback", () => {
     const boardWithInvalidFirstLocation = {
       items: [
         {
@@ -56,6 +72,9 @@ describe("idle clock weather location", () => {
       ],
     } as unknown as Board;
 
-    expect(getIdleWeatherInput(boardWithInvalidFirstLocation, { idleScreenWeatherLocation: null })).toBeNull();
+    expect(getIdleWeatherInput(boardWithInvalidFirstLocation, { idleScreenWeatherLocation: null })).toEqual({
+      latitude: 48.85341,
+      longitude: 2.3488,
+    });
   });
 });

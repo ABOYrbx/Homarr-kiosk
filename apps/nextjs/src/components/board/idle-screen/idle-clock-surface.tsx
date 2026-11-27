@@ -2,7 +2,6 @@
 
 import type { CSSProperties } from "react";
 import { Box, Group, Stack, Text } from "@mantine/core";
-import { skipToken } from "@tanstack/react-query";
 
 import { clientApi } from "@homarr/api/client";
 import type { Board } from "@homarr/boards/layout-data";
@@ -24,13 +23,25 @@ interface IdleClockSurfaceSettings extends IdleWeatherSettings {
   idleScreenClockColor: string;
 }
 
+const defaultIdleWeatherLocation = {
+  name: "Paris",
+  latitude: 48.85341,
+  longitude: 2.3488,
+} as const;
+
 const isCoordinateInput = (value: unknown): value is { latitude: number; longitude: number } =>
   typeof value === "object" &&
   value !== null &&
   "latitude" in value &&
   typeof value.latitude === "number" &&
+  Number.isFinite(value.latitude) &&
+  value.latitude >= -90 &&
+  value.latitude <= 90 &&
   "longitude" in value &&
-  typeof value.longitude === "number";
+  typeof value.longitude === "number" &&
+  Number.isFinite(value.longitude) &&
+  value.longitude >= -180 &&
+  value.longitude <= 180;
 
 export const getIdleWeatherInput = (board: Board, settings: IdleWeatherSettings) => {
   const configuredLocation = settings.idleScreenWeatherLocation;
@@ -39,7 +50,9 @@ export const getIdleWeatherInput = (board: Board, settings: IdleWeatherSettings)
   }
 
   const firstCandidate = board.items.find((item) => item.kind === "weather" || item.kind === "clock");
-  if (!firstCandidate) return null;
+  if (!firstCandidate) {
+    return { latitude: defaultIdleWeatherLocation.latitude, longitude: defaultIdleWeatherLocation.longitude };
+  }
 
   const location =
     firstCandidate.kind === "weather" ? firstCandidate.options.location : firstCandidate.options.weatherLocation;
@@ -47,14 +60,12 @@ export const getIdleWeatherInput = (board: Board, settings: IdleWeatherSettings)
     return { latitude: location.latitude, longitude: location.longitude };
   }
 
-  return null;
+  return { latitude: defaultIdleWeatherLocation.latitude, longitude: defaultIdleWeatherLocation.longitude };
 };
 
 export const IdleClockSurface = ({ board, settings }: { board: Board; settings: IdleClockSurfaceSettings }) => {
   const input = getIdleWeatherInput(board, settings);
-  const { data: weather } = clientApi.widget.weather.atLocation.useQuery(input ?? skipToken, {
-    enabled: input !== null,
-  });
+  const { data: weather } = clientApi.widget.weather.atLocation.useQuery(input);
 
   return (
     <Box

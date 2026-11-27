@@ -6761,7 +6761,11 @@
       "maker": "Maker: {name}",
       "music": {
         "notConfigured": "No music player configured.",
-        "nothingPlaying": "Nothing is playing."
+        "nothingPlaying": "Nothing is playing.",
+        "loading": "Loading music player…"
+      },
+      "widgets": {
+        "empty": "No widgets are configured for the idle screen."
       }
     },
     "emptyState": {
@@ -7068,6 +7072,7 @@
         "description": "Search for a location for the weather icon and temperature",
         "search": "Search",
         "select": "Select",
+        "clear": "Clear weather location",
         "unknown": "Unknown"
       },
       "idleScreenClockColor": {

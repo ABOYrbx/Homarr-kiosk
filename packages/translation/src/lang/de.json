@@ -6761,7 +6761,11 @@
       "maker": "Ersteller: {name}",
       "music": {
         "notConfigured": "Kein Musikplayer konfiguriert.",
-        "nothingPlaying": "Es wird nichts abgespielt."
+        "nothingPlaying": "Es wird nichts abgespielt.",
+        "loading": "Musikplayer wird geladen…"
+      },
+      "widgets": {
+        "empty": "Für den Leerlaufbildschirm sind keine Widgets konfiguriert."
       }
     },
     "emptyState": {
@@ -7068,6 +7072,7 @@
         "description": "Standort für Wetter-Icon und Temperatur suchen",
         "search": "Suchen",
         "select": "Auswählen",
+        "clear": "Wetterstandort löschen",
         "unknown": "Unbekannt"
       },
       "idleScreenClockColor": {
