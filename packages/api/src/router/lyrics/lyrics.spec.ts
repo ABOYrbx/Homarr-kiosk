@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { TtlLruCache } from "./cache";
 import { createCacheKey, findExactSearchId, isDurationMatch, parseTrackId } from "./match";
-import { normalizeSpicyLyrics } from "./normalize";
+import { normalizeLrclibRecord, normalizeSpicyLyrics } from "./normalize";
 
 const syllable = (text: string, start: number, end: number, isPartOfWord = false) => ({
   Text: text,
@@ -202,5 +202,75 @@ describe("LRCLIB helpers", () => {
     vi.setSystemTime(new Date("2026-01-01T00:00:01Z"));
     expect(cache.get("a")).toBeUndefined();
     vi.useRealTimers();
+  });
+});
+
+describe("normalizeLrclibRecord", () => {
+  it("parses word-synced lyricsfile timings into seconds", () => {
+    const result = normalizeLrclibRecord({
+      id: 1,
+      trackName: "T",
+      artistName: "A",
+      albumName: null,
+      duration: 200,
+      instrumental: false,
+      hasWordSync: true,
+      plainLyrics: null,
+      syncedLyrics: null,
+      lyricsfile:
+        "version: '1.0'\nlines:\n- text: Hello world\n  start_ms: 10180\n  end_ms: 15740\n  words:\n  - text: 'Hello '\n    start_ms: 10180\n  - text: world\n    start_ms: 12000",
+    });
+    expect(result?.type).toBe("syllable");
+    expect(result?.lines[0]).toMatchObject({ start: 10.18, end: 15.74 });
+    expect(result?.lines[0]?.words[0]).toEqual({ text: "Hello ", start: 10.18, end: 12 });
+  });
+  it("falls back to LRC lines and then plain lyrics", () => {
+    const base = {
+      id: 2,
+      trackName: "T",
+      artistName: "A",
+      albumName: null,
+      duration: 200,
+      instrumental: false,
+      hasWordSync: false,
+      lyricsfile: "",
+    };
+    expect(
+      normalizeLrclibRecord({ ...base, plainLyrics: null, syncedLyrics: "[00:17.12] First\n[00:20.00] Second" })
+        ?.lines[0],
+    ).toMatchObject({ start: 17.12, end: 20 });
+    expect(normalizeLrclibRecord({ ...base, plainLyrics: "One\nTwo", syncedLyrics: null })?.type).toBe("static");
+  });
+  it("malformed YAML falls back to synced lyrics", () => {
+    const result = normalizeLrclibRecord({
+      id: 3,
+      trackName: "T",
+      artistName: "A",
+      albumName: null,
+      duration: 200,
+      instrumental: false,
+      hasWordSync: true,
+      plainLyrics: null,
+      syncedLyrics: "[00:01.00] Safe",
+      lyricsfile: "lines: [oops",
+    });
+    expect(result?.lines[0]?.words[0]?.text).toBe("Safe");
+  });
+  it("word end derives from next word", () => {
+    const result = normalizeLrclibRecord({
+      id: 4,
+      trackName: "T",
+      artistName: "A",
+      albumName: null,
+      duration: 200,
+      instrumental: false,
+      hasWordSync: true,
+      plainLyrics: null,
+      syncedLyrics: null,
+      lyricsfile:
+        "lines:\n- text: a b\n  start_ms: 1000\n  end_ms: 3000\n  words:\n  - text: a\n    start_ms: 1000\n  - text: b\n    start_ms: 2000",
+    });
+    expect(result?.lines[0]?.words[0]?.end).toBe(2);
+    expect(result?.lines[0]?.words[1]?.end).toBe(3);
   });
 });

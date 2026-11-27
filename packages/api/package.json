@@ -67,6 +67,7 @@
     "superjson": "catalog:",
     "trpc-to-openapi": "catalog:",
     "undici": "catalog:",
+    "yaml": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
