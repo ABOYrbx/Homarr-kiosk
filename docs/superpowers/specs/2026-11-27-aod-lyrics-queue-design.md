@@ -68,7 +68,7 @@ the household.
 
 - `packages/definitions/src/integration.ts`: add `musicAssistant` with
   `name: "Music Assistant"`, `httpAuth: { type: "adapter" }`,
-  `secretKinds: [["apiKey"]]`, `category: ["mediaService"]`,
+  `secretKinds: [["apiKey"]]`, `category: ["miscellaneous"]` (not `mediaService` — that category means a media server with streaming sessions and its request handler calls `getCurrentSessionsAsync`),
   `documentationSlug: "music-assistant"`, `defaultPort: 8095` and an icon URL
   from the existing dashboard-icons CDN. Add it to
   `integrationHttpUnavailableReasons` so generic HTTP requests are refused

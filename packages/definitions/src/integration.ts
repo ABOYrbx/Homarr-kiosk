@@ -669,7 +669,7 @@ export const integrationDefs = {
     name: "Music Assistant",
     secretKinds: [["apiKey"]],
     iconUrl: "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons@master/svg/music-assistant.svg",
-    category: ["mediaService"],
+    category: ["miscellaneous"],
     documentationSlug: "music-assistant",
     defaultPort: 8095,
   },
