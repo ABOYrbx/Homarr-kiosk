@@ -6,7 +6,7 @@ import { getIdleWeatherInput } from "./idle-clock-surface";
 
 const board = { items: [] } as unknown as Board;
 const boardWithWeatherWidget = {
-  items: [{ kind: "weather", options: { location: { latitude: 48.85, longitude: 2.35 } } }],
+  items: [{ kind: "weather", options: { location: { name: "Paris", latitude: 48.85, longitude: 2.35 } } }],
 } as unknown as Board;
 
 describe("idle clock weather location", () => {
@@ -26,9 +26,14 @@ describe("idle clock weather location", () => {
     expect(getIdleWeatherInput(board, { idleScreenWeatherLocation: null })).toBeNull();
   });
 
-  it("falls back to a clock widget location", () => {
+  it("falls back to a clock widget weatherLocation", () => {
     const boardWithClockWidget = {
-      items: [{ kind: "clock", options: { location: { latitude: 52.52, longitude: 13.405 } } }],
+      items: [
+        {
+          kind: "clock",
+          options: { weatherLocation: { name: "Berlin", latitude: 52.52, longitude: 13.405 } },
+        },
+      ],
     } as unknown as Board;
 
     expect(getIdleWeatherInput(boardWithClockWidget, { idleScreenWeatherLocation: null })).toEqual({
@@ -37,11 +42,20 @@ describe("idle clock weather location", () => {
     });
   });
 
-  it("ignores widget locations without numeric coordinates", () => {
-    const boardWithInvalidLocation = {
-      items: [{ kind: "weather", options: { location: { latitude: "48.85", longitude: 2.35 } } }],
+  it("does not skip an invalid first candidate for a later valid location", () => {
+    const boardWithInvalidFirstLocation = {
+      items: [
+        {
+          kind: "clock",
+          options: { weatherLocation: { name: "Berlin", latitude: "52.52", longitude: 13.405 } },
+        },
+        {
+          kind: "weather",
+          options: { location: { name: "Paris", latitude: 48.85, longitude: 2.35 } },
+        },
+      ],
     } as unknown as Board;
 
-    expect(getIdleWeatherInput(boardWithInvalidLocation, { idleScreenWeatherLocation: null })).toBeNull();
+    expect(getIdleWeatherInput(boardWithInvalidFirstLocation, { idleScreenWeatherLocation: null })).toBeNull();
   });
 });

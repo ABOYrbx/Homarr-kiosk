@@ -38,12 +38,13 @@ export const getIdleWeatherInput = (board: Board, settings: IdleWeatherSettings)
     return { latitude: configuredLocation.latitude, longitude: configuredLocation.longitude };
   }
 
-  for (const item of board.items) {
-    if (item.kind !== "weather" && item.kind !== "clock") continue;
-    const location = (item.options as { location?: unknown }).location;
-    if (isCoordinateInput(location)) {
-      return { latitude: location.latitude, longitude: location.longitude };
-    }
+  const firstCandidate = board.items.find((item) => item.kind === "weather" || item.kind === "clock");
+  if (!firstCandidate) return null;
+
+  const location =
+    firstCandidate.kind === "weather" ? firstCandidate.options.location : firstCandidate.options.weatherLocation;
+  if (isCoordinateInput(location)) {
+    return { latitude: location.latitude, longitude: location.longitude };
   }
 
   return null;
