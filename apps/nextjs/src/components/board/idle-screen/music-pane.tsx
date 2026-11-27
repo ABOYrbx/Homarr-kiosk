@@ -61,7 +61,7 @@ const ConfiguredMusicPane = ({
   });
 
   if (state !== "ready" || !entity) return <MusicPaneMessage message={emptyMessage} />;
-  return <NowPlaying entity={entity} showLyrics={showLyrics} />;
+  return <NowPlaying entity={entity} showLyrics={showLyrics} integrationId={integrationId} entityId={entityId} />;
 };
 
 export const MusicPane = ({

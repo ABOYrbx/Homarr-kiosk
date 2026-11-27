@@ -395,6 +395,10 @@
   font-variant-numeric: tabular-nums;
 }
 
+.playbackControls {
+  margin-top: clamp(0.75rem, 1.5vh, 1.25rem);
+}
+
 /* Lyrics ---------------------------------------------------------------- */
 
 .lyricsPanel {

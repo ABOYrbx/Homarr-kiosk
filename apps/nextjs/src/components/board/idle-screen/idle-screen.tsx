@@ -83,7 +83,7 @@ const MusicIdleScreen = ({
   const view = decideIdleView({ mode, hasTrack, isPlaying: entity?.state === "playing" });
 
   if (isLoading || !entity || view === "clock") return <AnalogClock showSeconds={showClockSeconds} />;
-  return <NowPlaying entity={entity} showLyrics={showLyrics} />;
+  return <NowPlaying entity={entity} showLyrics={showLyrics} integrationId={integrationId} entityId={entityId} />;
 };
 
 export { MusicIdleScreen };

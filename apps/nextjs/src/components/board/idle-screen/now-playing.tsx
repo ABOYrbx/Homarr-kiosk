@@ -1,21 +1,53 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { IconMusic } from "@tabler/icons-react";
+import { ActionIcon, Group } from "@mantine/core";
+import {
+  IconMusic,
+  IconPlayerPause,
+  IconPlayerPlay,
+  IconPlayerSkipBack,
+  IconPlayerSkipForward,
+} from "@tabler/icons-react";
 
+import { clientApi } from "@homarr/api/client";
 import type { SmartHomeEntity } from "@homarr/integrations/types";
+import { supportsSmartHomeAction } from "@homarr/integrations/types";
 import { useI18n } from "@homarr/translation/client";
 
 import classes from "./idle-screen.module.css";
 import { LyricsPanel } from "./lyrics-panel";
+
+const controlVars = () => ({
+  root: {
+    "--ai-bg": "rgb(255 255 255 / 8%)",
+    "--ai-hover": "rgb(255 255 255 / 18%)",
+    "--ai-color": "rgb(255 255 255 / 88%)",
+    "--ai-hover-color": "#fff",
+  },
+});
 import type { LyricsViewData } from "./lyrics-view";
 import { formatDuration } from "./playback";
 import { useLyrics } from "./use-lyrics";
 import { usePlaybackClock } from "./use-playback-clock";
 
-export const NowPlaying = ({ entity, showLyrics }: { entity: SmartHomeEntity; showLyrics: boolean }) => {
+export const NowPlaying = ({
+  entity,
+  showLyrics,
+  integrationId,
+  entityId,
+}: {
+  entity: SmartHomeEntity;
+  showLyrics: boolean;
+  integrationId: string;
+  entityId: string;
+}) => {
   const t = useI18n("board");
   const [imageFailed, setImageFailed] = useState(false);
+  const { mutate: executeAction } = clientApi.widget.smartHome.executeAction.useMutation();
+  const run = (action: "mediaPrevious" | "mediaPlayPause" | "mediaNext") =>
+    executeAction({ integrationId, entityId, action });
+  const playing = entity.state === "playing";
   const attributes = entity.attributes;
   const title = attributes.mediaTitle?.trim() || entity.name;
   const artist = attributes.mediaArtist?.trim() || "";
@@ -108,6 +140,45 @@ export const NowPlaying = ({ entity, showLyrics }: { entity: SmartHomeEntity; sh
                 {duration !== undefined && <span>{formatDuration(duration)}</span>}
               </div>
             </div>
+            <Group className={classes.playbackControls} gap="sm" justify="center" wrap="nowrap">
+              <ActionIcon
+                variant="subtle"
+                size={54}
+                radius="xl"
+                vars={controlVars}
+                aria-label={t("idleScreen.previousTrack")}
+                disabled={!supportsSmartHomeAction(entity, { type: "mediaPrevious" })}
+                onClick={() => run("mediaPrevious")}
+              >
+                <IconPlayerSkipBack size={26} fill="currentColor" />
+              </ActionIcon>
+              <ActionIcon
+                variant="subtle"
+                size={64}
+                radius="xl"
+                vars={controlVars}
+                aria-label={t("idleScreen.playPause")}
+                disabled={!supportsSmartHomeAction(entity, { type: "mediaPlayPause" })}
+                onClick={() => run("mediaPlayPause")}
+              >
+                {playing ? (
+                  <IconPlayerPause size={30} fill="currentColor" />
+                ) : (
+                  <IconPlayerPlay size={30} fill="currentColor" />
+                )}
+              </ActionIcon>
+              <ActionIcon
+                variant="subtle"
+                size={54}
+                radius="xl"
+                vars={controlVars}
+                aria-label={t("idleScreen.nextTrack")}
+                disabled={!supportsSmartHomeAction(entity, { type: "mediaNext" })}
+                onClick={() => run("mediaNext")}
+              >
+                <IconPlayerSkipForward size={26} fill="currentColor" />
+              </ActionIcon>
+            </Group>
           </div>
         </div>
 
