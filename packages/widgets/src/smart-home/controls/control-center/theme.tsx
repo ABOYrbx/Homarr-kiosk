@@ -39,26 +39,21 @@ export const getTheme = (entity: HaEntity, palette: SmartHomeControlPalette): En
   const unavailable = isUnavailable(entity);
   const rgb = entity.domain === "light" && entity.state === "on" ? entity.attributes.rgbColor : undefined;
   const lightColor = rgb ? `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})` : null;
-  const shared = { palette, active, unavailable, Icon: getEntityIcon(entity) };
-
-  if (palette === "boring") {
-    return {
-      ...shared,
-      accent: "var(--mantine-primary-color-filled)",
-      onAccent: "var(--mantine-primary-color-contrast)",
-      swatch: lightColor,
-      tinted: false,
-    };
-  }
-
   const colorName = getStateColor(entity);
   const dark = rgb ? luminance(rgb) > 0.55 : darkOnColors.has(colorName);
+  const colorful = palette === "colorful";
+
+  // The instance/board primary colour is a branding token, not an entity colour:
+  // using it here turns every control red (or whatever the theme primary is).
   return {
-    ...shared,
+    palette,
+    active,
+    unavailable,
+    Icon: getEntityIcon(entity),
     accent: lightColor ?? `var(--mantine-color-${colorName}-filled)`,
     onAccent: dark ? darkInk : "#fff",
-    swatch: null,
-    tinted: active && !untintedDomains.has(entity.domain),
+    swatch: colorful ? null : lightColor,
+    tinted: colorful && active && !untintedDomains.has(entity.domain),
   };
 };
 
