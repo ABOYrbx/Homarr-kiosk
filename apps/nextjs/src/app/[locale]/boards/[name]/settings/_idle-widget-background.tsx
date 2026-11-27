@@ -33,7 +33,7 @@ export const IdleWidgetBackgroundSettings = ({ form }: Props) => {
   const images = medias.data?.items.filter((media) => media.contentType.startsWith("image/")) ?? [];
 
   return (
-    <Group wrap="nowrap" gap="xs" align="start">
+    <Group wrap="nowrap" gap="xs" align="flex-end">
       <Autocomplete
         flex={1}
         leftSection={
@@ -94,7 +94,7 @@ export const IdleWidgetBackgroundSettings = ({ form }: Props) => {
           }}
         >
           {({ onClick, loading }) => (
-            <ActionIcon onClick={onClick} loading={loading} mt={24} size={36} variant="default">
+            <ActionIcon onClick={onClick} loading={loading} size={36} variant="default">
               <IconUpload size={16} stroke={1.5} />
             </ActionIcon>
           )}

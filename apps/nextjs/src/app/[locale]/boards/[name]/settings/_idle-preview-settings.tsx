@@ -172,6 +172,7 @@ export const IdlePreviewSettings = ({ form, board }: Props) => {
         <Slider
           thumbLabel={formatWidgetScale(widgetScale)}
           mt="xs"
+          mb="sm"
           min={0.5}
           max={2}
           step={0.05}
