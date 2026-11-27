@@ -68,6 +68,8 @@ const PARTIAL_FORM_KEYS = [
   "idleScreenMediaPlayerEntityId",
   "idleScreenShowClockSeconds",
   "idleScreenShowLyrics",
+  "idleScreenWeatherLocation",
+  "idleScreenClockColor",
 ] as const;
 
 const buildInitialValues = (board: Board): FormValues => ({
@@ -94,6 +96,8 @@ const buildInitialValues = (board: Board): FormValues => ({
   idleScreenMediaPlayerEntityId: board.idleScreenMediaPlayerEntityId,
   idleScreenShowClockSeconds: board.idleScreenShowClockSeconds,
   idleScreenShowLyrics: board.idleScreenShowLyrics,
+  idleScreenWeatherLocation: board.idleScreenWeatherLocation,
+  idleScreenClockColor: board.idleScreenClockColor,
   layouts: normalizeMobileLayoutGutters(board.layouts),
 });
 

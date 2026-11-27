@@ -91,6 +91,8 @@ const normalizeFormValues = (
     idleScreenMediaPlayerEntityId: values.idleScreenMediaPlayerEntityId,
     idleScreenShowClockSeconds: values.idleScreenShowClockSeconds,
     idleScreenShowLyrics: values.idleScreenShowLyrics,
+    idleScreenWeatherLocation: values.idleScreenWeatherLocation,
+    idleScreenClockColor: values.idleScreenClockColor,
   };
 };
 
