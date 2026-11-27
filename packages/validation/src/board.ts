@@ -90,6 +90,7 @@ export const boardSavePartialSettingsSchema = z
     idleScreenMediaPlayerEntityId: mediaPlayerEntityIdSchema,
     idleScreenShowClockSeconds: z.boolean(),
     idleScreenShowLyrics: z.boolean(),
+    idleScreenLyricsOffsetSeconds: z.number().min(-15).max(15),
     idleScreenWeatherLocation: z
       .object({
         name: z.string(),
@@ -109,6 +110,7 @@ export const boardSettingsSchema = boardSavePartialSettingsSchema.required().ext
   name: z.string(),
   idleScreenClockColor: hexColorSchema.default("#1b3a5c"),
   idleScreenWidgetScale: z.number().min(0.5).max(2).default(1),
+  idleScreenLyricsOffsetSeconds: z.number().min(-15).max(15).default(0),
   idleScreenWidgetBackgroundFrost: z.boolean().default(true),
 });
 

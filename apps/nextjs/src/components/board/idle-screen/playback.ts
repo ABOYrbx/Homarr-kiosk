@@ -117,6 +117,14 @@ export const formatDuration = (seconds: number | null | undefined): string => {
 };
 
 /**
+ * Shift only the position fed to the lyrics view. A positive offset delays
+ * the highlight (earlier position), a negative one advances it. A missing
+ * playback position stays missing.
+ */
+export const offsetLyricsPosition = (position: number | null, offsetSeconds: number): number | null =>
+  position === null ? null : position - offsetSeconds;
+
+/**
  * Mode decision for the idle screen. A loaded track stays visible in the music
  * layer even while paused; the carousel decides when to leave that layer.
  */

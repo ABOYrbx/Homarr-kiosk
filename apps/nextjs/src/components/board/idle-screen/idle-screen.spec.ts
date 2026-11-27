@@ -9,6 +9,7 @@ import {
   decideIdleView,
   formatDuration,
   isBackwardSeek,
+  offsetLyricsPosition,
   resolvePositionAnchorAt,
 } from "./playback";
 
@@ -132,6 +133,20 @@ describe("playback position", () => {
     expect(formatDuration(65.8)).toBe("1:05");
     expect(formatDuration(3661)).toBe("1:01:01");
     expect(formatDuration(undefined)).toBe("0:00");
+  });
+});
+
+describe("lyrics timing offset", () => {
+  it("delays lyrics by subtracting a positive offset", () => {
+    expect(offsetLyricsPosition(50, 3)).toBe(47);
+  });
+
+  it("advances lyrics by subtracting a negative offset", () => {
+    expect(offsetLyricsPosition(50, -3)).toBe(53);
+  });
+
+  it("keeps a missing position missing", () => {
+    expect(offsetLyricsPosition(null, 3)).toBeNull();
   });
 });
 

@@ -99,6 +99,15 @@ describe("boardSavePartialSettingsSchema", () => {
     expect(() => boardSavePartialSettingsSchema.parse({ idleScreenWidgetScale: 0.4 })).toThrow();
     expect(() => boardSavePartialSettingsSchema.parse({ idleScreenWidgetScale: 2.1 })).toThrow();
   });
+
+  it("accepts a lyrics timing offset within -15 to 15 seconds and defaults to zero", () => {
+    expect(boardSavePartialSettingsSchema.parse({ idleScreenLyricsOffsetSeconds: -2.5 })).toMatchObject({
+      idleScreenLyricsOffsetSeconds: -2.5,
+    });
+    expect(() => boardSavePartialSettingsSchema.parse({ idleScreenLyricsOffsetSeconds: 16 })).toThrow();
+    expect(() => boardSavePartialSettingsSchema.parse({ idleScreenLyricsOffsetSeconds: -16 })).toThrow();
+    expect(boardSettingsSchema.shape.idleScreenLyricsOffsetSeconds.parse(undefined)).toBe(0);
+  });
 });
 
 describe("section behavior validation", () => {
