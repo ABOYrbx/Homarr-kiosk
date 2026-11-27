@@ -10,8 +10,8 @@ import { useI18n } from "@homarr/translation/client";
 
 import { AnalogClock } from "./analog-clock";
 import classes from "./idle-screen.module.css";
+import { IdleCarousel } from "./idle-carousel";
 import { IdleWidgets } from "./idle-widgets";
-import { resolveIdleItems } from "./idle-widgets-layout";
 import { NowPlaying } from "./now-playing";
 import type { IdleScreenMode } from "./playback";
 import { decideIdleView } from "./playback";
@@ -91,7 +91,7 @@ export const IdleScreen = ({ board, tourActive = false }: { board: IdleScreenSet
   // Read the live board so saved setting changes take effect without a reload.
   const liveBoard = useOptionalBoard();
   const settings: IdleScreenSettings = liveBoard ?? board;
-  const { previewOpen } = useIdleScreenPreview();
+  const { previewOpen, closePreview } = useIdleScreenPreview();
   const timerOpen = useIdleScreen({
     enabled: settings.idleScreenEnabled && !isEditMode && !tourActive && !onSettingsPage,
     timeoutMinutes: settings.idleScreenTimeoutMinutes,
@@ -104,42 +104,30 @@ export const IdleScreen = ({ board, tourActive = false }: { board: IdleScreenSet
 
   const integrationId = settings.idleScreenHomeAssistantIntegrationId;
   const entityId = settings.idleScreenMediaPlayerEntityId;
-  // In widgets mode without a widget layout the view is the clock, so mounting the
-  // music screen (and its Home Assistant query) would be pointless polling.
-  const canShowMusic =
-    settings.idleScreenMode !== "clock" && settings.idleScreenMode !== "widgets" && Boolean(integrationId && entityId);
   const idleLayoutId = settings.idleScreenLayoutId;
-  const hasWidgetLayout = Boolean(
-    liveBoard &&
-    idleLayoutId &&
-    liveBoard.layouts.some((layout) => layout.id === idleLayoutId) &&
-    resolveIdleItems(liveBoard, idleLayoutId).length > 0,
-  );
-  // Playback state stays owned by MusicIdleScreen; only the widgets branch is
-  // decided here, independently of whether a track is playing.
-  const view = decideIdleView({
-    mode: settings.idleScreenMode,
-    hasTrack: false,
-    isPlaying: false,
-    hasWidgetLayout,
-  });
 
   return (
     <Portal>
       <div className={classes.overlay} role="region" aria-label={t("idleScreen.title")} data-idle-screen="true">
-        {view === "widgets" ? (
-          <IdleWidgets layoutId={idleLayoutId ?? ""} />
-        ) : canShowMusic ? (
-          <MusicIdleScreen
-            integrationId={integrationId as string}
-            entityId={entityId as string}
-            mode={settings.idleScreenMode}
-            showClockSeconds={settings.idleScreenShowClockSeconds}
-            showLyrics={settings.idleScreenShowLyrics}
-          />
-        ) : (
-          <AnalogClock showSeconds={settings.idleScreenShowClockSeconds} />
-        )}
+        <IdleCarousel
+          initialLayer="clock"
+          musicPane={
+            integrationId && entityId ? (
+              <MusicIdleScreen
+                integrationId={integrationId}
+                entityId={entityId}
+                mode={settings.idleScreenMode}
+                showClockSeconds={settings.idleScreenShowClockSeconds}
+                showLyrics={settings.idleScreenShowLyrics}
+              />
+            ) : (
+              <AnalogClock showSeconds={settings.idleScreenShowClockSeconds} />
+            )
+          }
+          clockPane={<AnalogClock showSeconds={settings.idleScreenShowClockSeconds} />}
+          widgetsPane={<IdleWidgets layoutId={idleLayoutId ?? ""} />}
+          onClose={closePreview}
+        />
       </div>
     </Portal>
   );

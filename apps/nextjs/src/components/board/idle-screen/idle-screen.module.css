@@ -22,6 +22,34 @@
   }
 }
 
+/* Carousel --------------------------------------------------------------- */
+
+.carousel {
+  width: 100%;
+  height: 100%;
+  touch-action: pan-y;
+}
+
+.layer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  opacity: 1;
+  transform: translateX(0);
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+@starting-style {
+  .layer {
+    opacity: 0;
+    transform: translateX(1rem);
+  }
+}
+
 /* Idle widget layout ---------------------------------------------------- */
 
 .widgets {
@@ -376,6 +404,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .overlay,
+  .layer,
   .lyricLine {
     animation: none;
     transition: none;
