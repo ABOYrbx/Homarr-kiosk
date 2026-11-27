@@ -82,6 +82,7 @@ Only after this user-need test passes, use these locations:
 ## Monorepo Commands
 
 - `bun run dev` — Next.js app only
+- `bun run --filter @homarr/websocket dev` — standalone tRPC WebSocket server on port 3001; needed in dev for live smart-home subscriptions (production starts it embedded via `instrumentation-node.ts`)
 - `bun run dev:cli -- dev` — run the developer CLI without installing a global binary
 - `bun run db:seed` — seed default database data explicitly
 - `bun run docker:dev:up` — start the Redis development service in the background

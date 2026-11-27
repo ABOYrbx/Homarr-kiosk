@@ -26,6 +26,20 @@ const getPageVisibility = () => typeof document === "undefined" || document.visi
 
 const usePageVisible = () => useSyncExternalStore(subscribeToVisibility, getPageVisibility, () => true);
 
+const isSameSmartHomeEntity = (left: SmartHomeEntity, right: SmartHomeEntity) =>
+  left.domain === right.domain &&
+  left.name === right.name &&
+  left.areaId === right.areaId &&
+  left.icon === right.icon &&
+  left.deviceClass === right.deviceClass &&
+  left.stateClass === right.stateClass &&
+  left.unit === right.unit &&
+  left.state === right.state &&
+  left.lastChanged === right.lastChanged &&
+  left.lastUpdated === right.lastUpdated &&
+  left.contextId === right.contextId &&
+  JSON.stringify(left.attributes) === JSON.stringify(right.attributes);
+
 export const mergeSmartHomePatch = (
   snapshot: SmartHomeSnapshot | undefined,
   patch: SmartHomeEntityPatch,
@@ -43,11 +57,9 @@ export const mergeSmartHomePatch = (
     if (!next) return [entity];
     changed.delete(entity.id);
     if (next.lastUpdated < entity.lastUpdated) return [entity];
-    if (next.lastUpdated === entity.lastUpdated) {
-      if (next.name === entity.name && next.areaId === entity.areaId && next.icon === entity.icon) return [entity];
-      touched = true;
-      return [{ ...entity, name: next.name, areaId: next.areaId, icon: next.icon }];
-    }
+    // Attribute-only updates (for example media position or title) can arrive
+    // with an unchanged lastUpdated. Only skip the patch when nothing changed.
+    if (next.lastUpdated === entity.lastUpdated && isSameSmartHomeEntity(next, entity)) return [entity];
     touched = true;
     return [next];
   });
@@ -100,15 +112,7 @@ export const useSmartHomeSnapshot = (
     for (const [id, seen] of patched.current) {
       const entity = current.get(id);
       if (!query.isFetching && patchedDuringFetch.current.delete(id)) continue;
-      if (
-        entity &&
-        !query.isFetching &&
-        (seen.lastUpdated < entity.lastUpdated ||
-          (seen.lastUpdated === entity.lastUpdated &&
-            seen.name === entity.name &&
-            seen.areaId === entity.areaId &&
-            seen.icon === entity.icon))
-      )
+      if (entity && !query.isFetching && (seen.lastUpdated < entity.lastUpdated || isSameSmartHomeEntity(seen, entity)))
         patched.current.delete(id);
       if (!entity && !query.isFetching && seen.lastUpdated < data.updatedAt) patched.current.delete(id);
     }
