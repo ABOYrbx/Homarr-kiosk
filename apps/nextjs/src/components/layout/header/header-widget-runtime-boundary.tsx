@@ -40,6 +40,8 @@ const headerWidgetBoard: RouterOutputs["board"]["getBoardByName"] = {
   idleScreenShowClockSeconds: false,
   idleScreenShowLyrics: true,
   idleScreenLyricsOffsetSeconds: 0,
+  idleScreenMusicAssistantIntegrationId: null,
+  idleScreenMusicAssistantQueueId: null,
   idleScreenWeatherLocation: null,
   idleScreenClockColor: "#1b3a5c",
   idleScreenWidgetScale: 1,

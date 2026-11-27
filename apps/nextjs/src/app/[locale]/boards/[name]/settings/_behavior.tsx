@@ -74,6 +74,10 @@ export const IdleScreenSettingsContent = ({ board, form, saveSettingsAsync }: Id
     () => integrations.filter((integration) => integration.kind === "homeAssistant"),
     [integrations],
   );
+  const musicAssistantIntegrations = useMemo(
+    () => integrations.filter((integration) => integration.kind === "musicAssistant"),
+    [integrations],
+  );
 
   const integrationId = form.values.idleScreenHomeAssistantIntegrationId;
   const { data: catalog } = clientApi.widget.smartHome.searchCatalog.useQuery(
@@ -92,6 +96,23 @@ export const IdleScreenSettingsContent = ({ board, form, saveSettingsAsync }: Id
       form.setFieldValue("idleScreenMediaPlayerEntityId", null);
     }
   }, [integrationId, catalog, mediaPlayers, form]);
+
+  const musicAssistantIntegrationId = form.values.idleScreenMusicAssistantIntegrationId;
+  const { data: queuesData } = clientApi.musicAssistant.queues.useQuery(
+    { integrationId: musicAssistantIntegrationId ?? "" },
+    { enabled: Boolean(musicAssistantIntegrationId), staleTime: 60_000 },
+  );
+  const musicAssistantQueues = useMemo(() => queuesData?.queues ?? [], [queuesData]);
+
+  useEffect(() => {
+    // Wait for the queue list before validating: an empty array while loading
+    // would silently clear a previously saved queue.
+    if (!musicAssistantIntegrationId || !queuesData) return;
+    const selected = form.values.idleScreenMusicAssistantQueueId;
+    if (selected && !musicAssistantQueues.some((queue) => queue.id === selected)) {
+      form.setFieldValue("idleScreenMusicAssistantQueueId", null);
+    }
+  }, [musicAssistantIntegrationId, queuesData, musicAssistantQueues, form]);
 
   const enabled = form.values.idleScreenEnabled;
   const lyricsOffset = form.values.idleScreenLyricsOffsetSeconds ?? 0;
@@ -176,6 +197,35 @@ export const IdleScreenSettingsContent = ({ board, form, saveSettingsAsync }: Id
             clearable
             searchable
             disabled={!integrationId}
+          />
+          {/* TODO: swap these literal strings for board.idleScreenMusicAssistant* messages when Task 5 adds the translations. */}
+          <Select
+            {...form.getInputProps("idleScreenMusicAssistantIntegrationId")}
+            label="Music Assistant integration"
+            description="Music Assistant integration providing the AOD queue. Its URL and token are configured in the integration, not here."
+            data={musicAssistantIntegrations.map((integration) => ({
+              value: integration.id,
+              label: integration.name,
+            }))}
+            clearable
+            searchable
+          />
+          {musicAssistantIntegrations.length === 0 && (
+            <Text size="sm" c="dimmed">
+              No Music Assistant integration available
+            </Text>
+          )}
+          <Select
+            {...form.getInputProps("idleScreenMusicAssistantQueueId")}
+            label="Music Assistant queue"
+            description="Queue or player shown in the AOD queue view"
+            data={musicAssistantQueues.map((queue) => ({
+              value: queue.id,
+              label: queue.name,
+            }))}
+            clearable
+            searchable
+            disabled={!musicAssistantIntegrationId}
           />
           <Switch
             label={t("field.idleScreenShowClockSeconds.label")}

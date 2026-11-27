@@ -32,6 +32,8 @@ export interface IdleScreenSettings {
   idleScreenShowClockSeconds: boolean;
   idleScreenShowLyrics: boolean;
   idleScreenLyricsOffsetSeconds: number;
+  idleScreenMusicAssistantIntegrationId: string | null;
+  idleScreenMusicAssistantQueueId: string | null;
 }
 
 type WakeLock = { release: () => Promise<void> };

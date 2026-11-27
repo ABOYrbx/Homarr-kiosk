@@ -307,6 +307,8 @@ export const boards = sqliteTable("board", {
   idleScreenWidgetBackground: text(),
   idleScreenWidgetBackgroundFrost: int({ mode: "boolean" }).default(true).notNull(),
   idleScreenLyricsOffsetSeconds: real().default(0).notNull(),
+  idleScreenMusicAssistantIntegrationId: text(),
+  idleScreenMusicAssistantQueueId: text(),
 });
 
 export const boardUserPermissions = sqliteTable(

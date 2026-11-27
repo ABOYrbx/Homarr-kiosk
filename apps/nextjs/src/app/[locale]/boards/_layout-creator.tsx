@@ -129,6 +129,8 @@ export const createBoardLayout = <TParams extends Params>({
                       idleScreenShowClockSeconds: initialBoard.idleScreenShowClockSeconds,
                       idleScreenShowLyrics: initialBoard.idleScreenShowLyrics,
                       idleScreenLyricsOffsetSeconds: initialBoard.idleScreenLyricsOffsetSeconds ?? 0,
+                      idleScreenMusicAssistantIntegrationId: initialBoard.idleScreenMusicAssistantIntegrationId ?? null,
+                      idleScreenMusicAssistantQueueId: initialBoard.idleScreenMusicAssistantQueueId ?? null,
                     }}
                     tourActive={shouldRunBoardTour}
                   />

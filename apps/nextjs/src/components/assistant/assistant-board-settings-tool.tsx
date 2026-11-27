@@ -92,6 +92,8 @@ const normalizeFormValues = (
     idleScreenShowClockSeconds: values.idleScreenShowClockSeconds,
     idleScreenShowLyrics: values.idleScreenShowLyrics,
     idleScreenLyricsOffsetSeconds: values.idleScreenLyricsOffsetSeconds,
+    idleScreenMusicAssistantIntegrationId: values.idleScreenMusicAssistantIntegrationId,
+    idleScreenMusicAssistantQueueId: values.idleScreenMusicAssistantQueueId,
     idleScreenWeatherLocation: values.idleScreenWeatherLocation,
     idleScreenClockColor: values.idleScreenClockColor,
     idleScreenWidgetScale: values.idleScreenWidgetScale,

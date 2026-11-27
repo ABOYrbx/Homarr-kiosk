@@ -1235,7 +1235,7 @@ export const boardRouter = createTRPCRouter({
       mcp: {
         enabled: true,
         description:
-          "Read the editable visual, behavior and idle-screen settings for one board, including its current custom CSS and idle screen options (idleScreenEnabled, idleScreenTimeoutMinutes, idleScreenMode, idleScreenHomeAssistantIntegrationId, idleScreenMediaPlayerEntityId, idleScreenLayoutId, idleScreenShowClockSeconds, idleScreenShowLyrics, idleScreenLyricsOffsetSeconds, idleScreenWeatherLocation, idleScreenClockColor, idleScreenWidgetScale, idleScreenWidgetBackground, idleScreenWidgetBackgroundFrost). Requires modify permission. REQUIRED: id (board ID). Call this before proposing board settings or custom CSS changes",
+          "Read the editable visual, behavior and idle-screen settings for one board, including its current custom CSS and idle screen options (idleScreenEnabled, idleScreenTimeoutMinutes, idleScreenMode, idleScreenHomeAssistantIntegrationId, idleScreenMediaPlayerEntityId, idleScreenLayoutId, idleScreenShowClockSeconds, idleScreenShowLyrics, idleScreenLyricsOffsetSeconds, idleScreenMusicAssistantIntegrationId, idleScreenMusicAssistantQueueId, idleScreenWeatherLocation, idleScreenClockColor, idleScreenWidgetScale, idleScreenWidgetBackground, idleScreenWidgetBackgroundFrost). Requires modify permission. REQUIRED: id (board ID). Call this before proposing board settings or custom CSS changes",
       },
     })
     .input(z.object({ id: z.string() }))
@@ -1272,6 +1272,8 @@ export const boardRouter = createTRPCRouter({
           idleScreenShowClockSeconds: true,
           idleScreenShowLyrics: true,
           idleScreenLyricsOffsetSeconds: true,
+          idleScreenMusicAssistantIntegrationId: true,
+          idleScreenMusicAssistantQueueId: true,
           idleScreenWeatherLocation: true,
           idleScreenClockColor: true,
           idleScreenWidgetScale: true,
@@ -1761,7 +1763,7 @@ export const boardRouter = createTRPCRouter({
       mcp: {
         enabled: true,
         description:
-          "Update visual, behavior and idle-screen settings for a board. Requires modify permission. REQUIRED: id (board ID). Optional fields include pageTitle, metaTitle, logoImageUrl, faviconImageUrl, backgroundImageUrl, colors, opacity, customCss, itemRadius, disableStatus, idleScreenEnabled, idleScreenTimeoutMinutes, idleScreenMode, idleScreenHomeAssistantIntegrationId, idleScreenMediaPlayerEntityId, idleScreenLayoutId, idleScreenShowClockSeconds, idleScreenShowLyrics, idleScreenLyricsOffsetSeconds (-15 to 15, positive delays lyrics), idleScreenWeatherLocation, idleScreenClockColor, idleScreenWidgetScale (0.5-2), idleScreenWidgetBackground and idleScreenWidgetBackgroundFrost. Set primaryColor, secondaryColor, or itemRadius to null to inherit the instance theme.",
+          "Update visual, behavior and idle-screen settings for a board. Requires modify permission. REQUIRED: id (board ID). Optional fields include pageTitle, metaTitle, logoImageUrl, faviconImageUrl, backgroundImageUrl, colors, opacity, customCss, itemRadius, disableStatus, idleScreenEnabled, idleScreenTimeoutMinutes, idleScreenMode, idleScreenHomeAssistantIntegrationId, idleScreenMediaPlayerEntityId, idleScreenLayoutId, idleScreenShowClockSeconds, idleScreenShowLyrics, idleScreenLyricsOffsetSeconds (-15 to 15, positive delays lyrics), idleScreenMusicAssistantIntegrationId and idleScreenMusicAssistantQueueId (both nullable, null clears), idleScreenWeatherLocation, idleScreenClockColor, idleScreenWidgetScale (0.5-2), idleScreenWidgetBackground and idleScreenWidgetBackgroundFrost. Set primaryColor, secondaryColor, or itemRadius to null to inherit the instance theme.",
       },
     })
     .input(boardSavePartialSettingsSchema.extend({ id: z.string() }))
@@ -1807,6 +1809,8 @@ export const boardRouter = createTRPCRouter({
           idleScreenShowClockSeconds: input.idleScreenShowClockSeconds,
           idleScreenShowLyrics: input.idleScreenShowLyrics,
           idleScreenLyricsOffsetSeconds: input.idleScreenLyricsOffsetSeconds,
+          idleScreenMusicAssistantIntegrationId: input.idleScreenMusicAssistantIntegrationId,
+          idleScreenMusicAssistantQueueId: input.idleScreenMusicAssistantQueueId,
           idleScreenWeatherLocation: input.idleScreenWeatherLocation,
           idleScreenClockColor: input.idleScreenClockColor,
           idleScreenWidgetScale: input.idleScreenWidgetScale,

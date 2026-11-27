@@ -88,6 +88,8 @@ export const boardSavePartialSettingsSchema = z
     idleScreenLayoutId: trimmedNullableString,
     idleScreenHomeAssistantIntegrationId: trimmedNullableString,
     idleScreenMediaPlayerEntityId: mediaPlayerEntityIdSchema,
+    idleScreenMusicAssistantIntegrationId: trimmedNullableString,
+    idleScreenMusicAssistantQueueId: trimmedNullableString,
     idleScreenShowClockSeconds: z.boolean(),
     idleScreenShowLyrics: z.boolean(),
     idleScreenLyricsOffsetSeconds: z.number().min(-15).max(15),
