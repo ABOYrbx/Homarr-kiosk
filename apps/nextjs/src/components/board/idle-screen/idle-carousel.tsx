@@ -32,7 +32,7 @@ export const IdleCarousel = ({
 }) => {
   const [activeLayer, setActiveLayer] = useState<IdleLayer>(initialLayer);
   const pointerStart = useRef<PointerStart | null>(null);
-  const manuallyNavigated = useRef(false);
+  const previousPreferredLayer = useRef<IdleLayer>(initialLayer);
   const [showDots, setShowDots] = useState(true);
   const dotsTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -49,12 +49,17 @@ export const IdleCarousel = ({
     };
   }, [revealDots]);
 
-  // Playback starting or stopping changes the preferred layer. Only follow it
-  // until the user has navigated themselves.
+  // Playback starting or stopping changes the preferred layer. Follow every
+  // transition so the view always matches the player; manual navigation holds
+  // only until the next playback change.
   useEffect(() => {
-    if (manuallyNavigated.current) return;
-    setActiveLayer(initialLayer);
-  }, [initialLayer]);
+    const previous = previousPreferredLayer.current;
+    previousPreferredLayer.current = initialLayer;
+    if (previous !== initialLayer) {
+      setActiveLayer(initialLayer);
+      revealDots();
+    }
+  }, [initialLayer, revealDots]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -69,11 +74,9 @@ export const IdleCarousel = ({
       revealDots();
       if (event.key === "ArrowLeft") {
         event.preventDefault();
-        manuallyNavigated.current = true;
         setActiveLayer((current) => getIdleLayerTarget(current, -1));
       } else if (event.key === "ArrowRight") {
         event.preventDefault();
-        manuallyNavigated.current = true;
         setActiveLayer((current) => getIdleLayerTarget(current, 1));
       }
     };
@@ -107,7 +110,6 @@ export const IdleCarousel = ({
       onClose();
       return;
     }
-    manuallyNavigated.current = true;
     setActiveLayer((current) => getIdleLayerTarget(current, direction));
   };
 
