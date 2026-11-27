@@ -22,7 +22,7 @@ interface Props {
 }
 
 export const toIdleWeatherLocation = (
-  city: CitySearchResult,
+  city: Pick<CitySearchResult, "name" | "latitude" | "longitude">,
 ): NonNullable<FormValues["idleScreenWeatherLocation"]> => ({
   name: city.name,
   latitude: city.latitude,

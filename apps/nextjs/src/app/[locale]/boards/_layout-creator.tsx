@@ -6,7 +6,9 @@ import { AppShellMain } from "@mantine/core";
 import { TRPCError } from "@trpc/server";
 
 import { getRscUserSettingsAsync } from "@homarr/api/user-server";
+import { IntegrationProvider } from "@homarr/auth/client";
 import { auth } from "@homarr/auth/next";
+import { getIntegrationsWithPermissionsAsync } from "@homarr/auth/server";
 import { constructBoardPermissions } from "@homarr/auth/shared";
 import { boardViewportWidthCookieName, getLayoutIdForViewportWidth } from "@homarr/boards/layout-selection";
 import { createLogger } from "@homarr/core/infrastructure/logs";
@@ -99,6 +101,7 @@ export const createBoardLayout = <TParams extends Params>({
       throw error;
     }
     const initialBoard = initialBoardResult.board;
+    const integrations = await getIntegrationsWithPermissionsAsync(session);
     const { hasChangeAccess } = constructBoardPermissions(initialBoard, session);
     const initialLayoutId = getLayoutIdForViewportWidth(initialBoard.layouts, initialViewportWidth);
 
@@ -109,40 +112,42 @@ export const createBoardLayout = <TParams extends Params>({
         initialViewportWidth={initialViewportWidth}
         canModify={hasChangeAccess}
       >
-        <IdleScreenPreviewProvider>
-          <BoardMantineProvider defaultColorScheme={colorScheme}>
-            <ModalProvider>
-              {withCustomCss && <CustomCss />}
-              <BoardTourGate enabled={shouldRunBoardTour}>
-                <IdleScreen
-                  board={{
-                    idleScreenEnabled: initialBoard.idleScreenEnabled,
-                    idleScreenTimeoutMinutes: initialBoard.idleScreenTimeoutMinutes,
-                    idleScreenMode: initialBoard.idleScreenMode as "auto" | "clock" | "music" | "widgets",
-                    idleScreenLayoutId: initialBoard.idleScreenLayoutId,
-                    idleScreenHomeAssistantIntegrationId: initialBoard.idleScreenHomeAssistantIntegrationId,
-                    idleScreenMediaPlayerEntityId: initialBoard.idleScreenMediaPlayerEntityId,
-                    idleScreenShowClockSeconds: initialBoard.idleScreenShowClockSeconds,
-                    idleScreenShowLyrics: initialBoard.idleScreenShowLyrics,
-                  }}
-                  tourActive={shouldRunBoardTour}
-                />
-                <ClientShell hasNavigation={false}>
-                  <MainHeader
-                    logo={<BoardLogo size={appShellLogoHeight} />}
-                    logoWithTitle={<BoardLogoWithTitle size="md" />}
-                    actions={headerActions}
-                    boardEditAction={headerBoardEditAction}
-                    boardSettingsAction={headerBoardSettingsAction}
-                    hasNavigation={false}
-                    withBoardTabs={withBoardTabs}
+        <IntegrationProvider integrations={integrations}>
+          <IdleScreenPreviewProvider>
+            <BoardMantineProvider defaultColorScheme={colorScheme}>
+              <ModalProvider>
+                {withCustomCss && <CustomCss />}
+                <BoardTourGate enabled={shouldRunBoardTour}>
+                  <IdleScreen
+                    board={{
+                      idleScreenEnabled: initialBoard.idleScreenEnabled,
+                      idleScreenTimeoutMinutes: initialBoard.idleScreenTimeoutMinutes,
+                      idleScreenMode: initialBoard.idleScreenMode as "auto" | "clock" | "music" | "widgets",
+                      idleScreenLayoutId: initialBoard.idleScreenLayoutId,
+                      idleScreenHomeAssistantIntegrationId: initialBoard.idleScreenHomeAssistantIntegrationId,
+                      idleScreenMediaPlayerEntityId: initialBoard.idleScreenMediaPlayerEntityId,
+                      idleScreenShowClockSeconds: initialBoard.idleScreenShowClockSeconds,
+                      idleScreenShowLyrics: initialBoard.idleScreenShowLyrics,
+                    }}
+                    tourActive={shouldRunBoardTour}
                   />
-                  <AppShellMain data-advanced-focus-background>{children}</AppShellMain>
-                </ClientShell>
-              </BoardTourGate>
-            </ModalProvider>
-          </BoardMantineProvider>
-        </IdleScreenPreviewProvider>
+                  <ClientShell hasNavigation={false}>
+                    <MainHeader
+                      logo={<BoardLogo size={appShellLogoHeight} />}
+                      logoWithTitle={<BoardLogoWithTitle size="md" />}
+                      actions={headerActions}
+                      boardEditAction={headerBoardEditAction}
+                      boardSettingsAction={headerBoardSettingsAction}
+                      hasNavigation={false}
+                      withBoardTabs={withBoardTabs}
+                    />
+                    <AppShellMain data-advanced-focus-background>{children}</AppShellMain>
+                  </ClientShell>
+                </BoardTourGate>
+              </ModalProvider>
+            </BoardMantineProvider>
+          </IdleScreenPreviewProvider>
+        </IntegrationProvider>
       </BoardProviders>
     );
   };
