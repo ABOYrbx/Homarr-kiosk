@@ -1,5 +1,5 @@
-export type IdleScreenMode = "auto" | "clock" | "music";
-export type IdleView = "clock" | "music";
+export type IdleScreenMode = "auto" | "clock" | "music" | "widgets";
+export type IdleView = "clock" | "music" | "widgets";
 
 export interface PlaybackState {
   state?: string;
@@ -55,11 +55,14 @@ export const decideIdleView = ({
   mode,
   hasTrack,
   isPlaying,
+  hasWidgetLayout = false,
 }: {
   mode: IdleScreenMode;
   hasTrack: boolean;
   isPlaying: boolean;
+  hasWidgetLayout?: boolean;
 }): IdleView => {
+  if (mode === "widgets") return hasWidgetLayout ? "widgets" : "clock";
   if (mode === "clock") return "clock";
   if (mode === "music") return hasTrack ? "music" : "clock";
   return hasTrack && isPlaying ? "music" : "clock";

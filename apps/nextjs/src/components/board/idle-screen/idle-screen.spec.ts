@@ -77,6 +77,17 @@ describe("idle mode decision", () => {
     expect(decideIdleView({ mode: "music", hasTrack: true, isPlaying: false })).toBe("music");
     expect(decideIdleView({ mode: "music", hasTrack: false, isPlaying: false })).toBe("clock");
   });
+
+  it("shows widgets when an idle layout exists", () => {
+    expect(decideIdleView({ mode: "widgets", hasTrack: true, isPlaying: true, hasWidgetLayout: true })).toBe("widgets");
+  });
+
+  it("falls back to the clock when the idle layout is missing or empty", () => {
+    expect(decideIdleView({ mode: "widgets", hasTrack: true, isPlaying: true })).toBe("clock");
+    expect(decideIdleView({ mode: "widgets", hasTrack: false, isPlaying: false, hasWidgetLayout: false })).toBe(
+      "clock",
+    );
+  });
 });
 
 const lines: LyricLine[] = [
