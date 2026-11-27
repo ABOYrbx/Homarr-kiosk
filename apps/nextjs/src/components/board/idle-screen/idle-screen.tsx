@@ -109,6 +109,19 @@ export const IdleScreen = ({ board, tourActive = false }: { board: IdleScreenSet
     dismissTimer();
   };
   useWakeLock(open);
+  useEffect(() => {
+    if (!open) return;
+
+    const bodyOverflow = document.body.style.overflow;
+    const htmlOverflow = document.documentElement.style.overflow;
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = bodyOverflow;
+      document.documentElement.style.overflow = htmlOverflow;
+    };
+  }, [open]);
 
   if (!open) return null;
 
