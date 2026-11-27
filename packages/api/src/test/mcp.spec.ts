@@ -109,6 +109,7 @@ const MCP_TOOL_ALLOWLIST = {
     "board_addItem",
     "board_changeBoardVisibility",
     "board_createBoard",
+    "board_createIdleScreenLayout",
     "board_deleteBoard",
     "board_deleteItem",
     "board_duplicateBoard",

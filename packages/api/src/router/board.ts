@@ -1579,7 +1579,7 @@ export const boardRouter = createTRPCRouter({
     .meta({
       openapi: {
         method: "POST",
-        path: "/api/boards/{id}/idle-layout",
+        path: "/api/boards/{boardId}/idle-layout",
         tags: ["boards"],
         protect: true,
         summary: "Create an idle screen layout",
