@@ -36,7 +36,8 @@
     "./refetch-intervals": "./src/refetch-intervals.ts",
     "./widget-card-shell": "./src/widget-card-shell.tsx",
     "./smart-home/use-smart-home": "./src/smart-home/_shared/use-smart-home.ts",
-    "./server-prefetch": "./src/server-prefetch.ts"
+    "./server-prefetch": "./src/server-prefetch.ts",
+    "./weather-icon": "./src/weather/icon.tsx"
   },
   "scripts": {
     "clean": "rm -rf .turbo node_modules",

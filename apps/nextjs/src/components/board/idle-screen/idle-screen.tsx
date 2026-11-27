@@ -12,6 +12,7 @@ import { AnalogClock } from "./analog-clock";
 import { isIdleNavigationEvent } from "./carousel";
 import classes from "./idle-screen.module.css";
 import { IdleCarousel } from "./idle-carousel";
+import { IdleClockSurface } from "./idle-clock-surface";
 import { IdleWidgets } from "./idle-widgets";
 import { NowPlaying } from "./now-playing";
 import type { IdleScreenMode } from "./playback";
@@ -130,7 +131,13 @@ export const IdleScreen = ({ board, tourActive = false }: { board: IdleScreenSet
               <AnalogClock showSeconds={settings.idleScreenShowClockSeconds} />
             )
           }
-          clockPane={<AnalogClock showSeconds={settings.idleScreenShowClockSeconds} />}
+          clockPane={
+            liveBoard ? (
+              <IdleClockSurface board={liveBoard} settings={liveBoard} />
+            ) : (
+              <AnalogClock showSeconds={settings.idleScreenShowClockSeconds} />
+            )
+          }
           widgetsPane={<IdleWidgets layoutId={idleLayoutId ?? ""} />}
           onClose={closeIdleScreen}
         />
