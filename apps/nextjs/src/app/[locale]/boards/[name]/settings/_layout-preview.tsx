@@ -21,9 +21,9 @@ interface Props {
 
 export const LayoutPreview = ({ board, layout, layouts, sourceLayout, apps }: Props) => {
   const tBoard = useI18n("board");
-  const representativeWidth = getRepresentativeLayoutWidth(layout, layouts);
+  const representativeWidth = getRepresentativeLayoutWidth(layout, layouts, board.idleScreenLayoutId);
   const largestRepresentativeWidth = Math.max(
-    ...layouts.map((candidate) => getRepresentativeLayoutWidth(candidate, layouts)),
+    ...layouts.map((candidate) => getRepresentativeLayoutWidth(candidate, layouts, board.idleScreenLayoutId)),
   );
   const previewWidth = `${(representativeWidth / largestRepresentativeWidth) * 100}%`;
   const appsById = new Map(apps.map((app) => [app.id, app]));

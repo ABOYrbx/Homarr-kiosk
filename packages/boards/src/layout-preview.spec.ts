@@ -37,6 +37,14 @@ describe("layout representative widths", () => {
     expect(getRepresentativeLayoutWidth(custom, layouts)).toBe(624);
     expect(getRepresentativeLayoutWidth(base, layouts)).toBe(1280);
   });
+
+  test("previews the idle layout at base width instead of its breakpoint midpoint", () => {
+    const idle = { ...custom, id: "idle", breakpoint: 1 };
+    const layouts = [mobile, idle, custom, base];
+    expect(getRepresentativeLayoutWidth(idle, layouts)).toBe(241);
+    expect(getRepresentativeLayoutWidth(idle, layouts, idle.id)).toBe(1280);
+    expect(getRepresentativeLayoutWidth(custom, layouts, idle.id)).toBe(624);
+  });
 });
 
 describe("projectBoardLayout", () => {

@@ -63,7 +63,19 @@ type LayoutGeometry = Pick<
   "id" | "columnCount" | "leftGutterColumnCount" | "rightGutterColumnCount"
 >;
 
-export const getRepresentativeLayoutWidth = (layout: BoardPreviewLayout, allLayouts: readonly BoardPreviewLayout[]) => {
+export const getRepresentativeLayoutWidth = (
+  layout: BoardPreviewLayout,
+  allLayouts: readonly BoardPreviewLayout[],
+  idleScreenLayoutId?: string | null,
+): number => {
+  // The idle layout is not a responsive layout: it is only rendered in the
+  // always-on overlay, where it is scaled to the full kiosk viewport. Previewing
+  // it at the midpoint to the next breakpoint would show a tiny 301px canvas.
+  if (layout.id === idleScreenLayoutId) {
+    const baseLayout = allLayouts.find((candidate) => candidate.role === "base");
+    return baseLayout ? getRepresentativeLayoutWidth(baseLayout, allLayouts) : Math.max(1280, layout.breakpoint);
+  }
+
   if (layout.role === "mobile") return 390;
   if (layout.role === "base") return Math.max(1280, layout.breakpoint);
 

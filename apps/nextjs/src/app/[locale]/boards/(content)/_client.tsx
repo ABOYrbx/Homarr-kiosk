@@ -79,7 +79,9 @@ export const ClientBoard = () => {
   const logicalWidth =
     laneWidths.reduce((total, width) => total + width, 0) + (laneWidths.length - 1) * LOGICAL_GRID_GAP;
   const initialLogicalHeight = getInitialBoardLogicalHeight(board, currentLayoutId, mainSection.id);
-  const representativeWidth = layoutOverrideId ? getRepresentativeLayoutWidth(currentLayout, board.layouts) : null;
+  const representativeWidth = layoutOverrideId
+    ? getRepresentativeLayoutWidth(currentLayout, board.layouts, board.idleScreenLayoutId)
+    : null;
   const shellPadding = Number(px(theme.spacing.xs));
   const belowSmallViewport = initialViewportWidth > 0 && initialViewportWidth < Number(px(theme.breakpoints.sm));
   const isPreview = representativeWidth !== null;
