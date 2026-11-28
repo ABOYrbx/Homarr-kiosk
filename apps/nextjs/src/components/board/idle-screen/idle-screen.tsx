@@ -21,24 +21,18 @@ import type { IdleScreenMode } from "./playback";
 import { decideIdleView } from "./playback";
 import { isIdleScreenOpen, useIdleScreenPreview } from "./preview-context";
 import { useIdleScreen } from "./use-idle-screen";
+import { useMusicSource } from "./use-music-source";
+import type { MusicSourceSettings } from "./use-music-source";
 import { useNowPlaying } from "./use-now-playing";
 
-export interface IdleScreenSettings {
+export interface IdleScreenSettings extends MusicSourceSettings {
   idleScreenEnabled: boolean;
   idleScreenTimeoutMinutes: number;
   idleScreenMode: IdleScreenMode;
   idleScreenLayoutId: string | null;
-  idleScreenHomeAssistantIntegrationId: string | null;
-  idleScreenMediaPlayerEntityId: string | null;
   idleScreenShowClockSeconds: boolean;
   idleScreenShowLyrics: boolean;
   idleScreenLyricsOffsetSeconds: number;
-  idleScreenMusicAssistantIntegrationId: string | null;
-  idleScreenMusicAssistantQueueId: string | null;
-  idleScreenMusicSources: ("homeAssistant" | "musicAssistant")[];
-  idleScreenMusicSelectionMode: "fixed" | "auto";
-  idleScreenMusicPlayerFilterMode: "include" | "exclude";
-  idleScreenMusicPlayerIds: string[];
 }
 
 type WakeLock = { release: () => Promise<void> };
@@ -115,41 +109,22 @@ interface MusicPresenceState {
   ready: boolean;
 }
 
-const PlayingWatcher = ({
-  integrationId,
-  entityId,
-  onChange,
-}: {
-  integrationId: string;
-  entityId: string;
-  onChange: (state: MusicPresenceState) => void;
-}) => {
-  const { entity } = useNowPlaying({ integrationId, entityId });
-  const playing = entity?.state === "playing";
-
-  useEffect(() => {
-    onChange({ playing, ready: true });
-  }, [playing, onChange]);
-
-  return null;
-};
-
 /** Subscribes only while the overlay is open, so no player is polled on the dashboard. */
 const MusicPresence = ({
-  integrationId,
-  entityId,
+  settings,
   onChange,
 }: {
-  integrationId: string | null;
-  entityId: string | null;
+  settings: MusicSourceSettings;
   onChange: (state: MusicPresenceState) => void;
 }) => {
-  useEffect(() => {
-    if (!integrationId || !entityId) onChange({ playing: false, ready: true });
-  }, [integrationId, entityId, onChange]);
+  const { track, isLoading } = useMusicSource(settings);
+  const playing = track?.state === "playing";
 
-  if (!integrationId || !entityId) return null;
-  return <PlayingWatcher integrationId={integrationId} entityId={entityId} onChange={onChange} />;
+  useEffect(() => {
+    if (!isLoading) onChange({ playing, ready: true });
+  }, [playing, isLoading, onChange]);
+
+  return null;
 };
 
 export const IdleScreen = ({ board, tourActive = false }: { board: IdleScreenSettings; tourActive?: boolean }) => {
@@ -193,28 +168,18 @@ export const IdleScreen = ({ board, tourActive = false }: { board: IdleScreenSet
 
   if (!open) return null;
 
-  const integrationId = settings.idleScreenHomeAssistantIntegrationId;
-  const entityId = settings.idleScreenMediaPlayerEntityId;
   const idleLayoutId = settings.idleScreenLayoutId;
 
   return (
     <Portal>
       <div className={classes.overlay} role="region" aria-label={t("idleScreen.title")} data-idle-screen="true">
-        <MusicPresence
-          key={`${integrationId ?? ""}:${entityId ?? ""}`}
-          integrationId={integrationId}
-          entityId={entityId}
-          onChange={handleMusicPresence}
-        />
+        <MusicPresence settings={settings} onChange={handleMusicPresence} />
         {musicPresence.ready && (
           <IdleCarousel
             initialLayer={musicPresence.playing ? "music" : "clock"}
             musicPane={
               <MusicPane
-                integrationId={integrationId}
-                entityId={entityId}
-                musicAssistantIntegrationId={settings.idleScreenMusicAssistantIntegrationId}
-                musicAssistantQueueId={settings.idleScreenMusicAssistantQueueId}
+                settings={settings}
                 showLyrics={settings.idleScreenShowLyrics}
                 lyricsOffsetSeconds={settings.idleScreenLyricsOffsetSeconds ?? 0}
               />

@@ -5,11 +5,11 @@ import { IconMusic } from "@tabler/icons-react";
 
 import { useI18n } from "@homarr/translation/client";
 
-import { fromSmartHomeEntity } from "./music-track";
+import type { MusicTrack } from "./music-track";
 import { NowPlaying, useHomeAssistantMusicControls, useMusicAssistantMusicControls } from "./now-playing";
-import type { QueueView } from "./use-music-assistant-queue";
 import { useMusicAssistantQueue } from "./use-music-assistant-queue";
-import { useMusicAssistantNowPlaying } from "./use-music-assistant-now-playing";
+import type { MusicSourceSettings } from "./use-music-source";
+import { useMusicSource } from "./use-music-source";
 import { useNowPlaying } from "./use-now-playing";
 
 export type MusicPaneState = "not-configured" | "no-track" | "ready";
@@ -40,87 +40,36 @@ const MusicPaneMessage = ({ message }: { message: string }) => (
   </Center>
 );
 
-type MusicAssistantSelection = { integrationId: string; queueId: string };
-
 type PaneContentProps = {
-  queue: QueueView | undefined;
-  queueAvailable: boolean;
   showLyrics: boolean;
   lyricsOffsetSeconds: number;
-  emptyMessage: string;
   loadingMessage: string;
 };
 
-/** Renders the currently playing track of the configured MA queue. */
-const MusicAssistantPane = ({
-  musicAssistant,
-  queue,
-  queueAvailable,
+/** HA controls still need the live entity for its reported action capabilities. */
+const HomeAssistantTrackPane = ({
+  track,
+  queueSelection,
   showLyrics,
   lyricsOffsetSeconds,
-  emptyMessage,
-  loadingMessage,
-}: PaneContentProps & { musicAssistant: MusicAssistantSelection }) => {
-  const { tracks, isLoading } = useMusicAssistantNowPlaying({
-    integrationId: musicAssistant.integrationId,
-    queueId: musicAssistant.queueId,
-    enabled: true,
-  });
-  const track = tracks[0];
-  const { onControl, canControl } = useMusicAssistantMusicControls({ ...musicAssistant, track });
-
-  if (isLoading) return <MusicPaneMessage message={loadingMessage} />;
-  if (!track) return <MusicPaneMessage message={emptyMessage} />;
-
-  return (
-    <NowPlaying
-      track={track}
-      onControl={onControl}
-      canControl={canControl}
-      showLyrics={showLyrics}
-      lyricsOffsetSeconds={lyricsOffsetSeconds}
-      queue={queue}
-      queueAvailable={queueAvailable}
-    />
-  );
-};
-
-const ConfiguredMusicPane = ({
-  integrationId,
-  entityId,
-  musicAssistant,
-  queue,
-  queueAvailable,
-  showLyrics,
-  lyricsOffsetSeconds,
-  emptyMessage,
   loadingMessage,
 }: PaneContentProps & {
-  integrationId: string;
-  entityId: string;
-  musicAssistant: MusicAssistantSelection | undefined;
+  track: MusicTrack;
+  queueSelection: { integrationId: string; queueId: string } | undefined;
 }) => {
-  const { entity, isLoading } = useNowPlaying({ integrationId, entityId });
-  const { onControl, canControl } = useHomeAssistantMusicControls({ entity, integrationId, entityId });
-  const track = entity ? fromSmartHomeEntity(entity, integrationId) : undefined;
-  const maPaneProps = { queue, queueAvailable, showLyrics, lyricsOffsetSeconds, emptyMessage, loadingMessage };
-
-  if (isLoading) return <MusicPaneMessage message={loadingMessage} />;
-
-  const state = getMusicPaneState({
-    integrationId,
-    entityId,
-    entity: entity ?? null,
-    hasArtwork: Boolean(entity?.attributes.pictureUrl),
+  const { entity } = useNowPlaying({ integrationId: track.integrationId, entityId: track.playerId });
+  const { onControl, canControl } = useHomeAssistantMusicControls({
+    entity,
+    integrationId: track.integrationId,
+    entityId: track.playerId,
+  });
+  const { queue } = useMusicAssistantQueue({
+    integrationId: queueSelection?.integrationId ?? null,
+    queueId: queueSelection?.queueId ?? null,
+    enabled: Boolean(queueSelection),
   });
 
-  if (state !== "ready" || !track) {
-    return musicAssistant ? (
-      <MusicAssistantPane musicAssistant={musicAssistant} {...maPaneProps} />
-    ) : (
-      <MusicPaneMessage message={emptyMessage} />
-    );
-  }
+  if (!entity) return <MusicPaneMessage message={loadingMessage} />;
 
   return (
     <NowPlaying
@@ -130,55 +79,82 @@ const ConfiguredMusicPane = ({
       showLyrics={showLyrics}
       lyricsOffsetSeconds={lyricsOffsetSeconds}
       queue={queue}
-      queueAvailable={queueAvailable}
+      queueAvailable={Boolean(queueSelection && queue?.tracks.length)}
     />
   );
 };
 
+/** The selected MA queue keeps its own queue view in auto and fixed mode. */
+const MusicAssistantTrackPane = ({
+  track,
+  showLyrics,
+  lyricsOffsetSeconds,
+}: PaneContentProps & { track: MusicTrack }) => {
+  const { onControl, canControl } = useMusicAssistantMusicControls({
+    integrationId: track.integrationId,
+    queueId: track.playerId,
+    track,
+  });
+  const { queue } = useMusicAssistantQueue({
+    integrationId: track.integrationId,
+    queueId: track.playerId,
+    enabled: true,
+  });
+
+  return (
+    <NowPlaying
+      track={track}
+      onControl={onControl}
+      canControl={canControl}
+      showLyrics={showLyrics}
+      lyricsOffsetSeconds={lyricsOffsetSeconds}
+      queue={queue}
+      queueAvailable={Boolean(queue?.tracks.length)}
+    />
+  );
+};
+
+/**
+ * Both selection modes render from the same normalized track. This pane is
+ * mounted only while the carousel shows the music layer inside the open
+ * overlay, so none of these subscriptions exist on the dashboard.
+ */
 export const MusicPane = ({
-  integrationId,
-  entityId,
-  musicAssistantIntegrationId,
-  musicAssistantQueueId,
+  settings,
   showLyrics,
   lyricsOffsetSeconds,
 }: {
-  integrationId: string | null;
-  entityId: string | null;
-  musicAssistantIntegrationId: string | null;
-  musicAssistantQueueId: string | null;
+  settings: MusicSourceSettings;
   showLyrics: boolean;
   lyricsOffsetSeconds: number;
 }) => {
   const t = useI18n("board");
-  // This pane is mounted only while the carousel shows the music layer, so
-  // the queue is never polled on the dashboard or on the other layers.
-  const { queue } = useMusicAssistantQueue({
-    integrationId: musicAssistantIntegrationId,
-    queueId: musicAssistantQueueId,
-    enabled: true,
-  });
+  const { track, isLoading } = useMusicSource(settings);
 
-  const homeAssistant = integrationId && entityId ? { integrationId, entityId } : undefined;
-  const musicAssistant =
-    musicAssistantIntegrationId && musicAssistantQueueId
-      ? { integrationId: musicAssistantIntegrationId, queueId: musicAssistantQueueId }
-      : undefined;
   const paneProps = {
-    queue,
-    queueAvailable: Boolean(musicAssistant && queue?.tracks.length),
     showLyrics,
     lyricsOffsetSeconds,
-    emptyMessage: t("idleScreen.music.nothingPlaying"),
     loadingMessage: t("idleScreen.music.loading"),
   };
+  const configured = settings.idleScreenMusicSources.some((source) =>
+    source === "homeAssistant"
+      ? Boolean(settings.idleScreenHomeAssistantIntegrationId)
+      : Boolean(settings.idleScreenMusicAssistantIntegrationId),
+  );
+  const configuredQueue =
+    settings.idleScreenMusicAssistantIntegrationId && settings.idleScreenMusicAssistantQueueId
+      ? {
+          integrationId: settings.idleScreenMusicAssistantIntegrationId,
+          queueId: settings.idleScreenMusicAssistantQueueId,
+        }
+      : undefined;
 
-  if (homeAssistant) {
-    return <ConfiguredMusicPane {...homeAssistant} musicAssistant={musicAssistant} {...paneProps} />;
-  }
-  if (musicAssistant) {
-    return <MusicAssistantPane musicAssistant={musicAssistant} {...paneProps} />;
-  }
+  if (!configured) return <MusicPaneMessage message={t("idleScreen.music.notConfigured")} />;
+  if (isLoading) return <MusicPaneMessage message={paneProps.loadingMessage} />;
+  if (!track) return <MusicPaneMessage message={t("idleScreen.music.nothingPlaying")} />;
 
-  return <MusicPaneMessage message={t("idleScreen.music.notConfigured")} />;
+  if (track.source === "homeAssistant") {
+    return <HomeAssistantTrackPane track={track} queueSelection={configuredQueue} {...paneProps} />;
+  }
+  return <MusicAssistantTrackPane track={track} {...paneProps} />;
 };

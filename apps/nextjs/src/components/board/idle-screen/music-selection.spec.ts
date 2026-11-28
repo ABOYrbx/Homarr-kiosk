@@ -6,6 +6,8 @@ import type { SmartHomeEntity } from "@homarr/integrations/types";
 import { fromMusicAssistantNowPlaying, fromSmartHomeEntity } from "./music-track";
 import type { MusicTrack } from "./music-track";
 import { filterMusicTracks, parsePlayerId, pickPlayingTrack } from "./music-selection";
+import type { MusicSourceSettings } from "./use-music-source";
+import { selectMusicSourceTrack } from "./use-music-source";
 
 type NowPlaying = RouterOutputs["musicAssistant"]["nowPlaying"][number];
 
@@ -250,5 +252,105 @@ describe("music track adapters", () => {
       fromSmartHomeEntity(smartHomeEntity({ attributes: undefined as unknown as SmartHomeEntity["attributes"] }), "a")
         ?.title,
     ).toBe("Küche");
+  });
+});
+
+const idleTrack = (candidate: MusicTrack): MusicTrack => ({ ...candidate, state: "idle" });
+
+const musicSourceSettings = (overrides: Partial<MusicSourceSettings> = {}): MusicSourceSettings => ({
+  idleScreenHomeAssistantIntegrationId: "a",
+  idleScreenMediaPlayerEntityId: "media_player.kueche",
+  idleScreenMusicAssistantIntegrationId: "b",
+  idleScreenMusicAssistantQueueId: "b8:27:eb:8a",
+  idleScreenMusicSources: ["homeAssistant", "musicAssistant"],
+  idleScreenMusicSelectionMode: "auto",
+  idleScreenMusicPlayerFilterMode: "exclude",
+  idleScreenMusicPlayerIds: [],
+  ...overrides,
+});
+
+describe("automatic AOD music source selection", () => {
+  const haTracks: MusicTrack[] = [
+    track({
+      source: "homeAssistant",
+      integrationId: "a",
+      playerId: "media_player.kueche",
+      state: "playing",
+      positionUpdatedAt: 1_000,
+    }),
+    track({
+      source: "homeAssistant",
+      integrationId: "a",
+      playerId: "media_player.wohnzimmer",
+      positionUpdatedAt: 3_000,
+    }),
+  ];
+  const maTracks: MusicTrack[] = [
+    track({
+      source: "musicAssistant",
+      integrationId: "b",
+      playerId: "b8:27:eb:8a",
+      state: "playing",
+      positionUpdatedAt: 2_000,
+    }),
+    track({ source: "musicAssistant", integrationId: "b", playerId: "b8:27:eb:9b", positionUpdatedAt: 5_000 }),
+    track({
+      source: "musicAssistant",
+      integrationId: "b",
+      playerId: "excluded-queue",
+      state: "playing",
+      positionUpdatedAt: 9_999,
+    }),
+  ];
+
+  it("picks the newest playing MA track after excluding one of five HA and MA candidates", () => {
+    const selected = selectMusicSourceTrack({
+      settings: musicSourceSettings({ idleScreenMusicPlayerIds: ["ma:b:excluded-queue"] }),
+      haTracks,
+      maTracks,
+    });
+    expect(selected).toBe(maTracks[0]);
+  });
+
+  it("returns undefined when every allowed HA and MA player is idle", () => {
+    expect(
+      selectMusicSourceTrack({
+        settings: musicSourceSettings(),
+        haTracks: haTracks.map(idleTrack),
+        maTracks: maTracks.map(idleTrack),
+      }),
+    ).toBeUndefined();
+  });
+
+  it("ignores sources that are unchecked and selects nothing for include with an empty list", () => {
+    expect(
+      selectMusicSourceTrack({
+        settings: musicSourceSettings({
+          idleScreenMusicSources: ["musicAssistant"],
+          idleScreenMusicPlayerIds: ["ma:b:excluded-queue"],
+        }),
+        haTracks,
+        maTracks,
+      }),
+    ).toBe(maTracks[0]);
+    expect(
+      selectMusicSourceTrack({
+        settings: musicSourceSettings({ idleScreenMusicPlayerFilterMode: "include", idleScreenMusicPlayerIds: [] }),
+        haTracks,
+        maTracks,
+      }),
+    ).toBeUndefined();
+  });
+
+  it("keeps fixed mode HA-first with an MA fallback", () => {
+    const settings = musicSourceSettings({ idleScreenMusicSelectionMode: "fixed" });
+    expect(selectMusicSourceTrack({ settings, haTracks, maTracks })).toBe(haTracks[0]);
+    expect(
+      selectMusicSourceTrack({
+        settings,
+        haTracks: [],
+        maTracks,
+      }),
+    ).toBe(maTracks[0]);
   });
 });

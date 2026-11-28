@@ -72,25 +72,28 @@ export const mergeSmartHomePatch = (
 
 interface UseSmartHomeSnapshotOptions {
   live: boolean;
+  /** Keep the snapshot and live subscription dormant while the consumer is inactive. */
+  enabled?: boolean;
 }
 
 export const useSmartHomeSnapshot = (
   integrationId: string,
   selection: Required<SmartHomeEntitySelection>,
-  { live }: UseSmartHomeSnapshotOptions,
+  { live, enabled = true }: UseSmartHomeSnapshotOptions,
 ) => {
   const utils = clientApi.useUtils();
   const pageVisible = usePageVisible();
   const [liveError, setLiveError] = useState<Error | null>(null);
   const [isLive, setIsLive] = useState(false);
   const input = useMemo(() => ({ integrationId, ...selection }), [integrationId, selection]);
-  const subscriptionEnabled = live && pageVisible;
+  const subscriptionEnabled = enabled && live && pageVisible;
   const patched = useRef(new Map<string, SmartHomeEntity>());
   const patchedDuringFetch = useRef(new Set<string>());
   const patchedAreas = useRef<SmartHomeArea[] | undefined>(undefined);
   const removed = useRef(new Set<string>());
 
   const query = clientApi.widget.smartHome.snapshot.useQuery(input, {
+    enabled,
     refetchInterval: isLive && liveError === null ? false : FALLBACK_POLL_MS,
     refetchOnWindowFocus: !isLive,
   });
