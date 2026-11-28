@@ -7089,24 +7089,26 @@
       },
       "idleScreenMusicSources": {
         "label": "Musikquellen",
-        "description": "Wähle, welche Musikquellen der Leerlaufbildschirm verwendet"
+        "description": "Wähle, welche Musikquellen der Leerlaufbildschirm nutzt. Beim Abhaken einer Quelle bleiben deren gespeicherte Integration und Player-Einstellungen erhalten.",
+        "homeAssistant": "Home Assistant",
+        "musicAssistant": "Music Assistant"
       },
       "idleScreenMusicSelectionMode": {
         "label": "Player-Auswahl",
-        "description": "Einen festen Player verwenden oder automatisch das gerade spielende Gerät anzeigen",
+        "description": "Einen festen Player wählen oder automatisch das gerade spielende Gerät verwenden",
         "fixed": "Fester Player",
         "auto": "Automatisch – spielendes Gerät"
       },
       "idleScreenMusicPlayerFilterMode": {
         "label": "Player-Filter",
-        "description": "Ausgewählte Player in die automatische Auswahl einbeziehen oder ausschließen",
-        "include": "Einbeziehen",
-        "exclude": "Ausschließen"
+        "description": "Im automatischen Modus ausgewählte Player nur einbeziehen oder von der Auswahl ausschließen",
+        "include": "Ausgewählte einbeziehen",
+        "exclude": "Ausgewählte ausschließen"
       },
       "idleScreenMusicPlayerIds": {
         "label": "Player",
-        "description": "Player, die für die automatische Auswahl berücksichtigt werden",
-        "none": "Keine Player verfügbar"
+        "description": "Player, die im automatischen Modus berücksichtigt werden, mit Quelle und Integration als Kennzeichnung",
+        "none": "Keine Player verfügbar. Zuerst eine Home-Assistant- oder Music-Assistant-Integration verbinden."
       },
       "idleScreenWeatherLocation": {
         "label": "Wetterstandort",

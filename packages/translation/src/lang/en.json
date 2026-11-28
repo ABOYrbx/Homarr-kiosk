@@ -7089,24 +7089,26 @@
       },
       "idleScreenMusicSources": {
         "label": "Music sources",
-        "description": "Choose which music sources the idle screen uses"
+        "description": "Enable the sources the idle screen reads music from. Disabling a source keeps its saved integration and player settings.",
+        "homeAssistant": "Home Assistant",
+        "musicAssistant": "Music Assistant"
       },
       "idleScreenMusicSelectionMode": {
         "label": "Player selection",
-        "description": "Use a fixed player or automatically show the one currently playing",
+        "description": "Choose a fixed player, or let the idle screen follow the device that is currently playing",
         "fixed": "Fixed player",
         "auto": "Automatic - playing device"
       },
       "idleScreenMusicPlayerFilterMode": {
         "label": "Player filter",
-        "description": "Include or exclude the selected players from automatic selection",
-        "include": "Include",
-        "exclude": "Exclude"
+        "description": "In automatic mode, include only the selected players or exclude them from selection",
+        "include": "Include selected",
+        "exclude": "Exclude selected"
       },
       "idleScreenMusicPlayerIds": {
         "label": "Players",
-        "description": "Players considered for automatic selection",
-        "none": "No players available"
+        "description": "Players considered for automatic selection, labelled with their source and integration",
+        "none": "No players available. Connect a Home Assistant or Music Assistant integration first."
       },
       "idleScreenWeatherLocation": {
         "label": "Weather location",

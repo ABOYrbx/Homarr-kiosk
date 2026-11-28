@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
 import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Group, Input, NumberInput, Select, Slider, Stack, Switch, Text } from "@mantine/core";
+import { Button, Group, Input, NumberInput, Slider, Stack, Switch, Text } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
 
 import { clientApi } from "@homarr/api/client";
@@ -13,6 +12,7 @@ import { useI18n } from "@homarr/translation/client";
 
 import { SectionCard } from "@homarr/ui";
 import type { Board } from "../../_types";
+import { IdleMusicSourcesSettings } from "./_idle-music-sources";
 import { IdlePreviewSettings } from "./_idle-preview-settings";
 import type { FormValues } from "./_settings-form";
 
@@ -65,54 +65,6 @@ export const IdleScreenSettingsContent = ({ board, form, saveSettingsAsync }: Id
         });
       },
     });
-
-  const { data: integrations = [] } = clientApi.integration.all.useQuery(undefined, {
-    staleTime: 60_000,
-  });
-
-  const homeAssistantIntegrations = useMemo(
-    () => integrations.filter((integration) => integration.kind === "homeAssistant"),
-    [integrations],
-  );
-  const musicAssistantIntegrations = useMemo(
-    () => integrations.filter((integration) => integration.kind === "musicAssistant"),
-    [integrations],
-  );
-
-  const integrationId = form.values.idleScreenHomeAssistantIntegrationId;
-  const { data: catalog } = clientApi.widget.smartHome.searchCatalog.useQuery(
-    { integrationId: integrationId ?? "", domains: ["media_player"], query: "", limit: 100 },
-    { enabled: Boolean(integrationId), staleTime: 60_000 },
-  );
-
-  const mediaPlayers = useMemo(() => catalog?.entities ?? [], [catalog]);
-
-  useEffect(() => {
-    // Wait for the catalog before validating: an empty array while loading
-    // would silently clear a previously saved entity.
-    if (!integrationId || !catalog) return;
-    const selected = form.values.idleScreenMediaPlayerEntityId;
-    if (selected && !mediaPlayers.some((entity) => entity.id === selected)) {
-      form.setFieldValue("idleScreenMediaPlayerEntityId", null);
-    }
-  }, [integrationId, catalog, mediaPlayers, form]);
-
-  const musicAssistantIntegrationId = form.values.idleScreenMusicAssistantIntegrationId;
-  const { data: queuesData } = clientApi.musicAssistant.queues.useQuery(
-    { integrationId: musicAssistantIntegrationId ?? "" },
-    { enabled: Boolean(musicAssistantIntegrationId), staleTime: 60_000 },
-  );
-  const musicAssistantQueues = useMemo(() => queuesData?.queues ?? [], [queuesData]);
-
-  useEffect(() => {
-    // Wait for the queue list before validating: an empty array while loading
-    // would silently clear a previously saved queue.
-    if (!musicAssistantIntegrationId || !queuesData) return;
-    const selected = form.values.idleScreenMusicAssistantQueueId;
-    if (selected && !musicAssistantQueues.some((queue) => queue.id === selected)) {
-      form.setFieldValue("idleScreenMusicAssistantQueueId", null);
-    }
-  }, [musicAssistantIntegrationId, queuesData, musicAssistantQueues, form]);
 
   const enabled = form.values.idleScreenEnabled;
   const lyricsOffset = form.values.idleScreenLyricsOffsetSeconds ?? 0;
@@ -170,62 +122,7 @@ export const IdleScreenSettingsContent = ({ board, form, saveSettingsAsync }: Id
               {t("field.idleScreenLayout.edit")}
             </Button>
           </Group>
-          <Select
-            {...form.getInputProps("idleScreenHomeAssistantIntegrationId")}
-            label={t("field.idleScreenHomeAssistantIntegrationId.label")}
-            description={t("field.idleScreenHomeAssistantIntegrationId.description")}
-            data={homeAssistantIntegrations.map((integration) => ({
-              value: integration.id,
-              label: integration.name,
-            }))}
-            clearable
-            searchable
-          />
-          {homeAssistantIntegrations.length === 0 && (
-            <Text size="sm" c="dimmed">
-              {t("field.idleScreenHomeAssistantIntegrationId.none")}
-            </Text>
-          )}
-          <Select
-            {...form.getInputProps("idleScreenMediaPlayerEntityId")}
-            label={t("field.idleScreenMediaPlayerEntityId.label")}
-            description={t("field.idleScreenMediaPlayerEntityId.description")}
-            data={mediaPlayers.map((entity) => ({
-              value: entity.id,
-              label: entity.name,
-            }))}
-            clearable
-            searchable
-            disabled={!integrationId}
-          />
-          <Select
-            {...form.getInputProps("idleScreenMusicAssistantIntegrationId")}
-            label={t("field.idleScreenMusicAssistantIntegrationId.label")}
-            description={t("field.idleScreenMusicAssistantIntegrationId.description")}
-            data={musicAssistantIntegrations.map((integration) => ({
-              value: integration.id,
-              label: integration.name,
-            }))}
-            clearable
-            searchable
-          />
-          {musicAssistantIntegrations.length === 0 && (
-            <Text size="sm" c="dimmed">
-              {t("field.idleScreenMusicAssistantIntegrationId.none")}
-            </Text>
-          )}
-          <Select
-            {...form.getInputProps("idleScreenMusicAssistantQueueId")}
-            label={t("field.idleScreenMusicAssistantQueueId.label")}
-            description={t("field.idleScreenMusicAssistantQueueId.description")}
-            data={musicAssistantQueues.map((queue) => ({
-              value: queue.id,
-              label: queue.name,
-            }))}
-            clearable
-            searchable
-            disabled={!musicAssistantIntegrationId}
-          />
+          <IdleMusicSourcesSettings form={form} />
           <Switch
             label={t("field.idleScreenShowClockSeconds.label")}
             description={t("field.idleScreenShowClockSeconds.description")}
