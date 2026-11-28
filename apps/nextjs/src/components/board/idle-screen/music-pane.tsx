@@ -6,9 +6,10 @@ import { IconMusic } from "@tabler/icons-react";
 import { useI18n } from "@homarr/translation/client";
 
 import { fromSmartHomeEntity } from "./music-track";
-import { NowPlaying, useHomeAssistantMusicControls } from "./now-playing";
+import { NowPlaying, useHomeAssistantMusicControls, useMusicAssistantMusicControls } from "./now-playing";
 import type { QueueView } from "./use-music-assistant-queue";
 import { useMusicAssistantQueue } from "./use-music-assistant-queue";
+import { useMusicAssistantNowPlaying } from "./use-music-assistant-now-playing";
 import { useNowPlaying } from "./use-now-playing";
 
 export type MusicPaneState = "not-configured" | "no-track" | "ready";
@@ -39,30 +40,70 @@ const MusicPaneMessage = ({ message }: { message: string }) => (
   </Center>
 );
 
-const ConfiguredMusicPane = ({
-  integrationId,
-  entityId,
-  musicAssistantIntegrationId,
-  musicAssistantQueueId,
-  queue,
-  showLyrics,
-  lyricsOffsetSeconds,
-  emptyMessage,
-  loadingMessage,
-}: {
-  integrationId: string;
-  entityId: string;
-  musicAssistantIntegrationId: string | null;
-  musicAssistantQueueId: string | null;
+type MusicAssistantSelection = { integrationId: string; queueId: string };
+
+type PaneContentProps = {
   queue: QueueView | undefined;
+  queueAvailable: boolean;
   showLyrics: boolean;
   lyricsOffsetSeconds: number;
   emptyMessage: string;
   loadingMessage: string;
+};
+
+/** Renders the currently playing track of the configured MA queue. */
+const MusicAssistantPane = ({
+  musicAssistant,
+  queue,
+  queueAvailable,
+  showLyrics,
+  lyricsOffsetSeconds,
+  emptyMessage,
+  loadingMessage,
+}: PaneContentProps & { musicAssistant: MusicAssistantSelection }) => {
+  const { tracks, isLoading } = useMusicAssistantNowPlaying({
+    integrationId: musicAssistant.integrationId,
+    queueId: musicAssistant.queueId,
+    enabled: true,
+  });
+  const track = tracks[0];
+  const { onControl, canControl } = useMusicAssistantMusicControls({ ...musicAssistant, track });
+
+  if (isLoading) return <MusicPaneMessage message={loadingMessage} />;
+  if (!track) return <MusicPaneMessage message={emptyMessage} />;
+
+  return (
+    <NowPlaying
+      track={track}
+      onControl={onControl}
+      canControl={canControl}
+      showLyrics={showLyrics}
+      lyricsOffsetSeconds={lyricsOffsetSeconds}
+      queue={queue}
+      queueAvailable={queueAvailable}
+    />
+  );
+};
+
+const ConfiguredMusicPane = ({
+  integrationId,
+  entityId,
+  musicAssistant,
+  queue,
+  queueAvailable,
+  showLyrics,
+  lyricsOffsetSeconds,
+  emptyMessage,
+  loadingMessage,
+}: PaneContentProps & {
+  integrationId: string;
+  entityId: string;
+  musicAssistant: MusicAssistantSelection | undefined;
 }) => {
   const { entity, isLoading } = useNowPlaying({ integrationId, entityId });
   const { onControl, canControl } = useHomeAssistantMusicControls({ entity, integrationId, entityId });
   const track = entity ? fromSmartHomeEntity(entity, integrationId) : undefined;
+  const maPaneProps = { queue, queueAvailable, showLyrics, lyricsOffsetSeconds, emptyMessage, loadingMessage };
 
   if (isLoading) return <MusicPaneMessage message={loadingMessage} />;
 
@@ -73,7 +114,14 @@ const ConfiguredMusicPane = ({
     hasArtwork: Boolean(entity?.attributes.pictureUrl),
   });
 
-  if (state !== "ready" || !track) return <MusicPaneMessage message={emptyMessage} />;
+  if (state !== "ready" || !track) {
+    return musicAssistant ? (
+      <MusicAssistantPane musicAssistant={musicAssistant} {...maPaneProps} />
+    ) : (
+      <MusicPaneMessage message={emptyMessage} />
+    );
+  }
+
   return (
     <NowPlaying
       track={track}
@@ -82,7 +130,7 @@ const ConfiguredMusicPane = ({
       showLyrics={showLyrics}
       lyricsOffsetSeconds={lyricsOffsetSeconds}
       queue={queue}
-      queueAvailable={Boolean(musicAssistantIntegrationId && musicAssistantQueueId && queue?.tracks.length)}
+      queueAvailable={queueAvailable}
     />
   );
 };
@@ -111,21 +159,26 @@ export const MusicPane = ({
     enabled: true,
   });
 
-  if (!integrationId || !entityId) {
-    return <MusicPaneMessage message={t("idleScreen.music.notConfigured")} />;
+  const homeAssistant = integrationId && entityId ? { integrationId, entityId } : undefined;
+  const musicAssistant =
+    musicAssistantIntegrationId && musicAssistantQueueId
+      ? { integrationId: musicAssistantIntegrationId, queueId: musicAssistantQueueId }
+      : undefined;
+  const paneProps = {
+    queue,
+    queueAvailable: Boolean(musicAssistant && queue?.tracks.length),
+    showLyrics,
+    lyricsOffsetSeconds,
+    emptyMessage: t("idleScreen.music.nothingPlaying"),
+    loadingMessage: t("idleScreen.music.loading"),
+  };
+
+  if (homeAssistant) {
+    return <ConfiguredMusicPane {...homeAssistant} musicAssistant={musicAssistant} {...paneProps} />;
+  }
+  if (musicAssistant) {
+    return <MusicAssistantPane musicAssistant={musicAssistant} {...paneProps} />;
   }
 
-  return (
-    <ConfiguredMusicPane
-      integrationId={integrationId}
-      entityId={entityId}
-      musicAssistantIntegrationId={musicAssistantIntegrationId}
-      musicAssistantQueueId={musicAssistantQueueId}
-      queue={queue}
-      showLyrics={showLyrics}
-      lyricsOffsetSeconds={lyricsOffsetSeconds}
-      emptyMessage={t("idleScreen.music.nothingPlaying")}
-      loadingMessage={t("idleScreen.music.loading")}
-    />
-  );
+  return <MusicPaneMessage message={t("idleScreen.music.notConfigured")} />;
 };

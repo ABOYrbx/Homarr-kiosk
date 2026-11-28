@@ -24,6 +24,8 @@ import { QueuePanel } from "./queue-panel";
 import type { QueueView } from "./use-music-assistant-queue";
 
 export type MusicControlAction = "mediaPrevious" | "mediaPlayPause" | "mediaNext";
+/** MA also accepts seeking; the renderer only exposes the three player buttons. */
+export type MusicAssistantControlAction = MusicControlAction | "seek";
 
 /**
  * Home Assistant control wiring. Kept outside the renderer so the same
@@ -51,6 +53,47 @@ export const useHomeAssistantMusicControls = ({
   return {
     onControl: (action) => executeAction({ integrationId, entityId, action }),
     canControl: (action) => entity !== undefined && supportsSmartHomeAction(entity, { type: action }),
+  };
+};
+
+const toMusicAssistantAction = (action: MusicAssistantControlAction): "previous" | "play_pause" | "next" | "seek" => {
+  if (action === "mediaPrevious") return "previous";
+  if (action === "mediaNext") return "next";
+  if (action === "seek") return "seek";
+  return "play_pause";
+};
+
+/**
+ * Music Assistant control wiring. The integration does not report per-action
+ * capabilities, so the actions it implements are available whenever a track
+ * exists. Seeks always carry the current track position: MA requires it.
+ */
+export const useMusicAssistantMusicControls = ({
+  integrationId,
+  queueId,
+  track,
+}: {
+  integrationId: string;
+  queueId: string;
+  track: MusicTrack | undefined;
+}): {
+  onControl: (action: MusicAssistantControlAction) => void;
+  canControl: (action: MusicAssistantControlAction) => boolean;
+} => {
+  const utils = clientApi.useUtils();
+  const { mutate: control } = clientApi.musicAssistant.control.useMutation({
+    onSuccess: () => void utils.musicAssistant.nowPlaying.invalidate({ integrationId }),
+  });
+
+  return {
+    onControl: (action) =>
+      control({
+        integrationId,
+        queueId,
+        action: toMusicAssistantAction(action),
+        ...(action === "seek" ? { positionSeconds: track?.positionSeconds ?? 0 } : {}),
+      }),
+    canControl: () => track !== undefined,
   };
 };
 
