@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { normalizeQueue, normalizeQueues } from "./music-assistant-queue";
+import { normalizeNowPlaying, normalizeQueue, normalizeQueues } from "./music-assistant-queue";
 
 const envelope = (result: unknown) => ({ message_id: "7", result });
 
@@ -116,5 +116,73 @@ describe("normalizeQueues", () => {
       { id: "queue-1", name: "Kitchen" },
       { id: "queue-2", name: "Studio" },
     ]);
+  });
+});
+
+describe("normalizeNowPlaying", () => {
+  it("reads playback state, elapsed time and the current track from player_queues/all", () => {
+    const nowPlaying = normalizeNowPlaying(
+      envelope([
+        {
+          queue_id: "queue-1",
+          display_name: "Living room",
+          state: "playing",
+          elapsed_time: 12.5,
+          elapsed_time_last_updated: 1700000000,
+          current_index: 1,
+          current_item: {
+            ...queueItem("Song"),
+            image: { path: "https://example.com/cover.jpg" },
+          },
+        },
+      ]),
+      "queue-1",
+    );
+
+    expect(nowPlaying.queueId).toBe("queue-1");
+    expect(nowPlaying.name).toBe("Living room");
+    expect(nowPlaying.state).toBe("playing");
+    // MA reports elapsed_time and elapsed_time_last_updated in seconds; keep the unit here.
+    expect(nowPlaying.elapsedTime).toBe(12.5);
+    expect(nowPlaying.elapsedTimeLastUpdated).toBe(1700000000);
+    expect(nowPlaying.currentIndex).toBe(1);
+    expect(nowPlaying.track?.title).toBe("Song");
+    expect(nowPlaying.track?.artworkUrl).toBe("https://example.com/cover.jpg");
+  });
+
+  it("leaves the track undefined when the queue has no current_item", () => {
+    const nowPlaying = normalizeNowPlaying(
+      envelope([{ queue_id: "queue-1", display_name: "Kitchen", state: "playing", items: 0 }]),
+      "queue-1",
+    );
+
+    expect(nowPlaying.track).toBeUndefined();
+    expect(nowPlaying.state).toBe("playing");
+  });
+
+  it("keeps an idle queue state", () => {
+    const nowPlaying = normalizeNowPlaying(
+      envelope([{ queue_id: "queue-1", display_name: "Kitchen", state: "idle", items: 0 }]),
+      "queue-1",
+    );
+
+    expect(nowPlaying.state).toBe("idle");
+  });
+
+  it("omits artwork when the image path is not an absolute http(s) URL", () => {
+    const nowPlaying = normalizeNowPlaying(
+      envelope([
+        {
+          queue_id: "queue-1",
+          display_name: "Kitchen",
+          state: "playing",
+          current_item: { ...queueItem("Song"), image: { path: "/api/image?path=cover.jpg" } },
+        },
+      ]),
+      "queue-1",
+    );
+
+    expect(nowPlaying.track?.title).toBe("Song");
+    expect(nowPlaying.track?.artworkUrl).toBeUndefined();
   });
 });

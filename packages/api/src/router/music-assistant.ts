@@ -1,6 +1,8 @@
 import { z } from "zod/v4";
 
+import { createIntegrationAsync } from "@homarr/integrations/factory";
 import {
+  musicAssistantNowPlayingRequestHandler,
   musicAssistantQueueRequestHandler,
   musicAssistantQueuesRequestHandler,
 } from "@homarr/request-handler/music-assistant";
@@ -25,7 +27,24 @@ const queueViewSchema = z.object({
   currentIndex: z.number().optional(),
 });
 
+const nowPlayingTrackSchema = queueTrackSchema.extend({
+  artworkUrl: z.string().optional(),
+});
+
+const nowPlayingSchema = z.object({
+  queueId: z.string(),
+  name: z.string(),
+  state: z.enum(["playing", "paused", "idle"]),
+  // MA reports elapsed time and its update timestamp in seconds; the client
+  // adapter is responsible for converting them to milliseconds.
+  elapsedTime: z.number().optional(),
+  elapsedTimeLastUpdated: z.number().optional(),
+  currentIndex: z.number().optional(),
+  track: nowPlayingTrackSchema.optional(),
+});
+
 const access = createOneIntegrationMiddleware("query", "musicAssistant");
+const interact = createOneIntegrationMiddleware("interact", "musicAssistant");
 
 export const musicAssistantRouter = createTRPCRouter({
   queues: protectedProcedure
@@ -44,5 +63,29 @@ export const musicAssistantRouter = createTRPCRouter({
       const handler = musicAssistantQueueRequestHandler.handler(ctx.integration, { queueId: input.queueId });
       const { data } = await handler.getDataAsync();
       return data;
+    }),
+  nowPlaying: protectedProcedure
+    .concat(access)
+    .input(z.object({ integrationId: z.string() }))
+    .output(z.array(nowPlayingSchema))
+    .query(async ({ ctx }) => {
+      const handler = musicAssistantNowPlayingRequestHandler.handler(ctx.integration, {});
+      const { data } = await handler.getDataAsync();
+      return data;
+    }),
+  control: protectedProcedure
+    .concat(interact)
+    .input(
+      z.object({
+        integrationId: z.string(),
+        queueId: z.string(),
+        action: z.enum(["play_pause", "next", "previous", "seek"]),
+        positionSeconds: z.number().nonnegative().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const instance = await createIntegrationAsync(ctx.integration);
+      await instance.controlAsync(input.queueId, input.action, input.positionSeconds);
+      await musicAssistantNowPlayingRequestHandler.invalidateCacheAsync([ctx.integration.id]);
     }),
 });

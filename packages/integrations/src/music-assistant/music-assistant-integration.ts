@@ -8,8 +8,8 @@ import { Integration } from "../base/integration";
 import type { TestingResult } from "../base/test-connection/test-connection-service";
 import type { IntegrationHttpAuthentication } from "../http-auth";
 import { MusicAssistantConnection } from "./music-assistant-connection";
-import type { QueueInfo, QueueView } from "./music-assistant-queue";
-import { normalizeQueue, normalizeQueues } from "./music-assistant-queue";
+import type { MusicAssistantNowPlaying, QueueInfo, QueueView } from "./music-assistant-queue";
+import { normalizeNowPlaying, normalizeQueue, normalizeQueues } from "./music-assistant-queue";
 
 export class MusicAssistantIntegration extends Integration {
   public async getHttpAuthenticationAsync(): Promise<IntegrationHttpAuthentication> {
@@ -33,6 +33,27 @@ export class MusicAssistantIntegration extends Integration {
       connection.sendAsync("player_queues/items", { queue_id: queueId, limit: 500 }),
     ]);
     return normalizeQueue(queue, items);
+  }
+
+  public async getNowPlayingAsync(): Promise<MusicAssistantNowPlaying[]> {
+    if (env.NO_EXTERNAL_CONNECTION) return [];
+    const connection = this.getConnection();
+    const queues = await connection.sendAsync("player_queues/all");
+    return normalizeQueues(queues).map((queue) => normalizeNowPlaying(queues, queue.id));
+  }
+
+  public async controlAsync(
+    queueId: string,
+    action: "play_pause" | "next" | "previous" | "seek",
+    positionSeconds?: number,
+  ): Promise<void> {
+    if (env.NO_EXTERNAL_CONNECTION) return;
+    const connection = this.getConnection();
+    if (action === "seek") {
+      await connection.sendAsync("player_queues/seek", { queue_id: queueId, position: positionSeconds });
+      return;
+    }
+    await connection.sendAsync(`player_queues/${action}`, { queue_id: queueId });
   }
 
   protected async testingAsync(input: IntegrationTestingInput): Promise<TestingResult> {
