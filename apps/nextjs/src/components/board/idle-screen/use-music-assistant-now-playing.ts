@@ -8,6 +8,7 @@ import { fromMusicAssistantNowPlaying } from "./music-track";
 import type { MusicTrack } from "./music-track";
 
 const STALE_TIME_MS = 5 * 1000;
+const REFETCH_INTERVAL_MS = 5 * 1000;
 
 /**
  * Subscribes to every Music Assistant queue while the idle overlay is open.
@@ -29,6 +30,9 @@ export const useMusicAssistantNowPlaying = ({
     {
       enabled: enabled && Boolean(integrationId),
       staleTime: STALE_TIME_MS,
+      // The overlay stays mounted for hours on a kiosk; HA has live updates,
+      // so poll MA for external track changes while this query is active.
+      refetchInterval: enabled && Boolean(integrationId) ? REFETCH_INTERVAL_MS : false,
       retry: false,
       refetchOnWindowFocus: false,
     },

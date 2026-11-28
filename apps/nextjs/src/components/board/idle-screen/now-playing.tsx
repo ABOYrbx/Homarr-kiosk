@@ -82,7 +82,10 @@ export const useMusicAssistantMusicControls = ({
 } => {
   const utils = clientApi.useUtils();
   const { mutate: control } = clientApi.musicAssistant.control.useMutation({
-    onSuccess: () => void utils.musicAssistant.nowPlaying.invalidate({ integrationId }),
+    onSuccess: () => {
+      void utils.musicAssistant.nowPlaying.invalidate({ integrationId });
+      void utils.musicAssistant.queue.invalidate({ integrationId, queueId });
+    },
   });
 
   return {
