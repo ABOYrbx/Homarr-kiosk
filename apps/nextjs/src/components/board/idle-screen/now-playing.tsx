@@ -67,7 +67,8 @@ export const NowPlaying = ({
   const t = useI18n("board");
   // Local to this mount: closing the AOD unmounts the music layer and resets
   // the view to the default. Lyrics stay the default whenever they are enabled.
-  const [activeView, setActiveView] = useState<"lyrics" | "queue">(showLyrics ? "lyrics" : "queue");
+  // "none" means the lyrics button has hidden the side panel.
+  const [activeView, setActiveView] = useState<"lyrics" | "queue" | "none">(showLyrics ? "lyrics" : "queue");
   const [imageFailed, setImageFailed] = useState(false);
   const [seekOverrideAt, setSeekOverrideAt] = useState<number | undefined>(undefined);
   const pendingTrackDirection = useRef<"next" | "previous">("next");
@@ -156,7 +157,7 @@ export const NowPlaying = ({
     : undefined;
   const hasArtwork = Boolean(artwork) && !imageFailed;
   const progress = position !== null && duration !== undefined && duration > 0 ? (position / duration) * 100 : null;
-  const hasSidePanel = activeView === "lyrics" ? Boolean(lyrics) : true;
+  const hasSidePanel = activeView === "none" ? false : activeView === "lyrics" ? Boolean(lyrics) : true;
 
   return (
     <div className={classes.musicRoot}>
@@ -273,7 +274,7 @@ export const NowPlaying = ({
           aria-label={t("idleScreen.lyricsButton")}
           aria-pressed={activeView === "lyrics"}
           disabled={!showLyrics}
-          onClick={() => setActiveView("lyrics")}
+          onClick={() => setActiveView((current) => (current === "lyrics" ? "none" : "lyrics"))}
         >
           <IconMessage size={26} />
         </ActionIcon>
