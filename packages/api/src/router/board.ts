@@ -1235,7 +1235,7 @@ export const boardRouter = createTRPCRouter({
       mcp: {
         enabled: true,
         description:
-          "Read the editable visual, behavior and idle-screen settings for one board, including its current custom CSS and idle screen options (idleScreenEnabled, idleScreenTimeoutMinutes, idleScreenMode, idleScreenHomeAssistantIntegrationId, idleScreenMediaPlayerEntityId, idleScreenLayoutId, idleScreenShowClockSeconds, idleScreenShowLyrics, idleScreenLyricsOffsetSeconds, idleScreenMusicAssistantIntegrationId, idleScreenMusicAssistantQueueId, idleScreenWeatherLocation, idleScreenClockColor, idleScreenWidgetScale, idleScreenWidgetBackground, idleScreenWidgetBackgroundFrost). Requires modify permission. REQUIRED: id (board ID). Call this before proposing board settings or custom CSS changes",
+          "Read the editable visual, behavior and idle-screen settings for one board, including its current custom CSS and idle screen options (idleScreenEnabled, idleScreenTimeoutMinutes, idleScreenMode, idleScreenHomeAssistantIntegrationId, idleScreenMediaPlayerEntityId, idleScreenLayoutId, idleScreenShowClockSeconds, idleScreenShowLyrics, idleScreenLyricsOffsetSeconds, idleScreenMusicAssistantIntegrationId, idleScreenMusicAssistantQueueId, idleScreenMusicSources, idleScreenMusicSelectionMode, idleScreenMusicPlayerFilterMode, idleScreenMusicPlayerIds, idleScreenWeatherLocation, idleScreenClockColor, idleScreenWidgetScale, idleScreenWidgetBackground, idleScreenWidgetBackgroundFrost). Requires modify permission. REQUIRED: id (board ID). Call this before proposing board settings or custom CSS changes",
       },
     })
     .input(z.object({ id: z.string() }))
