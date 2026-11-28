@@ -1,7 +1,7 @@
 import type { AdapterAccount } from "@auth/core/adapters";
 import type { MantineSize } from "@mantine/core";
 import type { DayOfWeek } from "@mantine/dates";
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import {
   boolean,
@@ -46,6 +46,7 @@ import type { ByteUnitSystem } from "@homarr/common";
 import type { CustomWidgetSecretKind } from "@homarr/custom-widgets/core";
 import { defaultHeaderPreferencesSerialized } from "@homarr/validation/header-preferences";
 
+import { pgIdleMusicPlayerIdsText, pgIdleMusicSourcesText } from "./idle-screen-music";
 import { pgIdleWeatherLocationText } from "./idle-screen-location";
 
 const customBlob = customType<{ data: Buffer }>({
@@ -325,6 +326,14 @@ export const boards = pgTable("board", {
   idleScreenLyricsOffsetSeconds: doublePrecision().default(0).notNull(),
   idleScreenMusicAssistantIntegrationId: text(),
   idleScreenMusicAssistantQueueId: text(),
+  idleScreenMusicSources: pgIdleMusicSourcesText()
+    .default(sql`'[]'`)
+    .notNull(),
+  idleScreenMusicSelectionMode: text().$type<"fixed" | "auto">().default("fixed").notNull(),
+  idleScreenMusicPlayerFilterMode: text().$type<"include" | "exclude">().default("exclude").notNull(),
+  idleScreenMusicPlayerIds: pgIdleMusicPlayerIdsText()
+    .default(sql`'[]'`)
+    .notNull(),
 });
 
 export const boardUserPermissions = pgTable(

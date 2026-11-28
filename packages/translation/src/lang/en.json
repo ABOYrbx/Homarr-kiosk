@@ -7087,6 +7087,27 @@
         "label": "Music Assistant queue",
         "description": "Queue or player shown in the AOD queue view"
       },
+      "idleScreenMusicSources": {
+        "label": "Music sources",
+        "description": "Choose which music sources the idle screen uses"
+      },
+      "idleScreenMusicSelectionMode": {
+        "label": "Player selection",
+        "description": "Use a fixed player or automatically show the one currently playing",
+        "fixed": "Fixed player",
+        "auto": "Automatic - playing device"
+      },
+      "idleScreenMusicPlayerFilterMode": {
+        "label": "Player filter",
+        "description": "Include or exclude the selected players from automatic selection",
+        "include": "Include",
+        "exclude": "Exclude"
+      },
+      "idleScreenMusicPlayerIds": {
+        "label": "Players",
+        "description": "Players considered for automatic selection",
+        "none": "No players available"
+      },
       "idleScreenWeatherLocation": {
         "label": "Weather location",
         "description": "Search for a location for the weather icon and temperature",

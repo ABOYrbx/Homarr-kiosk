@@ -7087,6 +7087,27 @@
         "label": "Music-Assistant-Warteschlange",
         "description": "Warteschlange oder Player, der in der AOD-Warteschlangenansicht angezeigt wird"
       },
+      "idleScreenMusicSources": {
+        "label": "Musikquellen",
+        "description": "Wähle, welche Musikquellen der Leerlaufbildschirm verwendet"
+      },
+      "idleScreenMusicSelectionMode": {
+        "label": "Player-Auswahl",
+        "description": "Einen festen Player verwenden oder automatisch das gerade spielende Gerät anzeigen",
+        "fixed": "Fester Player",
+        "auto": "Automatisch – spielendes Gerät"
+      },
+      "idleScreenMusicPlayerFilterMode": {
+        "label": "Player-Filter",
+        "description": "Ausgewählte Player in die automatische Auswahl einbeziehen oder ausschließen",
+        "include": "Einbeziehen",
+        "exclude": "Ausschließen"
+      },
+      "idleScreenMusicPlayerIds": {
+        "label": "Player",
+        "description": "Player, die für die automatische Auswahl berücksichtigt werden",
+        "none": "Keine Player verfügbar"
+      },
       "idleScreenWeatherLocation": {
         "label": "Wetterstandort",
         "description": "Standort für Wetter-Icon und Temperatur suchen",

@@ -34,6 +34,10 @@ export interface IdleScreenSettings {
   idleScreenLyricsOffsetSeconds: number;
   idleScreenMusicAssistantIntegrationId: string | null;
   idleScreenMusicAssistantQueueId: string | null;
+  idleScreenMusicSources: ("homeAssistant" | "musicAssistant")[];
+  idleScreenMusicSelectionMode: "fixed" | "auto";
+  idleScreenMusicPlayerFilterMode: "include" | "exclude";
+  idleScreenMusicPlayerIds: string[];
 }
 
 type WakeLock = { release: () => Promise<void> };

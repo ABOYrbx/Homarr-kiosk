@@ -33,6 +33,7 @@ import type { ByteUnitSystem } from "@homarr/common";
 import type { CustomWidgetSecretKind } from "@homarr/custom-widgets/core";
 import { defaultHeaderPreferencesSerialized } from "@homarr/validation/header-preferences";
 
+import { sqliteIdleMusicPlayerIdsText, sqliteIdleMusicSourcesText } from "./idle-screen-music";
 import { sqliteIdleWeatherLocationText } from "./idle-screen-location";
 
 export * from "@homarr/core/infrastructure/certificates/hostnames/db/sqlite";
@@ -309,6 +310,14 @@ export const boards = sqliteTable("board", {
   idleScreenLyricsOffsetSeconds: real().default(0).notNull(),
   idleScreenMusicAssistantIntegrationId: text(),
   idleScreenMusicAssistantQueueId: text(),
+  idleScreenMusicSources: sqliteIdleMusicSourcesText()
+    .default(sql`'[]'`)
+    .notNull(),
+  idleScreenMusicSelectionMode: text().$type<"fixed" | "auto">().default("fixed").notNull(),
+  idleScreenMusicPlayerFilterMode: text().$type<"include" | "exclude">().default("exclude").notNull(),
+  idleScreenMusicPlayerIds: sqliteIdleMusicPlayerIdsText()
+    .default(sql`'[]'`)
+    .notNull(),
 });
 
 export const boardUserPermissions = sqliteTable(

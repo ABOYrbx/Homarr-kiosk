@@ -1274,6 +1274,10 @@ export const boardRouter = createTRPCRouter({
           idleScreenLyricsOffsetSeconds: true,
           idleScreenMusicAssistantIntegrationId: true,
           idleScreenMusicAssistantQueueId: true,
+          idleScreenMusicSources: true,
+          idleScreenMusicSelectionMode: true,
+          idleScreenMusicPlayerFilterMode: true,
+          idleScreenMusicPlayerIds: true,
           idleScreenWeatherLocation: true,
           idleScreenClockColor: true,
           idleScreenWidgetScale: true,
@@ -1763,7 +1767,7 @@ export const boardRouter = createTRPCRouter({
       mcp: {
         enabled: true,
         description:
-          "Update visual, behavior and idle-screen settings for a board. Requires modify permission. REQUIRED: id (board ID). Optional fields include pageTitle, metaTitle, logoImageUrl, faviconImageUrl, backgroundImageUrl, colors, opacity, customCss, itemRadius, disableStatus, idleScreenEnabled, idleScreenTimeoutMinutes, idleScreenMode, idleScreenHomeAssistantIntegrationId, idleScreenMediaPlayerEntityId, idleScreenLayoutId, idleScreenShowClockSeconds, idleScreenShowLyrics, idleScreenLyricsOffsetSeconds (-15 to 15, positive delays lyrics), idleScreenMusicAssistantIntegrationId and idleScreenMusicAssistantQueueId (both nullable, null clears), idleScreenWeatherLocation, idleScreenClockColor, idleScreenWidgetScale (0.5-2), idleScreenWidgetBackground and idleScreenWidgetBackgroundFrost. Set primaryColor, secondaryColor, or itemRadius to null to inherit the instance theme.",
+          "Update visual, behavior and idle-screen settings for a board. Requires modify permission. REQUIRED: id (board ID). Optional fields include pageTitle, metaTitle, logoImageUrl, faviconImageUrl, backgroundImageUrl, colors, opacity, customCss, itemRadius, disableStatus, idleScreenEnabled, idleScreenTimeoutMinutes, idleScreenMode, idleScreenHomeAssistantIntegrationId, idleScreenMediaPlayerEntityId, idleScreenLayoutId, idleScreenShowClockSeconds, idleScreenShowLyrics, idleScreenLyricsOffsetSeconds (-15 to 15, positive delays lyrics), idleScreenMusicAssistantIntegrationId and idleScreenMusicAssistantQueueId (both nullable, null clears), idleScreenMusicSources (homeAssistant/musicAssistant), idleScreenMusicSelectionMode (fixed or auto), idleScreenMusicPlayerFilterMode (include or exclude), idleScreenMusicPlayerIds (ha:/ma:-prefixed player IDs, max 200), idleScreenWeatherLocation, idleScreenClockColor, idleScreenWidgetScale (0.5-2), idleScreenWidgetBackground and idleScreenWidgetBackgroundFrost. Set primaryColor, secondaryColor, or itemRadius to null to inherit the instance theme.",
       },
     })
     .input(boardSavePartialSettingsSchema.extend({ id: z.string() }))
@@ -1811,6 +1815,10 @@ export const boardRouter = createTRPCRouter({
           idleScreenLyricsOffsetSeconds: input.idleScreenLyricsOffsetSeconds,
           idleScreenMusicAssistantIntegrationId: input.idleScreenMusicAssistantIntegrationId,
           idleScreenMusicAssistantQueueId: input.idleScreenMusicAssistantQueueId,
+          idleScreenMusicSources: input.idleScreenMusicSources,
+          idleScreenMusicSelectionMode: input.idleScreenMusicSelectionMode,
+          idleScreenMusicPlayerFilterMode: input.idleScreenMusicPlayerFilterMode,
+          idleScreenMusicPlayerIds: input.idleScreenMusicPlayerIds,
           idleScreenWeatherLocation: input.idleScreenWeatherLocation,
           idleScreenClockColor: input.idleScreenClockColor,
           idleScreenWidgetScale: input.idleScreenWidgetScale,

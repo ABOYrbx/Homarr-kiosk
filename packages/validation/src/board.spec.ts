@@ -108,6 +108,19 @@ describe("boardSavePartialSettingsSchema", () => {
     expect(() => boardSavePartialSettingsSchema.parse({ idleScreenLyricsOffsetSeconds: -16 })).toThrow();
     expect(boardSettingsSchema.shape.idleScreenLyricsOffsetSeconds.parse(undefined)).toBe(0);
   });
+
+  it("accepts unified AOD music source settings and rejects invalid values", () => {
+    const settings = {
+      idleScreenMusicSelectionMode: "auto",
+      idleScreenMusicPlayerFilterMode: "include",
+      idleScreenMusicSources: ["homeAssistant", "musicAssistant"],
+      idleScreenMusicPlayerIds: ["ha:abc:media_player.kueche", "ma:abc:b8:27:eb:8a:b8:8e"],
+    };
+
+    expect(boardSavePartialSettingsSchema.parse(settings)).toEqual(settings);
+    expect(() => boardSavePartialSettingsSchema.parse({ idleScreenMusicSelectionMode: "bogus" })).toThrow();
+    expect(() => boardSavePartialSettingsSchema.parse({ idleScreenMusicPlayerIds: ["media_player.kueche"] })).toThrow();
+  });
 });
 
 describe("section behavior validation", () => {
