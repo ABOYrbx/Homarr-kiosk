@@ -110,6 +110,8 @@ Add tests only when requested, and only when the test is extremely relevant and 
 
 For a focused live check of board UI without a pre-existing `.env`, copy `.env.example` to a gitignored `.env`, set `AUTH_SECRET`/`SECRET_ENCRYPTION_KEY` to different 64-character hex values, `DB_DRIVER='better-sqlite3'`, `DB_URL` to an absolute writable path outside the repo, plus `DEMO_MODE=true`, `DEMO_READ_ONLY=false`, `UNSAFE_ENABLE_MOCK_INTEGRATION=true`. Run `bun run db:migration:sqlite:run` (it seeds the demo user) before `bun run dev`; log in as `demo`/`demo`. For scripted fixture setup, call tRPC as that session with `POST /api/trpc/<router>.<procedure>` and a `{"json":{...}}` body (the credentials field is `name`, not `username`), using cookies from `curl -c`. Remove the temporary `.env` and DB when finished.
 
+Screenshots embedded in earlier chat replies live in `.openchamber/screenshots/`. Never delete that directory during cleanup — the files are referenced by previous messages and are not reproducible. Keep new verification artifacts in a temp directory outside the repo instead.
+
 ## AI-assisted pull requests
 
 These rules apply to every PR an agent prepares or opens, including contributor PRs. A PR that does not meet them will be closed.
