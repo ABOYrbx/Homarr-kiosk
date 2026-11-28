@@ -136,10 +136,13 @@ export const MusicPane = ({
     lyricsOffsetSeconds,
     loadingMessage: t("idleScreen.music.loading"),
   };
+  const fixed = settings.idleScreenMusicSelectionMode === "fixed";
   const configured = settings.idleScreenMusicSources.some((source) =>
     source === "homeAssistant"
-      ? Boolean(settings.idleScreenHomeAssistantIntegrationId)
-      : Boolean(settings.idleScreenMusicAssistantIntegrationId),
+      ? Boolean(settings.idleScreenHomeAssistantIntegrationId) &&
+        (!fixed || Boolean(settings.idleScreenMediaPlayerEntityId))
+      : Boolean(settings.idleScreenMusicAssistantIntegrationId) &&
+        (!fixed || Boolean(settings.idleScreenMusicAssistantQueueId)),
   );
   const configuredQueue =
     settings.idleScreenMusicAssistantIntegrationId && settings.idleScreenMusicAssistantQueueId

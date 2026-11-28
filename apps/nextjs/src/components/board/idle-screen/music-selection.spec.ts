@@ -323,13 +323,17 @@ describe("automatic AOD music source selection", () => {
   });
 
   it("ignores sources that are unchecked and selects nothing for include with an empty list", () => {
+    // HA would win on timestamp here; only ignoring the unchecked source makes MA the answer.
+    const newerHaTracks: MusicTrack[] = haTracks.map((candidate, index) =>
+      index === 0 ? { ...candidate, positionUpdatedAt: 9_000 } : candidate,
+    );
     expect(
       selectMusicSourceTrack({
         settings: musicSourceSettings({
           idleScreenMusicSources: ["musicAssistant"],
           idleScreenMusicPlayerIds: ["ma:b:excluded-queue"],
         }),
-        haTracks,
+        haTracks: newerHaTracks,
         maTracks,
       }),
     ).toBe(maTracks[0]);
@@ -352,5 +356,18 @@ describe("automatic AOD music source selection", () => {
         maTracks,
       }),
     ).toBe(maTracks[0]);
+  });
+
+  it("keeps a paused HA track in fixed mode instead of picking a playing MA track", () => {
+    const pausedHa: MusicTrack[] = haTracks
+      .slice(0, 1)
+      .map((candidate) => ({ ...candidate, state: "paused" as const, positionUpdatedAt: 0 }));
+    expect(
+      selectMusicSourceTrack({
+        settings: musicSourceSettings({ idleScreenMusicSelectionMode: "fixed" }),
+        haTracks: pausedHa,
+        maTracks,
+      }),
+    ).toBe(pausedHa[0]);
   });
 });
