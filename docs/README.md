@@ -52,6 +52,28 @@
 <br/>
 <br/>
 
+## AOD-Kiosk-Modus (dieser Fork)
+
+Dieser Fork ergänzt Homarr um einen vollflächigen Leerlaufbildschirm (Always On Display) für Kiosk-Geräte. Er wird in den Board-Einstellungen unter **Leerlaufbildschirm** aktiviert; der Timeout in Minuten legt fest, wann er erscheint. Mit **AOD-Vorschau** lässt er sich direkt ansehen — die Vorschau zeigt den gespeicherten Board-Zustand, keine ungespeicherten Formularänderungen.
+
+Der AOD hat drei Ebenen, die per Wischen oder Pfeiltasten gewechselt werden; die Punkt-Indikatoren verschwinden nach wenigen Sekunden:
+
+- **Musik** — Cover als animierter, gefrosteter Hintergrund, Titel/Interpret, Fortschritt und synchronisierte Lyrics von LRCLIB (mit einstellbarem Zeitversatz). Vor/Zurück und Play/Pause sind touch-tauglich.
+- **Uhr** — Standard-Ebene mit Analoguhr, Wetter-Icon und -Temperatur, wählbarer Hintergrundfarbe und optionalem Hintergrundbild mit Frost-Option.
+- **Widgets** — das gespeicherte Idle-Screen-Layout mit echten, touch-tauglichen Widgets. Skalierung (50–200 %) sowie Hintergrundbild und Frost sind einstellbar; das Layout wird im Layout-Editor „Idle Screen" bearbeitet.
+
+Meldet der konfigurierte Player Wiedergabe, öffnet der AOD direkt die Musik-Ebene; nach Ende der Wiedergabe geht es zurück zur Uhr. Ein manueller Ebenenwechsel bleibt bis zur nächsten Änderung der Wiedergabe erhalten.
+
+### Musikquellen
+
+Im Settings-Block **Musik** können Home Assistant und Music Assistant parallel aktiviert werden:
+
+- **Fester Player** verwendet die gewählte HA-Entity und greift auf die konfigurierte MA-Warteschlange zurück, wenn keine HA-Entity gesetzt ist.
+- **Automatisch – spielendes Gerät** wählt aus den erlaubten Playern den mit dem jüngsten Wiedergabe-Zeitstempel; bei Gleichstand gewinnt Home Assistant.
+- **Player-Filter** bestimmt, ob die angehakten `media_player`-Entities und MA-Warteschlangen einbezogen oder ausgeschlossen werden. Beim Abhaken einer Quelle bleiben ihre gespeicherten Integrationen und Player-Einstellungen erhalten.
+
+Music Assistant liefert dabei Titel, Fortschritt, Wiedergabesteuerung und die Warteschlangenansicht. Lyrics- und Queue-Button blenden ihre Ansichten ein und aus. Voraussetzung ist eine erreichbare Home-Assistant-Integration mit `media_player` bzw. eine Music-Assistant-Integration; Lyrics werden von LRCLIB geladen.
+
 ![](img/headers/integrations.png)
 
 <!-- AUTO_GENERATE_INTEGRATION_LIST_START -->
