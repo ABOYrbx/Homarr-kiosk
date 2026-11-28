@@ -15,7 +15,8 @@ import { IdleCarousel } from "./idle-carousel";
 import { IdleClockSurface } from "./idle-clock-surface";
 import { IdleWidgets } from "./idle-widgets";
 import { MusicPane } from "./music-pane";
-import { NowPlaying } from "./now-playing";
+import { fromSmartHomeEntity } from "./music-track";
+import { NowPlaying, useHomeAssistantMusicControls } from "./now-playing";
 import type { IdleScreenMode } from "./playback";
 import { decideIdleView } from "./playback";
 import { isIdleScreenOpen, useIdleScreenPreview } from "./preview-context";
@@ -87,17 +88,19 @@ const MusicIdleScreen = ({
   lyricsOffsetSeconds?: number;
 }) => {
   const { entity, isLoading } = useNowPlaying({ integrationId, entityId });
+  const { onControl, canControl } = useHomeAssistantMusicControls({ entity, integrationId, entityId });
+  const track = entity ? fromSmartHomeEntity(entity, integrationId) : undefined;
   const attributes = entity?.attributes;
   const hasTrack = Boolean(attributes?.mediaTitle || entity?.state === "playing");
   const view = decideIdleView({ mode, hasTrack });
 
-  if (isLoading || !entity || view === "clock") return <AnalogClock showSeconds={showClockSeconds} />;
+  if (isLoading || !entity || !track || view === "clock") return <AnalogClock showSeconds={showClockSeconds} />;
   return (
     <NowPlaying
-      entity={entity}
+      track={track}
+      onControl={onControl}
+      canControl={canControl}
       showLyrics={showLyrics}
-      integrationId={integrationId}
-      entityId={entityId}
       lyricsOffsetSeconds={lyricsOffsetSeconds}
       queue={undefined}
       queueAvailable={false}

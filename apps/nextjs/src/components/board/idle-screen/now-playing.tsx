@@ -19,8 +19,40 @@ import { useI18n } from "@homarr/translation/client";
 
 import classes from "./idle-screen.module.css";
 import { LyricsPanel } from "./lyrics-panel";
+import type { MusicTrack } from "./music-track";
 import { QueuePanel } from "./queue-panel";
 import type { QueueView } from "./use-music-assistant-queue";
+
+export type MusicControlAction = "mediaPrevious" | "mediaPlayPause" | "mediaNext";
+
+/**
+ * Home Assistant control wiring. Kept outside the renderer so the same
+ * NowPlaying view can be driven by Music Assistant as well.
+ */
+export const useHomeAssistantMusicControls = ({
+  entity,
+  integrationId,
+  entityId,
+}: {
+  entity: SmartHomeEntity | undefined;
+  integrationId: string;
+  entityId: string;
+}): {
+  onControl: (action: MusicControlAction) => void;
+  canControl: (action: MusicControlAction) => boolean;
+} => {
+  const utils = clientApi.useUtils();
+  const { mutate: executeAction } = clientApi.widget.smartHome.executeAction.useMutation({
+    // The live patch can be delayed; refresh the player state right away so
+    // seeking back or skipping a track moves the progress bar immediately.
+    onSuccess: () => void utils.widget.smartHome.snapshot.invalidate(),
+  });
+
+  return {
+    onControl: (action) => executeAction({ integrationId, entityId, action }),
+    canControl: (action) => entity !== undefined && supportsSmartHomeAction(entity, { type: action }),
+  };
+};
 
 const controlVars = () => ({
   root: {
@@ -48,18 +80,18 @@ import { useLyrics } from "./use-lyrics";
 import { usePlaybackClock } from "./use-playback-clock";
 
 export const NowPlaying = ({
-  entity,
+  track,
+  onControl,
+  canControl,
   showLyrics,
-  integrationId,
-  entityId,
   lyricsOffsetSeconds,
   queue,
   queueAvailable,
 }: {
-  entity: SmartHomeEntity;
+  track: MusicTrack;
+  onControl: (action: MusicControlAction) => void;
+  canControl: (action: MusicControlAction) => boolean;
   showLyrics: boolean;
-  integrationId: string;
-  entityId: string;
   lyricsOffsetSeconds: number;
   queue: QueueView | undefined;
   queueAvailable: boolean;
@@ -72,30 +104,28 @@ export const NowPlaying = ({
   const [imageFailed, setImageFailed] = useState(false);
   const [seekOverrideAt, setSeekOverrideAt] = useState<number | undefined>(undefined);
   const pendingTrackDirection = useRef<"next" | "previous">("next");
-  const utils = clientApi.useUtils();
-  const { mutate: executeAction } = clientApi.widget.smartHome.executeAction.useMutation({
-    // The live patch can be delayed; refresh the player state right away so
-    // seeking back or skipping a track moves the progress bar immediately.
-    onSuccess: () => void utils.widget.smartHome.snapshot.invalidate(),
-  });
-  const run = (action: "mediaPrevious" | "mediaPlayPause" | "mediaNext") => {
+  const run = (action: MusicControlAction) => {
     if (action === "mediaNext") pendingTrackDirection.current = "next";
     if (action === "mediaPrevious") pendingTrackDirection.current = "previous";
     if (action !== "mediaPlayPause") setSeekOverrideAt(Date.now());
-    executeAction({ integrationId, entityId, action });
+    onControl(action);
   };
-  const playing = entity.state === "playing";
-  const attributes = entity.attributes;
-  const title = attributes.mediaTitle?.trim() || entity.name;
-  const artist = attributes.mediaArtist?.trim() || "";
-  const album = attributes.mediaAlbum?.trim();
-  const artwork = attributes.pictureUrl;
-  const duration = Number.isFinite(attributes.mediaDuration) ? attributes.mediaDuration : undefined;
+  const playing = track.state === "playing";
+  const title = track.title;
+  const artist = track.artist;
+  const album = track.album;
+  const artwork = track.artworkUrl;
+  const duration = track.durationSeconds;
 
   // A new track identity remounts the column so the slide keyframe plays.
   // The direction comes from the button that caused the change; external
   // changes arrive as "next". No animation on the very first render.
-  const trackKey = buildTrackKey(attributes);
+  const trackKey = buildTrackKey({
+    mediaContentId: track.mediaContentId,
+    mediaTitle: track.title,
+    mediaArtist: track.artist,
+    mediaDuration: track.durationSeconds,
+  });
   const trackMotion = useRef<{ key: string; className: string | undefined }>({ key: trackKey, className: undefined });
   if (trackMotion.current.key !== trackKey) {
     trackMotion.current = {
@@ -118,29 +148,29 @@ export const NowPlaying = ({
     setSeekOverrideAt(Date.now());
   }, [trackKey]);
 
-  // Once HA reports real forward progress the optimistic seek can be dropped.
+  // Once the player reports real forward progress the optimistic seek can be dropped.
   useEffect(() => {
     if (
       shouldClearSeekOverride({
         seekOverrideAt,
-        mediaPosition: attributes.mediaPosition,
-        mediaPositionUpdatedAt: attributes.mediaPositionUpdatedAt,
+        mediaPosition: track.positionSeconds,
+        mediaPositionUpdatedAt: track.positionUpdatedAt,
       })
     )
       setSeekOverrideAt(undefined);
-  }, [attributes.mediaPosition, attributes.mediaPositionUpdatedAt, seekOverrideAt]);
+  }, [track.positionSeconds, track.positionUpdatedAt, seekOverrideAt]);
 
   const position = usePlaybackClock({
-    state: entity.state,
-    mediaPosition: attributes.mediaPosition,
-    mediaPositionUpdatedAt: attributes.mediaPositionUpdatedAt,
+    state: track.state,
+    mediaPosition: track.positionSeconds,
+    mediaPositionUpdatedAt: track.positionUpdatedAt,
     mediaDuration: duration,
     enabled: true,
     seekOverrideAt,
   });
 
   const lyricsQuery = useLyrics({
-    enabled: showLyrics && Boolean(attributes.mediaTitle),
+    enabled: showLyrics && Boolean(track.title),
     title,
     artist,
     album,
@@ -224,7 +254,7 @@ export const NowPlaying = ({
                 radius="xl"
                 vars={controlVars}
                 aria-label={t("idleScreen.previousTrack")}
-                disabled={!supportsSmartHomeAction(entity, { type: "mediaPrevious" })}
+                disabled={!canControl("mediaPrevious")}
                 onClick={() => run("mediaPrevious")}
               >
                 <IconPlayerSkipBack size={26} fill="currentColor" />
@@ -235,7 +265,7 @@ export const NowPlaying = ({
                 radius="xl"
                 vars={controlVars}
                 aria-label={t("idleScreen.playPause")}
-                disabled={!supportsSmartHomeAction(entity, { type: "mediaPlayPause" })}
+                disabled={!canControl("mediaPlayPause")}
                 onClick={() => run("mediaPlayPause")}
               >
                 {playing ? (
@@ -250,7 +280,7 @@ export const NowPlaying = ({
                 radius="xl"
                 vars={controlVars}
                 aria-label={t("idleScreen.nextTrack")}
-                disabled={!supportsSmartHomeAction(entity, { type: "mediaNext" })}
+                disabled={!canControl("mediaNext")}
                 onClick={() => run("mediaNext")}
               >
                 <IconPlayerSkipForward size={26} fill="currentColor" />

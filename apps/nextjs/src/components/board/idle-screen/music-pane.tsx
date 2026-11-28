@@ -5,7 +5,8 @@ import { IconMusic } from "@tabler/icons-react";
 
 import { useI18n } from "@homarr/translation/client";
 
-import { NowPlaying } from "./now-playing";
+import { fromSmartHomeEntity } from "./music-track";
+import { NowPlaying, useHomeAssistantMusicControls } from "./now-playing";
 import type { QueueView } from "./use-music-assistant-queue";
 import { useMusicAssistantQueue } from "./use-music-assistant-queue";
 import { useNowPlaying } from "./use-now-playing";
@@ -60,6 +61,8 @@ const ConfiguredMusicPane = ({
   loadingMessage: string;
 }) => {
   const { entity, isLoading } = useNowPlaying({ integrationId, entityId });
+  const { onControl, canControl } = useHomeAssistantMusicControls({ entity, integrationId, entityId });
+  const track = entity ? fromSmartHomeEntity(entity, integrationId) : undefined;
 
   if (isLoading) return <MusicPaneMessage message={loadingMessage} />;
 
@@ -70,13 +73,13 @@ const ConfiguredMusicPane = ({
     hasArtwork: Boolean(entity?.attributes.pictureUrl),
   });
 
-  if (state !== "ready" || !entity) return <MusicPaneMessage message={emptyMessage} />;
+  if (state !== "ready" || !track) return <MusicPaneMessage message={emptyMessage} />;
   return (
     <NowPlaying
-      entity={entity}
+      track={track}
+      onControl={onControl}
+      canControl={canControl}
       showLyrics={showLyrics}
-      integrationId={integrationId}
-      entityId={entityId}
       lyricsOffsetSeconds={lyricsOffsetSeconds}
       queue={queue}
       queueAvailable={Boolean(musicAssistantIntegrationId && musicAssistantQueueId && queue?.tracks.length)}
